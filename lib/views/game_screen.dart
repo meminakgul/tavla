@@ -3,11 +3,23 @@ import '../models/board_state.dart';
 import '../models/player.dart';
 import '../models/move.dart';
 import '../engine/backgammon_engine.dart';
+import '../engine/backgammon_ai.dart';
 import 'board_widget.dart';
 import 'dice_widget.dart';
 
+enum GameMode { classic, cards }
+
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  final GameMode gameMode;
+  final bool isVsAI;
+  final AIDifficulty aiDifficulty;
+
+  const GameScreen({
+    super.key,
+    this.gameMode = GameMode.classic,
+    this.isVsAI = true,
+    this.aiDifficulty = AIDifficulty.master,
+  });
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -15,23 +27,59 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   final BackgammonEngine _engine = BackgammonEngine();
+  late BackgammonAI _aiEngine;
   late BoardState _state;
+  bool _isAIBusy = false;
+
   @override
   void initState() {
     super.initState();
+    _aiEngine = BackgammonAI(engine: _engine);
     _state = BoardState.initial();
   }
 
   void _resetGame() {
     setState(() {
       _state = BoardState.initial();
+      _isAIBusy = false;
     });
+  }
+
+  void _checkAITurn() {
+    if (!widget.isVsAI || _isAIBusy || _state.winner != null) return;
+    if (_state.currentTurn != PlayerType.black) return;
+
+    _isAIBusy = true;
+
+    // AI rolls dice if dice empty
+    if (_state.dice.isEmpty && !_state.isRolling) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        _rollDice();
+      });
+      return;
+    }
+
+    // AI plays best move if dice available
+    if (_state.dice.isNotEmpty && !_state.isRolling) {
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (!mounted) return;
+        BackgammonMove? bestMove = _aiEngine.selectBestMove(
+          _state,
+          difficulty: widget.aiDifficulty,
+        );
+
+        if (bestMove != null) {
+          _applyMove(bestMove);
+        }
+        _isAIBusy = false;
+      });
+    }
   }
 
   void _rollDice() {
     if (_state.dice.isNotEmpty || _state.winner != null || _state.isRolling) return;
 
-    // Pre-determine dice roll result (deterministic outcome)
     List<int> rolled = _engine.rollDice();
 
     setState(() {
@@ -40,14 +88,12 @@ class _GameScreenState extends State<GameScreen> {
       _state.remainingDice = List.from(rolled);
     });
 
-    // 1100ms duration matches controlled tumbling & ground bounce duration
     Future.delayed(const Duration(milliseconds: 1100), () {
       if (!mounted) return;
       BoardState newState = _state.clone();
       newState.isRolling = false;
       newState.validMoves = _engine.getValidMoves(newState);
 
-      // Auto turn-switch if BAR checkers blocked or no valid moves available
       if (newState.validMoves.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -63,13 +109,18 @@ class _GameScreenState extends State<GameScreen> {
             _state.dice = [];
             _state.remainingDice = [];
             _state.validMoves = [];
+            _isAIBusy = false;
           });
+          _checkAITurn();
         });
       }
 
       setState(() {
         _state = newState;
+        _isAIBusy = false;
       });
+
+      _checkAITurn();
     });
   }
 
@@ -179,6 +230,8 @@ class _GameScreenState extends State<GameScreen> {
 
     if (_state.winner != null) {
       _showWinnerDialog(_state.winner!);
+    } else {
+      _checkAITurn();
     }
   }
 
@@ -280,6 +333,11 @@ class _GameScreenState extends State<GameScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home, color: Color(0xFFD4AF37)),
+            tooltip: 'Ana Menü',
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFFD4AF37)),
             tooltip: 'Yeniden Başlat',

@@ -117,28 +117,138 @@
     button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,175,55,0.6); }
     button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .toast {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(180, 20, 20, 0.95);
-      color: #FFF;
-      padding: 14px 28px;
-      border-radius: 12px;
-      border: 2px solid #FFD700;
-      font-weight: bold;
-      font-size: 16px;
+    .overlay-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at center, #2A160A 0%, #140C07 60%, #0D0704 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .gold-badge {
+      background: #1C1009;
+      border: 3px solid #D4AF37;
+      border-radius: 20px;
+      padding: 16px 36px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+      box-shadow: 0 0 30px rgba(212,175,55,0.4);
+      margin-bottom: 30px;
+    }
+    .gold-badge h1 {
+      color: #D4AF37;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+    }
+    .gold-badge p {
+      color: #FFF;
+      font-size: 11px;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .menu-btn-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .menu-btn {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 28px;
+      border: 1px solid rgba(212,175,55,0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      transition: all 0.2s;
+    }
+    .btn-gold { background: linear-gradient(180deg, #D4AF37, #997A15); color: #000; }
+    .btn-blue { background: linear-gradient(180deg, #0288D1, #01579B); color: #FFF; }
+    .btn-orange { background: linear-gradient(180deg, #E65100, #BF360C); color: #FFF; }
+    .btn-amber { background: linear-gradient(180deg, #F57F17, #E65100); color: #FFF; }
+    .menu-modal {
       display: none;
-      z-index: 100;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1E110A;
+      border: 2px solid #D4AF37;
+      border-radius: 18px;
+      padding: 24px;
+      width: 90%;
+      max-width: 440px;
+      z-index: 1100;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+      color: #FFF;
     }
   </style>
 </head>
 <body>
+  <!-- 1. Tavla Evrimi Main Menu Overlay -->
+  <div id="main-menu" class="overlay-screen">
+    <div class="gold-badge">
+      <h1>TAVLA EVRİMİ</h1>
+      <p>PREMIUM BACKGAMMON EXPERIENCE</p>
+    </div>
+
+    <div class="menu-btn-list">
+      <button class="menu-btn btn-gold" onclick="startMode('ai')">🤖 YAPAY ZEKAYA KARŞI (KLASİK)</button>
+      <button class="menu-btn btn-blue" onclick="openOnlineModal()">🔵 ÇEVRİMİÇİ / 2 OYUNCULU MOD</button>
+      <button class="menu-btn btn-orange" onclick="openModal('settings-modal')">⚙️ AYARLAR</button>
+      <button class="menu-btn btn-amber" onclick="openModal('guide-modal')">❓ NASIL OYNANIR</button>
+    </div>
+    <div style="position: absolute; bottom: 15px; font-size: 11px; color: rgba(255,255,255,0.4);">Versiyon 1.5 - Oyun Atölyesi</div>
+  </div>
+
+  <!-- 2. Online Mode Selection Submodal -->
+  <div id="online-modal" class="menu-modal">
+    <h3 style="color:#D4AF37; text-align:center; margin-bottom:18px;">ÇEVRİMİÇİ MOD SEÇİMİ</h3>
+    <div class="menu-btn-list">
+      <button class="menu-btn btn-gold" onclick="startMode('2p-classic')">🟡 KLASİK ÇEVRİMİÇİ MOD</button>
+      <button class="menu-btn btn-blue" style="background: linear-gradient(180deg, #8E24AA, #4A148C);" onclick="startMode('2p-cards')">🟣 KARTLI ÖZEL GÜÇLER MODU</button>
+      <button class="menu-btn" style="background:#333; color:#FFF;" onclick="closeModal('online-modal')">İPTAL</button>
+    </div>
+  </div>
+
+  <!-- 3. Settings Modal -->
+  <div id="settings-modal" class="menu-modal">
+    <h3 style="color:#D4AF37; margin-bottom:15px;">⚙️ OYUN AYARLARI</h3>
+    <div style="margin-bottom:15px;">
+      <label style="display:block; margin-bottom:8px; font-weight:bold;">Yapay Zeka Zorluk Seviyesi:</label>
+      <select id="ai-diff-select" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#D4AF37; border:1px solid #D4AF37;">
+        <option value="easy">Kolay</option>
+        <option value="medium">Orta</option>
+        <option value="master" selected>Usta AI</option>
+      </select>
+    </div>
+    <button class="menu-btn btn-gold" onclick="closeModal('settings-modal')">KAYDET VE KAPAT</button>
+  </div>
+
+  <!-- 4. Guide Modal -->
+  <div id="guide-modal" class="menu-modal" style="max-height: 80vh; overflow-y: auto;">
+    <h3 style="color:#D4AF37; margin-bottom:12px;">❓ TAVLA NASIL OYNANIR?</h3>
+    <p style="font-size:13px; line-height:1.5; color:#DDD; margin-bottom:10px;">
+      <b>🎲 Zarlar:</b> Zar atın ve çıkan sayılar kadar taşlarınızı kendi ev borunuza doğru ilerletin. Çift zarlarda hamle hakkınız 4'e çıkar.<br><br>
+      <b>🛡️ Kırık Pul:</b> Kırılan pul kına düşer. Kındaki pul oyuna girmeden başka pul oynanamaz.<br><br>
+      <b>🏰 Kapı Alma:</b> En az 2 taşın olduğu yer kapıdır. Rakip basamaz.<br><br>
+      <b>🏆 Taş Toplama:</b> 15 taşın tamamını ev borusuna toplayan oyuncu taşları toplamaya başlar. İlk bitiren kazanır!
+    </p>
+    <button class="menu-btn btn-gold" onclick="closeModal('guide-modal')">KAPAT</button>
+  </div>
+
   <div class="rotate-hint">📱 En iyi deneyim için telefonunuzu YATAY çevirin!</div>
-  <header style="justify-content: flex-end; margin-bottom: 6px;">
+  <header style="justify-content: space-between; margin-bottom: 6px; width:100%; max-width:900px;">
+    <button id="main-menu-btn" onclick="showMainMenu()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px;">🏠 ANA MENÜ</button>
     <button id="reset-btn" onclick="initGame()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px; box-shadow: none;">🔄 YENİ MAÇ</button>
   </header>
 
@@ -185,13 +295,41 @@
       selectedPoint: null, validMoves: []
     };
 
-    let dragItem = null;
-    let isRolling = false;
-    let animStartTime = 0;
-    let dicePhysics = [];
+    let isVsAI = true;
+    let isAIBusy = false;
 
-    // Animated Waypoint Move State
-    let activeMoveAnim = null;
+    function openModal(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function openOnlineModal() {
+      openModal('online-modal');
+    }
+
+    function showMainMenu() {
+      document.getElementById('main-menu').style.display = 'flex';
+    }
+
+    function startMode(mode) {
+      closeModal('online-modal');
+      closeModal('settings-modal');
+      closeModal('guide-modal');
+      document.getElementById('main-menu').style.display = 'none';
+
+      if (mode === 'ai') {
+        isVsAI = true;
+        showToast('🤖 Yapay Zekaya Karşı Maç Başladı!', 2000);
+      } else {
+        isVsAI = false;
+        showToast('👥 İki Kişilik Maç Başladı!', 2000);
+      }
+
+      initGame();
+    }
 
     function showToast(msg, duration = 2400) {
       toastEl.innerText = msg;
@@ -505,8 +643,81 @@
           state.validMoves = [];
           updateUI();
           draw();
+          checkAITurn();
         }, 2400);
+      } else {
+        checkAITurn();
       }
+    }
+
+    function checkAITurn() {
+      if (!isVsAI || state.winner || isRolling || activeMoveAnim || isAIBusy) return;
+      if (state.turn !== 'black') return;
+
+      isAIBusy = true;
+
+      if (state.dice.length === 0 && !isRolling) {
+        setTimeout(() => {
+          if (state.turn === 'black' && state.dice.length === 0) {
+            rollDice();
+          }
+          isAIBusy = false;
+        }, 700);
+        return;
+      }
+
+      if (state.dice.length > 0 && state.validMoves.length > 0) {
+        setTimeout(() => {
+          if (state.turn !== 'black' || activeMoveAnim) {
+            isAIBusy = false;
+            return;
+          }
+          let move = getAIBestMove();
+          isAIBusy = false;
+          if (move) applyMoveWithWaypointAnim(move);
+        }, 850);
+      } else {
+        isAIBusy = false;
+      }
+    }
+
+    function getAIBestMove() {
+      let valid = state.validMoves;
+      if (valid.length === 0) return null;
+
+      let bestMove = valid[0];
+      let maxScore = -999999;
+
+      valid.forEach(m => {
+        let temp = simulateSingleMoveState(state, m);
+        let score = evaluateBoardForAI(temp);
+        if (score > maxScore) {
+          maxScore = score;
+          bestMove = m;
+        }
+      });
+      return bestMove;
+    }
+
+    function evaluateBoardForAI(st) {
+      let score = 0;
+      if (st.blackOff === 15) return 100000;
+      if (st.whiteOff === 15) return -100000;
+
+      score += st.blackOff * 50 - st.whiteOff * 50;
+      score -= st.blackBar * 120 - st.whiteBar * 120;
+
+      for (let i = 0; i < 24; i++) {
+        let pt = st.points[i];
+        if (!pt.owner || pt.count === 0) continue;
+        if (pt.owner === 'black') {
+          if (pt.count === 1) score -= (i >= 18 ? 45 : 30);
+          else if (pt.count >= 2) score += (i >= 18 ? 60 : 25);
+        } else {
+          if (pt.count === 1) score += 30;
+        }
+      }
+      return score;
     }
 
     function calculateValidMoves() {

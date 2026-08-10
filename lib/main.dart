@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/game_screen.dart';
+import 'views/main_menu_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class YeniNesilTavlaApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const GameScreen(),
+      home: const MainMenuScreen(),
     );
   }
 }
