@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Yeni Nesil Tavla - Premium 2.5D Waypoint Trajectory</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      background: #0D0704;
+      color: #FFF;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 6px;
+    }
+    .rotate-hint {
+      display: none;
+      background: linear-gradient(135deg, #D4AF37, #8B6B1B);
+      color: #000;
+      font-weight: bold;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 768px) and (orientation: portrait) {
+      .rotate-hint { display: block; }
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 4px;
+    }
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 900px;
+      background: #180E09;
+      border: 1px solid #D4AF37;
+      border-radius: 10px;
+      padding: 6px 12px;
+      margin-bottom: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #D4AF37;
+    }
+    .avatar.white { background: #FFF; }
+    .avatar.black { background: #111; }
+    .turn-badge {
+      color: #00E676;
+      font-weight: bold;
+      font-size: 11px;
+    }
+    .board-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      max-height: calc(100vh - 120px);
+      max-height: calc(100dvh - 120px);
+      aspect-ratio: 1.4;
+      background: #140C07;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+      touch-action: none;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: pointer;
+      border-radius: 16px;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    button {
+      background: linear-gradient(135deg, #D4AF37, #AA820A);
+      color: #000;
+      border: none;
+      font-weight: bold;
+      font-size: 15px;
+      padding: 10px 26px;
+      border-radius: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(212,175,55,0.4);
+      transition: all 0.2s;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,175,55,0.6); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(180, 20, 20, 0.95);
+      color: #FFF;
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: 2px solid #FFD700;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+      display: none;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="rotate-hint">📱 En iyi deneyim için telefonunuzu YATAY çevirin!</div>
+  <header style="justify-content: flex-end; margin-bottom: 6px;">
+    <button id="reset-btn" onclick="initGame()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px; box-shadow: none;">🔄 YENİ MAÇ</button>
+  </header>
+
+  <div class="hud">
+    <div class="player-info">
+      <div class="avatar white"></div>
+      <div>
+        <div style="font-weight:bold;">Beyaz Oyuncu</div>
+        <div id="white-turn" class="turn-badge">● SIRA SENDE</div>
+        <div style="font-size:11px; color:#D4AF37; margin-top:2px;">Toplanan: <span id="white-off-count" style="font-weight:bold; color:#FFF;">0</span> / 15</div>
+      </div>
+    </div>
+    <div id="status-msg" style="color:#D4AF37; font-weight:bold; font-size:14px;">Zar Atın!</div>
+    <div class="player-info">
+      <div>
+        <div style="font-weight:bold; text-align:right;">Siyah Oyuncu</div>
+        <div id="black-turn" class="turn-badge" style="display:none; text-align:right;">● SIRA SENDE</div>
+        <div style="font-size:11px; color:#D4AF37; margin-top:2px; text-align:right;">Toplanan: <span id="black-off-count" style="font-weight:bold; color:#FFF;">0</span> / 15</div>
+      </div>
+      <div class="avatar black"></div>
+    </div>
+  </div>
+
+  <div class="board-container" id="board-box">
+    <canvas id="boardCanvas"></canvas>
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <div class="controls">
+    <button id="roll-btn" onclick="rollDice()">🎲 ZAR AT</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('boardCanvas');
+    const ctx = canvas.getContext('2d');
+    const toastEl = document.getElementById('toast');
+
+    let state = {
+      points: Array(24).fill(null).map(() => ({ count: 0, owner: null })),
+      whiteBar: 0, blackBar: 0,
+      whiteOff: 0, blackOff: 0,
+      turn: 'white',
+      dice: [], remainingDice: [],
+      selectedPoint: null, validMoves: []
+    };
+
+    let dragItem = null;
+    let isRolling = false;
+    let animStartTime = 0;
+    let dicePhysics = [];
+
+    // Animated Waypoint Move State
+    let activeMoveAnim = null;
+
+    function showToast(msg, duration = 2400) {
+      toastEl.innerText = msg;
+      toastEl.style.display = 'block';
+      setTimeout(() => {
+        toastEl.style.display = 'none';
+      }, duration);
+    }
+
+    function initGame() {
+      state.points = Array(24).fill(null).map(() => ({ count: 0, owner: null }));
+      
+      setPt(23, 2, 'white');
+      setPt(12, 5, 'white');
+      setPt(7,  3, 'white');
+      setPt(5,  5, 'white');
+
+      setPt(0,  2, 'black');
+      setPt(11, 5, 'black');
+      setPt(16, 3, 'black');
+      setPt(18, 5, 'black');
+
+      state.whiteBar = 0; state.blackBar = 0;
+      state.whiteOff = 0; state.blackOff = 0;
+      state.turn = 'white';
+      state.winner = null;
+      state.dice = []; state.remainingDice = [];
+      state.selectedPoint = null; state.validMoves = [];
+      dragItem = null;
+      isRolling = false;
+      dicePhysics = [];
+      activeMoveAnim = null;
+      updateUI();
+      draw();
+    }
+
+    function setPt(idx, count, owner) {
+      state.points[idx] = { count, owner };
+    }
+
+    function rollDice() {
+      if (state.dice.length > 0 || isRolling || activeMoveAnim || state.winner != null) return;
+      isRolling = true;
+      document.getElementById('roll-btn').disabled = true;
+
+      let d1 = Math.floor(Math.random() * 6) + 1;
+      let d2 = Math.floor(Math.random() * 6) + 1;
+      let finalDice = (d1 === d2) ? [d1, d1, d1, d1] : [d1, d2];
+      let targets = [d1, d2];
+
+      state.dice = finalDice;
+      state.remainingDice = [...finalDice];
+
+      dicePhysics = [
+        {
+          startX: -15 + (Math.random() - 0.5) * 10, startY: 12 + (Math.random() - 0.5) * 8,
+          targetX: -36 + (Math.random() - 0.5) * 8, targetY: (Math.random() - 0.5) * 6,
+          rotSpeedX: (3 + Math.random() * 2) * Math.PI,
+          rotSpeedY: (4 + Math.random() * 2) * Math.PI,
+          targetVal: targets[0], delay: 0.0
+        },
+        {
+          startX: 15 + (Math.random() - 0.5) * 10, startY: -10 + (Math.random() - 0.5) * 8,
+          targetX: 36 + (Math.random() - 0.5) * 8, targetY: (Math.random() - 0.5) * 6,
+          rotSpeedX: -(3 + Math.random() * 2) * Math.PI,
+          rotSpeedY: -(4 + Math.random() * 2) * Math.PI,
+          targetVal: targets[1], delay: 0.04
+        }
+      ];
+
+      animStartTime = performance.now();
+      requestAnimationFrame(stepPhysicsAnimation);
+
+      setTimeout(() => {
+        state.dice = finalDice;
+        state.remainingDice = [...finalDice];
+        isRolling = false;
+        calculateValidMoves();
+        updateUI();
+        draw();
+
+        checkAutoPass();
+      }, 1100);
+    }
+
+    function stepPhysicsAnimation(now) {
+      let elapsed = (now - animStartTime) / 1500.0;
+      let t = Math.min(1.0, elapsed);
+
+      draw(t);
+
+      if (t < 1.0) {
+        requestAnimationFrame(stepPhysicsAnimation);
+      }
+    }
+
+    // ----------------------------------------------------
+    // Waypoint Path Calculation Across the BAR
+    // ----------------------------------------------------
+    function getPointCenterCoords(index) {
+      let container = canvas.parentElement;
+      let w = container ? container.clientWidth : canvas.clientWidth;
+      let h = container ? container.clientHeight : canvas.clientHeight;
+      let frameBorder = 14;
+      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+
+      if (index === 24) return { x: halfW + barW / 2, y: 45 };
+      if (index === -1) return { x: halfW + barW / 2, y: h - 45 };
+
+      let left = 0, isTop = index >= 12;
+      if (index <= 5) left = halfW + barW + (5 - index) * ptW;
+      else if (index <= 11) left = frameBorder + (11 - index) * ptW;
+      else if (index <= 17) left = frameBorder + (index - 12) * ptW;
+      else left = halfW + barW + (index - 18) * ptW;
+
+      let pt = state.points[index];
+      let count = pt ? pt.count : 0;
+      let r = Math.min(ptW * 0.44, 17);
+      let cy = isTop ? (frameBorder + 18 + r + count * r * 1.7) : (h - frameBorder - 18 - r - count * r * 1.7);
+
+      return { x: left + ptW / 2, y: cy };
+    }
+
+    function buildWaypointPath(fromIdx, toIdx) {
+      let container = canvas.parentElement;
+      let w = container ? container.clientWidth : canvas.clientWidth;
+      let h = container ? container.clientHeight : canvas.clientHeight;
+      let barLeft = (w - 48) / 2;
+      let barRight = barLeft + 48;
+      let barCenter = barLeft + 24;
+
+      let start = getPointCenterCoords(fromIdx);
+      let dest = getPointCenterCoords(toIdx);
+
+      // Check if path crosses central BAR
+      let startOnLeft = (start.x < barLeft);
+      let destOnRight = (dest.x > barRight);
+      let startOnRight = (start.x > barRight);
+      let destOnLeft = (dest.x < barLeft);
+
+      let crossesBar = (startOnLeft && destOnRight) || (startOnRight && destOnLeft) || fromIdx === 24 || fromIdx === -1 || toIdx === 24 || toIdx === -1;
+
+      if (!crossesBar) {
+        return [start, dest];
+      }
+
+      // Explicit Waypoint Arc Path Jumping OVER the Raised 3D Wooden BAR!
+      let barNearX = startOnLeft ? barLeft - 10 : barRight + 10;
+      let barFarX = startOnLeft ? barRight + 10 : barLeft - 10;
+
+      return [
+        start,
+        { x: start.x, y: start.y + (start.y < h/2 ? 35 : -35) },
+        { x: barNearX, y: h / 2 + (start.y < h/2 ? -20 : 20) },
+        { x: barCenter, y: h / 2 - 50 }, // Apex Jump OVER the BAR!
+        { x: barFarX, y: h / 2 + (dest.y < h/2 ? -20 : 20) },
+        { x: dest.x, y: dest.y + (dest.y < h/2 ? 35 : -35) },
+        dest
+      ];
+    }
+
+    // ----------------------------------------------------
+    // True 3D Software Renderer for 6-Faced Physical Cubes
+    // ----------------------------------------------------
+    class Vector3 {
+      constructor(x, y, z) { this.x = x; this.y = y; this.z = z; }
+      rotate(rx, ry, rz) {
+        let cx = Math.cos(rx), sx = Math.sin(rx);
+        let y1 = this.y * cx - this.z * sx, z1 = this.y * sx + this.z * cx;
+
+        let cy = Math.cos(ry), sy = Math.sin(ry);
+        let x2 = this.x * cy + z1 * sy, z2 = -this.x * sy + z1 * cy;
+
+        let cz = Math.cos(rz), sz = Math.sin(rz);
+        let x3 = x2 * cz - y1 * sz, y3 = x2 * sz + y1 * cz;
+
+        return new Vector3(x3, y3, z2);
+      }
+    }
+
+    function renderTrue3DCube(cx, cy, cubeSize, rotX, rotY, rotZ, zHeight, opacity) {
+      let s = cubeSize / 2.2;
+      let vertices = [
+        new Vector3(-s, -s, -s), new Vector3( s, -s, -s),
+        new Vector3( s,  s, -s), new Vector3(-s,  s, -s),
+        new Vector3(-s, -s,  s), new Vector3( s, -s,  s),
+        new Vector3( s,  s,  s), new Vector3(-s,  s,  s)
+      ];
+
+      let rotated = vertices.map(v => v.rotate(rotX, rotY, rotZ));
+
+      const faces = [
+        { idx: [4, 5, 6, 7], norm: new Vector3(0, 0, 1), val: 1 },  // Front (+Z)
+        { idx: [1, 0, 3, 2], norm: new Vector3(0, 0, -1), val: 6 }, // Back (-Z)
+        { idx: [0, 1, 5, 4], norm: new Vector3(0, -1, 0), val: 2 }, // Top (-Y)
+        { idx: [7, 6, 2, 3], norm: new Vector3(0, 1, 0), val: 5 },  // Bottom (+Y)
+        { idx: [5, 1, 2, 6], norm: new Vector3(1, 0, 0), val: 3 },  // Right (+X)
+        { idx: [0, 4, 7, 3], norm: new Vector3(-1, 0, 0), val: 4 }  // Left (-X)
+      ];
+
+      let lightDir = new Vector3(-0.4, -0.6, 0.7);
+
+      let renderable = [];
+      faces.forEach(f => {
+        let rNorm = f.norm.rotate(rotX, rotY, rotZ);
+        if (rNorm.z > 0.05) {
+          let avgZ = (rotated[f.idx[0]].z + rotated[f.idx[1]].z + rotated[f.idx[2]].z + rotated[f.idx[3]].z) / 4;
+          let lightInt = Math.max(0.40, Math.min(1.0, 0.55 + (rNorm.x * lightDir.x + rNorm.y * lightDir.y + rNorm.z * lightDir.z) * 0.45));
+          renderable.push({ face: f, avgZ, lightInt });
+        }
+      });
+
+      renderable.sort((a, b) => a.avgZ - b.avgZ);
+
+      let focal = 160.0;
+      function project(v) {
+        let scale = focal / (focal + v.z + 100.0);
+        return {
+          x: cx + v.x * scale,
+          y: cy - zHeight + v.y * scale
+        };
+      }
+
+      let isGrounded = zHeight < 0.5;
+      let shadowScale = isGrounded ? 1.0 : Math.max(0.4, Math.min(1.2, 1.0 - zHeight / 140.0));
+      let shadowOpacity = isGrounded ? 0.75 : Math.max(0.15, Math.min(0.75, 0.75 - zHeight / 160.0)) * opacity;
+      let shadowOffsetY = isGrounded ? 14 : (14 + zHeight * 0.35);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(cx + zHeight * 0.1, cy + shadowOffsetY, cubeSize * 0.48 * shadowScale, cubeSize * 0.18 * shadowScale, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = opacity;
+
+      renderable.forEach(r => {
+        let pts = r.face.idx.map(i => project(rotated[i]));
+
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+        ctx.lineTo(pts[2].x, pts[2].y);
+        ctx.lineTo(pts[3].x, pts[3].y);
+        ctx.closePath();
+
+        let baseShade = Math.floor(235 * r.lightInt);
+        ctx.fillStyle = `rgb(${baseShade}, ${Math.floor(baseShade * 0.96)}, ${Math.floor(baseShade * 0.88)})`;
+        ctx.fill();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#7A5C14';
+        ctx.stroke();
+
+        draw3DPips(pts, r.face.val, r.lightInt);
+      });
+
+      ctx.restore();
+    }
+
+    function draw3DPips(quad, val, light) {
+      let center = {
+        x: (quad[0].x + quad[1].x + quad[2].x + quad[3].x) / 4,
+        y: (quad[0].y + quad[1].y + quad[2].y + quad[3].y) / 4
+      };
+
+      let uVec = { x: (quad[1].x - quad[0].x) * 0.5, y: (quad[1].y - quad[0].y) * 0.5 };
+      let vVec = { x: (quad[3].x - quad[0].x) * 0.5, y: (quad[3].y - quad[0].y) * 0.5 };
+
+      const pipOffsets = {
+        1: [[0, 0]],
+        2: [[-0.55, -0.55], [0.55, 0.55]],
+        3: [[-0.55, -0.55], [0, 0], [0.55, 0.55]],
+        4: [[-0.55, -0.55], [0.55, -0.55], [-0.55, 0.55], [0.55, 0.55]],
+        5: [[-0.55, -0.55], [0.55, -0.55], [0, 0], [-0.55, 0.55], [0.55, 0.55]],
+        6: [[-0.55, -0.65], [0.55, -0.65], [-0.55, 0], [0.55, 0], [-0.55, 0.65], [0.55, 0.65]]
+      };
+
+      let offsets = pipOffsets[val] || [[0, 0]];
+      let pipShade = Math.floor(40 * light);
+      ctx.fillStyle = `rgb(${pipShade}, ${pipShade}, ${pipShade})`;
+
+      let quadWidth = Math.hypot(quad[1].x - quad[0].x, quad[1].y - quad[0].y);
+      let r = Math.max(2.0, Math.min(4.5, quadWidth * 0.08));
+
+      offsets.forEach(off => {
+        let px = center.x + uVec.x * off[0] + vVec.x * off[1];
+        let py = center.y + uVec.y * off[0] + vVec.y * off[1];
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function checkAutoPass() {
+      if (state.remainingDice.length > 0 && state.validMoves.length === 0) {
+        let barCount = state.turn === 'white' ? state.whiteBar : state.blackBar;
+        let pName = state.turn === 'white' ? 'Beyaz' : 'Siyah';
+
+        let msg = barCount > 0
+          ? `${pName} oyuncunun kırık pulu geleceği haneler kapalı olduğu için oyuna giremiyor! Sıra rakibe geçti.`
+          : `${pName} oyuncunun oynayabileceği hamle yok! Sıra rakibe geçti.`;
+
+        showToast(msg, 2400);
+
+        setTimeout(() => {
+          state.turn = state.turn === 'white' ? 'black' : 'white';
+          state.dice = [];
+          state.remainingDice = [];
+          state.validMoves = [];
+          updateUI();
+          draw();
+        }, 2400);
+      }
+    }
+
+    function calculateValidMoves() {
+      let rawMoves = getRawValidMoves();
+      if (rawMoves.length === 0 || state.remainingDice.length <= 1) {
+        state.validMoves = rawMoves;
+        return;
+      }
+
+      let maxDice = 0;
+      let moveUsage = [];
+
+      rawMoves.forEach(m => {
+        let temp = simulateSingleMoveState(state, m);
+        let used = state.remainingDice.length - temp.remainingDice.length;
+        if (used <= 0) used = 1;
+        let total = used + getMaxPossibleDiceUsage(temp);
+        moveUsage.push({ move: m, count: total });
+        if (total > maxDice) maxDice = total;
+      });
+
+      let filtered = moveUsage.filter(item => item.count === maxDice).map(item => item.move);
+
+      if (maxDice === 1 && state.remainingDice.length === 2 && state.remainingDice[0] !== state.remainingDice[1]) {
+        let maxDie = Math.max(state.remainingDice[0], state.remainingDice[1]);
+        let hasHigher = filtered.some(m => m.die === maxDie);
+        if (hasHigher) {
+          filtered = filtered.filter(m => m.die === maxDie);
+        }
+      }
+
+      state.validMoves = filtered;
+    }
+
+    function getMaxPossibleDiceUsage(st) {
+      if (st.remainingDice.length === 0) return 0;
+      let raw = getRawValidMovesForState(st);
+      if (raw.length === 0) return 0;
+
+      let maxCount = 0;
+      raw.forEach(m => {
+        let temp = simulateSingleMoveState(st, m);
+        let used = st.remainingDice.length - temp.remainingDice.length;
+        if (used <= 0) used = 1;
+        let total = used + getMaxPossibleDiceUsage(temp);
+        if (total > maxCount) maxCount = total;
+      });
+      return maxCount;
+    }
+
+    function simulateSingleMoveState(st, m) {
+      let temp = JSON.parse(JSON.stringify(st));
+      if (m.from === 24) temp.whiteBar--;
+      else if (m.from === -1) temp.blackBar--;
+      else {
+        temp.points[m.from].count--;
+        if (temp.points[m.from].count === 0) temp.points[m.from].owner = null;
+      }
+
+      if (m.isOff) {
+        if (temp.turn === 'white') temp.whiteOff++; else temp.blackOff++;
+      } else {
+        let targetPt = temp.points[m.to];
+        let opp = temp.turn === 'white' ? 'black' : 'white';
+        if (targetPt.owner === opp && targetPt.count === 1) {
+          if (opp === 'white') temp.whiteBar++; else temp.blackBar++;
+          targetPt.count = 1; targetPt.owner = temp.turn;
+        } else {
+          targetPt.count++; targetPt.owner = temp.turn;
+        }
+      }
+
+      if (m.isCombined && m.componentDice) {
+        m.componentDice.forEach(d => {
+          let idx = temp.remainingDice.indexOf(d);
+          if (idx !== -1) temp.remainingDice.splice(idx, 1);
+        });
+      } else {
+        let dieIdx = temp.remainingDice.indexOf(m.die);
+        if (dieIdx !== -1) temp.remainingDice.splice(dieIdx, 1);
+      }
+      return temp;
+    }
+
+    function getRawValidMoves() {
+      return getRawValidMovesForState(state);
+    }
+
+    function getRawValidMovesForState(st) {
+      let rawMoves = [];
+      if (st.remainingDice.length === 0) return rawMoves;
+
+      let p = st.turn;
+      let barCount = p === 'white' ? st.whiteBar : st.blackBar;
+
+      if (barCount > 0) {
+        let fromIdx = p === 'white' ? 24 : -1;
+        let uniqueDice = [...new Set(st.remainingDice)];
+        uniqueDice.forEach(die => {
+          let toIdx = p === 'white' ? (24 - die) : (die - 1);
+          if (isValidTargetForState(st, toIdx, p)) {
+            rawMoves.push({ from: fromIdx, to: toIdx, die });
+          }
+        });
+        return rawMoves;
+      }
+
+      let uniqueDice = [...new Set(st.remainingDice)];
+      for (let i = 0; i < 24; i++) {
+        if (st.points[i].owner === p && st.points[i].count > 0) {
+          uniqueDice.forEach(die => {
+            let target = p === 'white' ? (i - die) : (i + die);
+
+            if (p === 'white') {
+              if (target >= 0) {
+                if (isValidTargetForState(st, target, p)) {
+                  rawMoves.push({ from: i, to: target, die });
+                }
+              } else if (canBearOffForState(st, p)) {
+                if (target === -1 || isHighestOccupiedForState(st, p, i)) {
+                  rawMoves.push({ from: i, to: -1, die, isOff: true });
+                }
+              }
+            } else {
+              if (target < 24) {
+                if (isValidTargetForState(st, target, p)) {
+                  rawMoves.push({ from: i, to: target, die });
+                }
+              } else if (canBearOffForState(st, p)) {
+                if (target === 24 || isHighestOccupiedForState(st, p, i)) {
+                  rawMoves.push({ from: i, to: 24, die, isOff: true });
+                }
+              }
+            }
+          });
+
+          if (st.remainingDice.length >= 2) {
+            let d1 = st.remainingDice[0];
+            let d2 = st.remainingDice[1];
+
+            let inter1 = p === 'white' ? (i - d1) : (i + d1);
+            let combTarget = p === 'white' ? (i - d1 - d2) : (i + d1 + d2);
+            let inter2 = p === 'white' ? (i - d2) : (i + d2);
+
+            let path1Valid = isValidTargetForState(st, inter1, p) && isValidTargetForState(st, combTarget, p);
+            let path2Valid = isValidTargetForState(st, inter2, p) && isValidTargetForState(st, combTarget, p);
+
+            if ((path1Valid || path2Valid) && combTarget >= 0 && combTarget < 24) {
+              if (!rawMoves.some(m => m.from === i && m.to === combTarget)) {
+                rawMoves.push({
+                  from: i,
+                  to: combTarget,
+                  die: d1 + d2,
+                  isCombined: true,
+                  componentDice: [d1, d2]
+                });
+              }
+            }
+          }
+        }
+      }
+      return rawMoves;
+    }
+
+    function isValidTargetForState(st, target, player) {
+      if (target < 0 || target >= 24) return false;
+      let pt = st.points[target];
+      if (!pt.owner || pt.count === 0) return true;
+      if (pt.owner === player) return true;
+      if (pt.owner !== player && pt.count === 1) return true;
+      return false;
+    }
+
+    function canBearOffForState(st, player) {
+      let bar = player === 'white' ? st.whiteBar : st.blackBar;
+      if (bar > 0) return false;
+      let outside = 0;
+      if (player === 'white') {
+        for (let i = 6; i < 24; i++) if (st.points[i].owner === 'white') outside += st.points[i].count;
+      } else {
+        for (let i = 0; i < 18; i++) if (st.points[i].owner === 'black') outside += st.points[i].count;
+      }
+      return outside === 0;
+    }
+
+    function isHighestOccupiedForState(st, player, idx) {
+      if (player === 'white') {
+        for (let i = 5; i > idx; i--) {
+          if (st.points[i].owner === 'white' && st.points[i].count > 0) return false;
+        }
+        return true;
+      } else {
+        for (let i = 18; i < idx; i++) {
+          if (st.points[i].owner === 'black' && st.points[i].count > 0) return false;
+        }
+        return true;
+      }
+    }
+
+    function isValidTarget(target, player) {
+      if (target < 0 || target >= 24) return false;
+      let pt = state.points[target];
+      if (!pt.owner || pt.count === 0) return true;
+      if (pt.owner === player) return true;
+      if (pt.owner !== player && pt.count === 1) return true;
+      return false;
+    }
+
+    function canBearOff(player) {
+      let bar = player === 'white' ? state.whiteBar : state.blackBar;
+      if (bar > 0) return false;
+      let outside = 0;
+      if (player === 'white') {
+        for (let i = 6; i < 24; i++) if (state.points[i].owner === 'white') outside += state.points[i].count;
+      } else {
+        for (let i = 0; i < 18; i++) if (state.points[i].owner === 'black') outside += state.points[i].count;
+      }
+      return outside === 0;
+    }
+
+    function isHighestOccupied(player, idx) {
+      if (player === 'white') {
+        for (let i = 5; i > idx; i--) {
+          if (state.points[i].owner === 'white' && state.points[i].count > 0) return false;
+        }
+        return true;
+      } else {
+        for (let i = 18; i < idx; i++) {
+          if (state.points[i].owner === 'black' && state.points[i].count > 0) return false;
+        }
+        return true;
+      }
+    }
+
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = (e.touches && e.touches.length > 0)
+        ? e.touches[0]
+        : (e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0] : null);
+      const clientX = touch ? touch.clientX : e.clientX;
+      const clientY = touch ? touch.clientY : e.clientY;
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('touchstart', startDrag);
+
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('touchmove', moveDrag);
+
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+      if (state.dice.length === 0 || isRolling || activeMoveAnim) return;
+      let pos = getCanvasCoords(e);
+      let clickedPt = getPointFromCoords(pos.x, pos.y);
+
+      // 1. Direct Click-to-Move: If a point is already selected, check if clickedPt is a valid move
+      if (state.selectedPoint !== null && clickedPt !== null && clickedPt !== state.selectedPoint) {
+        let move = state.validMoves.find(m => m.from === state.selectedPoint && m.to === clickedPt);
+        if (move) {
+          state.selectedPoint = null;
+          dragItem = null;
+          applyMoveWithWaypointAnim(move);
+          return;
+        }
+      }
+
+      if (clickedPt === null) {
+        state.selectedPoint = null;
+        dragItem = null;
+        draw();
+        return;
+      }
+
+      let barCount = state.turn === 'white' ? state.whiteBar : state.blackBar;
+      if (barCount > 0) {
+        let barIdx = state.turn === 'white' ? 24 : -1;
+        if (clickedPt === barIdx) {
+          state.selectedPoint = barIdx;
+          dragItem = { from: barIdx, startX: pos.x, startY: pos.y, currentX: pos.x, currentY: pos.y };
+        } else if (state.selectedPoint === barIdx) {
+          let move = state.validMoves.find(m => m.from === barIdx && m.to === clickedPt);
+          if (move) {
+            state.selectedPoint = null;
+            dragItem = null;
+            applyMoveWithWaypointAnim(move);
+            return;
+          }
+        }
+        draw();
+        return;
+      }
+
+      // 2. Select point & initialize drag item
+      if (clickedPt >= 0 && clickedPt < 24 && state.points[clickedPt].owner === state.turn) {
+        state.selectedPoint = clickedPt;
+        dragItem = { from: clickedPt, startX: pos.x, startY: pos.y, currentX: pos.x, currentY: pos.y };
+      } else {
+        state.selectedPoint = null;
+        dragItem = null;
+      }
+      draw();
+    }
+
+    function moveDrag(e) {
+      if (!dragItem) return;
+      let pos = getCanvasCoords(e);
+      dragItem.currentX = pos.x;
+      dragItem.currentY = pos.y;
+      draw();
+    }
+
+    function endDrag(e) {
+      if (!dragItem) return;
+      let pos = getCanvasCoords(e);
+      let targetPt = getPointFromCoords(pos.x, pos.y);
+
+      let dragDist = Math.hypot(pos.x - dragItem.startX, pos.y - dragItem.startY);
+
+      if (dragDist > 10) {
+        // Was a Drag & Drop gesture
+        if (targetPt !== null && targetPt !== dragItem.from) {
+          let move = state.validMoves.find(m => m.from === dragItem.from && m.to === targetPt);
+          if (move) {
+            state.selectedPoint = null;
+            dragItem = null;
+            applyMoveWithWaypointAnim(move);
+            return;
+          }
+        }
+        // Dropped on invalid point or dropped back on same point -> CLEAR SELECTION CLEANLY!
+        state.selectedPoint = null;
+      }
+
+      dragItem = null;
+      draw();
+    }
+
+    function showToast(msg, duration = 2400) {
+      let toast = document.getElementById('toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(212,175,55,0.95); color:#000; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.5); transition:opacity 0.3s;';
+        document.body.appendChild(toast);
+      }
+      toast.innerText = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; }, duration);
+    }
+
+    function getPointCenter(idx) {
+      let container = canvas.parentElement;
+      let w = container ? container.clientWidth : canvas.clientWidth;
+      let h = container ? container.clientHeight : canvas.clientHeight;
+      let frameBorder = 14;
+      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+
+      // BAR indices
+      if (idx === 24 && state.turn === 'white') return { x: halfW + barW / 2, y: 45 };
+      if (idx === -1 && state.turn === 'black') return { x: halfW + barW / 2, y: h - 45 };
+
+      // Bear-Off targets
+      if (idx === -1 && state.turn === 'white') return { x: w - 10, y: h * 0.3 };
+      if (idx === 24 && state.turn === 'black') return { x: w - 10, y: h * 0.7 };
+
+      let isTop = idx >= 12;
+      let left = frameBorder;
+      if (idx >= 0 && idx <= 5) left = halfW + barW + (5 - idx) * ptW;
+      else if (idx >= 6 && idx <= 11) left = frameBorder + (11 - idx) * ptW;
+      else if (idx >= 12 && idx <= 17) left = frameBorder + (idx - 12) * ptW;
+      else if (idx >= 18 && idx <= 23) left = halfW + barW + (idx - 18) * ptW;
+
+      let x = left + ptW / 2;
+      let y = isTop ? frameBorder + 45 : h - frameBorder - 45;
+      return { x, y };
+    }
+
+    function buildWaypointPath(from, to) {
+      let p1 = getPointCenter(from);
+      let p2 = getPointCenter(to);
+
+      let midX = (p1.x + p2.x) / 2;
+      let midY = (p1.y + p2.y) / 2 - 40;
+
+      return [p1, { x: midX, y: midY }, p2];
+    }
+
+    function applyMoveWithWaypointAnim(m) {
+      let waypoints = buildWaypointPath(m.from, m.to);
+      let startT = performance.now();
+      let duration = 420; // 420ms smooth trajectory arc
+
+      let moverOwner = state.turn;
+
+      activeMoveAnim = {
+        waypoints,
+        startT,
+        duration,
+        owner: moverOwner,
+        move: m
+      };
+
+      function stepMoveAnim(now) {
+        if (!activeMoveAnim) return;
+        let elapsed = now - activeMoveAnim.startT;
+        let ratio = Math.min(1.0, elapsed / activeMoveAnim.duration);
+
+        draw(1.0, ratio);
+
+        if (ratio < 1.0) {
+          requestAnimationFrame(stepMoveAnim);
+        } else {
+          activeMoveAnim = null;
+          applyMoveState(m);
+        }
+      }
+
+      requestAnimationFrame(stepMoveAnim);
+    }
+
+    function interpolateWaypoints(waypoints, ratio) {
+      if (!waypoints || waypoints.length === 0) return { x: 0, y: 0 };
+      if (waypoints.length === 1 || ratio <= 0) return { x: waypoints[0].x, y: waypoints[0].y };
+      if (ratio >= 1.0) return { x: waypoints[waypoints.length - 1].x, y: waypoints[waypoints.length - 1].y };
+
+      let n = waypoints.length - 1;
+      let scaled = ratio * n;
+      let idx = Math.floor(scaled);
+      if (idx >= n) idx = n - 1;
+      let subRatio = scaled - idx;
+
+      let pA = waypoints[idx] || waypoints[0];
+      let pB = waypoints[idx + 1] || pA;
+
+      let x = pA.x + (pB.x - pA.x) * subRatio;
+      let y = pA.y + (pB.y - pA.y) * subRatio;
+
+      if (isNaN(x) || isNaN(y)) {
+        return { x: waypoints[0].x, y: waypoints[0].y };
+      }
+      return { x, y };
+    }
+
+    function applyMoveState(m) {
+      if (m.isCombined) {
+        let d1 = m.componentDice[0];
+        let d2 = m.componentDice[1];
+
+        let p = state.turn;
+        let midTarget = p === 'white' ? (m.from - d1) : (m.from + d1);
+        if (!isValidTarget(midTarget, p)) {
+          midTarget = p === 'white' ? (m.from - d2) : (m.from + d2);
+        }
+
+        applySingleMove({ from: m.from, to: midTarget, die: d1 });
+        applySingleMove({ from: midTarget, to: m.to, die: d2 });
+        return;
+      }
+
+      applySingleMove(m);
+    }
+
+    function checkWinCondition() {
+      if (state.whiteOff >= 15 || state.blackOff >= 15) {
+        let winnerName = state.whiteOff >= 15 ? 'Beyaz' : 'Siyah';
+        state.winner = winnerName;
+        state.dice = [];
+        state.remainingDice = [];
+        state.validMoves = [];
+        updateUI();
+        draw();
+        setTimeout(() => {
+          showToast(`🏆 TEBRİKLER! ${winnerName.toUpperCase()} OYUNCU MAÇI KAZANDI! 🎉`, 5000);
+        }, 150);
+        return true;
+      }
+      return false;
+    }
+
+    function applySingleMove(m) {
+      if (m.from === 24) state.whiteBar--;
+      else if (m.from === -1) state.blackBar--;
+      else {
+        state.points[m.from].count--;
+        if (state.points[m.from].count === 0) state.points[m.from].owner = null;
+      }
+
+      if (m.isOff) {
+        if (state.turn === 'white') state.whiteOff++;
+        else state.blackOff++;
+        if (checkWinCondition()) return;
+      } else {
+        let targetPt = state.points[m.to];
+        let opp = state.turn === 'white' ? 'black' : 'white';
+        if (targetPt.owner === opp && targetPt.count === 1) {
+          if (opp === 'white') state.whiteBar++; else state.blackBar++;
+          targetPt.count = 1; targetPt.owner = state.turn;
+        } else {
+          targetPt.count++; targetPt.owner = state.turn;
+        }
+      }
+
+      let dieIdx = state.remainingDice.indexOf(m.die);
+      if (dieIdx !== -1) state.remainingDice.splice(dieIdx, 1);
+      state.selectedPoint = null;
+      calculateValidMoves();
+
+      if (state.remainingDice.length === 0) {
+        state.turn = state.turn === 'white' ? 'black' : 'white';
+        state.dice = [];
+        state.remainingDice = [];
+        state.validMoves = [];
+      } else {
+        checkAutoPass();
+      }
+
+      updateUI();
+      draw();
+    }
+
+    function getPointFromCoords(x, y) {
+      let container = canvas.parentElement;
+      let w = container ? container.clientWidth : canvas.clientWidth;
+      let h = container ? container.clientHeight : canvas.clientHeight;
+      if (!w || !h) return null;
+
+      let frameBorder = 14;
+      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+
+      if (x > halfW && x < halfW + barW) {
+        return y < h / 2 ? 24 : -1;
+      }
+
+      // Detect Bear-Off Zone (Right outer frame rim)
+      if (x >= w - frameBorder - 10 && canBearOff(state.turn)) {
+        return state.turn === 'white' ? -1 : 24;
+      }
+
+      let isTop = y < h / 2;
+      let idx = null;
+
+      if (!isTop) {
+        if (x >= halfW + barW && x < w - frameBorder) {
+          let col = Math.floor((x - (halfW + barW)) / ptW);
+          idx = 5 - col;
+        } else if (x >= frameBorder && x < halfW) {
+          let col = Math.floor((x - frameBorder) / ptW);
+          idx = 11 - col;
+        }
+      } else {
+        if (x >= frameBorder && x < halfW) {
+          let col = Math.floor((x - frameBorder) / ptW);
+          idx = 12 + col;
+        } else if (x >= halfW + barW && x < w - frameBorder) {
+          let col = Math.floor((x - (halfW + barW)) / ptW);
+          idx = 18 + col;
+        }
+      }
+      return idx;
+    }
+
+    function draw(animRatio = 1.0, moveRatio = 1.0) {
+      let dpr = window.devicePixelRatio || 1;
+      let container = canvas.parentElement;
+      if (!container) return;
+      let w = container.clientWidth;
+      let h = container.clientHeight;
+      if (!w || !h || w < 100 || h < 100) return;
+
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      let frameBorder = 14;
+      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6, triH = h * 0.42;
+
+      // 1. Outer Embossed Mahogany Frame
+      ctx.fillStyle = '#3D210F';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#7E4A28'; ctx.lineWidth = 3;
+      ctx.strokeRect(2, 2, w - 4, h - 4);
+
+      // 2. Recessed Inner Floor Surface
+      ctx.fillStyle = '#140C07';
+      ctx.fillRect(frameBorder, frameBorder, w - (frameBorder * 2), h - (frameBorder * 2));
+
+      // Inner Shadows for Recessed Floor
+      let innerGrd = ctx.createLinearGradient(0, frameBorder, 0, frameBorder + 20);
+      innerGrd.addColorStop(0, 'rgba(0,0,0,0.85)'); innerGrd.addColorStop(1, 'transparent');
+      ctx.fillStyle = innerGrd;
+      ctx.fillRect(frameBorder, frameBorder, w - frameBorder * 2, 20);
+
+      // 3. Draw 24 Points with Exact Separation at Center Bar
+      for (let i = 0; i < 24; i++) {
+        let isDark = i % 2 === 0;
+        let isSel = state.selectedPoint === i;
+        let isTarget = state.validMoves.some(m => m.to === i && m.from === state.selectedPoint);
+
+        let left = 0, isTop = i >= 12;
+        if (i <= 5) left = halfW + barW + (5 - i) * ptW;
+        else if (i <= 11) left = frameBorder + (11 - i) * ptW;
+        else if (i <= 17) left = frameBorder + (i - 12) * ptW;
+        else left = halfW + barW + (i - 18) * ptW;
+
+        ctx.beginPath();
+        if (!isTop) {
+          ctx.moveTo(left, h - frameBorder); ctx.lineTo(left + ptW / 2, h - frameBorder - triH); ctx.lineTo(left + ptW, h - frameBorder);
+        } else {
+          ctx.moveTo(left, frameBorder); ctx.lineTo(left + ptW / 2, frameBorder + triH); ctx.lineTo(left + ptW, frameBorder);
+        }
+        ctx.closePath();
+
+        let ptGrd = ctx.createLinearGradient(0, isTop ? frameBorder : h - frameBorder, 0, isTop ? frameBorder + triH : h - frameBorder - triH);
+        if (isSel) { ptGrd.addColorStop(0, '#66BB6A'); ptGrd.addColorStop(1, '#2E7D32'); }
+        else if (isTarget) { ptGrd.addColorStop(0, '#00E676'); ptGrd.addColorStop(1, '#00897B'); }
+        else if (isDark) { ptGrd.addColorStop(0, '#A32B20'); ptGrd.addColorStop(1, '#661711'); }
+        else { ptGrd.addColorStop(0, '#D9C496'); ptGrd.addColorStop(1, '#A69165'); }
+
+        ctx.fillStyle = ptGrd;
+        ctx.fill();
+        ctx.strokeStyle = isSel ? '#FFD700' : isTarget ? '#00E676' : (isDark ? '#4A100B' : '#806E48');
+        ctx.lineWidth = isSel || isTarget ? 2.5 : 1.2;
+        ctx.stroke();
+
+        // Checkers Stacking with 2.5D Rim
+        let pt = state.points[i];
+        if (pt.count > 0) {
+          let count = Math.min(pt.count, 5);
+          let r = Math.min(ptW * 0.44, 17);
+
+          let renderCount = (dragItem && dragItem.from === i) ? count - 1 : count;
+
+          for (let c = 0; c < renderCount; c++) {
+            let cx = left + ptW / 2;
+            let cy = isTop ? (frameBorder + 18 + r + c * r * 1.7) : (h - frameBorder - 18 - r - c * r * 1.7);
+            draw3DCylindricalChecker(cx, cy, r, pt.owner);
+          }
+        }
+      }
+
+      // 4. Physical 3D Raised Center BAR Beam (Orta Yükseltilmiş Ahşap Çıta)
+      let barLeft = halfW;
+      let barTop = frameBorder - 2;
+      let barH = h - (frameBorder * 2) + 4;
+
+      // Drop Shadows onto left & right floor halves
+      let sL = ctx.createLinearGradient(barLeft - 14, 0, barLeft, 0);
+      sL.addColorStop(0, 'transparent'); sL.addColorStop(1, 'rgba(0,0,0,0.8)');
+      ctx.fillStyle = sL; ctx.fillRect(barLeft - 14, frameBorder, 14, h - frameBorder * 2);
+
+      let sR = ctx.createLinearGradient(barLeft + barW, 0, barLeft + barW + 14, 0);
+      sR.addColorStop(0, 'rgba(0,0,0,0.8)'); sR.addColorStop(1, 'transparent');
+      ctx.fillStyle = sR; ctx.fillRect(barLeft + barW, frameBorder, 14, h - frameBorder * 2);
+
+      // Raised Beam Top Surface
+      let beamGrd = ctx.createLinearGradient(barLeft, 0, barLeft + barW, 0);
+      beamGrd.addColorStop(0.0, '#6E3E20');
+      beamGrd.addColorStop(0.5, '#4E2A14');
+      beamGrd.addColorStop(1.0, '#3B1E0D');
+      ctx.fillStyle = beamGrd;
+      ctx.fillRect(barLeft, barTop, barW, barH);
+
+      // Bevel Highlights
+      ctx.strokeStyle = '#9E5C32'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(barLeft, barTop); ctx.lineTo(barLeft, barTop + barH); ctx.stroke();
+      ctx.strokeStyle = '#1F0E05';
+      ctx.beginPath(); ctx.moveTo(barLeft + barW, barTop); ctx.lineTo(barLeft + barW, barTop + barH); ctx.stroke();
+
+      // Brass Hinges
+      drawBrassHinge(barLeft + barW / 2, h / 3.8, barW - 10);
+      drawBrassHinge(barLeft + barW / 2, h - h / 3.8, barW - 10);
+
+      // BAR Label Engraving
+      ctx.fillStyle = '#D4AF37'; ctx.font = '900 11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('BAR', barLeft + barW / 2, h / 2 + 4);
+
+      // Draw BAR Checkers (Resting ON TOP of Raised 3D Center Beam)
+      let visWhiteBar = (dragItem && dragItem.from === 24) ? state.whiteBar - 1 : state.whiteBar;
+      let visBlackBar = (dragItem && dragItem.from === -1) ? state.blackBar - 1 : state.blackBar;
+      if (visWhiteBar > 0) draw3DCylindricalChecker(barLeft + barW / 2, 45, 17, 'white');
+      if (visBlackBar > 0) draw3DCylindricalChecker(barLeft + barW / 2, h - 45, 17, 'black');
+
+      if (dragItem) {
+        draw3DCylindricalChecker(dragItem.currentX, dragItem.currentY, 18, state.turn);
+      }
+
+      // Render Active Waypoint Move Checker (Traveling Along Arc Trajectory OVER the BAR)
+      if (activeMoveAnim) {
+        let pos = interpolateWaypoints(activeMoveAnim.waypoints, moveRatio);
+        draw3DCylindricalChecker(pos.x, pos.y, 18, activeMoveAnim.owner);
+      }
+
+      // ------------------------------------------------
+      // Render True 3D Software Cubes during Anim or Rest
+      // ------------------------------------------------
+      if (isRolling && dicePhysics.length === 2) {
+        let t = animRatio;
+        dicePhysics.forEach(p => {
+          let easeT = Math.min(1.0, Math.pow(t, 0.8));
+          let posX = p.startX + (p.targetX - p.startX) * easeT;
+          let posY = p.startY + (p.targetY - p.startY) * easeT;
+
+          let zH = 0;
+          if (t < 0.45) zH = Math.sin((t / 0.45) * Math.PI) * 34.0;
+          else if (t < 0.75) zH = Math.sin(((t - 0.45) / 0.30) * Math.PI) * 11.0;
+          else if (t < 0.95) zH = Math.sin(((t - 0.75) / 0.20) * Math.PI) * 3.0;
+
+          let targetRotX = 0, targetRotY = 0;
+          switch (p.targetVal) {
+            case 1: targetRotX = 0; targetRotY = 0; break;
+            case 6: targetRotX = Math.PI; targetRotY = 0; break;
+            case 2: targetRotX = -Math.PI/2; targetRotY = 0; break;
+            case 5: targetRotX = Math.PI/2; targetRotY = 0; break;
+            case 3: targetRotX = 0; targetRotY = -Math.PI/2; break;
+            case 4: targetRotX = 0; targetRotY = Math.PI/2; break;
+          }
+
+          let rotX, rotY;
+          if (t < 0.75) {
+            let subT = t / 0.75;
+            rotX = subT * p.rotSpeedX;
+            rotY = subT * p.rotSpeedY;
+          } else {
+            let subT = (t - 0.75) / 0.25;
+            let currentRotX = 0.75 * p.rotSpeedX;
+            let currentRotY = 0.75 * p.rotSpeedY;
+            let finalTargetX = targetRotX + Math.round(currentRotX / (2 * Math.PI)) * 2 * Math.PI;
+            let finalTargetY = targetRotY + Math.round(currentRotY / (2 * Math.PI)) * 2 * Math.PI;
+
+            rotX = currentRotX + (finalTargetX - currentRotX) * Math.pow(subT, 2);
+            rotY = currentRotY + (finalTargetY - currentRotY) * Math.pow(subT, 2);
+          }
+
+          renderTrue3DCube(w/2 + posX, h/2 + posY, 44, rotX, rotY, 0, zH, 1.0);
+        });
+      } else if (state.dice.length > 0) {
+        let d1 = state.dice[0];
+        let d2 = state.dice[1] !== undefined ? state.dice[1] : state.dice[0];
+
+        let op1 = getDieOpacity(0);
+        let op2 = getDieOpacity(1);
+
+        let rotX1 = 0, rotY1 = 0;
+        let rotX2 = 0, rotY2 = 0;
+
+        function getFaceAngles(v) {
+          switch (v) {
+            case 1: return [0, 0];
+            case 6: return [Math.PI, 0];
+            case 2: return [-Math.PI/2, 0];
+            case 5: return [Math.PI/2, 0];
+            case 3: return [0, -Math.PI/2];
+            case 4: return [0, Math.PI/2];
+          }
+          return [0, 0];
+        }
+
+        [rotX1, rotY1] = getFaceAngles(d1);
+        [rotX2, rotY2] = getFaceAngles(d2);
+
+        renderTrue3DCube(w/2 - 30, h/2, 44, rotX1, rotY1, 0, 0, op1);
+        renderTrue3DCube(w/2 + 30, h/2, 44, rotX2, rotY2, 0, 0, op2);
+      }
+      ctx.restore();
+    }
+
+    function draw3DCylindricalChecker(x, y, r, owner) {
+      if (!r || r <= 0 || isNaN(r)) return;
+      let isWhite = owner === 'white';
+
+      // 1. 3D Contact Shadow
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(x + 2, y + r * 0.4, r * 0.95, r * 0.45, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.fill();
+      ctx.restore();
+
+      // 2. 3D Side Thickness Wall Extrusion
+      ctx.beginPath();
+      ctx.arc(x, y + 3, r, 0, Math.PI * 2);
+      ctx.fillStyle = isWhite ? '#9E9585' : '#150D07';
+      ctx.fill();
+      ctx.strokeStyle = isWhite ? '#7A7060' : '#0A0503';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 3. 3D Cylinder Top Disc Surface
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      let discGrd = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+      if (isWhite) {
+        discGrd.addColorStop(0, '#FFFFFF');
+        discGrd.addColorStop(0.6, '#EBE5D8');
+        discGrd.addColorStop(1.0, '#C7BDA9');
+      } else {
+        discGrd.addColorStop(0, '#3A2417');
+        discGrd.addColorStop(0.6, '#22130A');
+        discGrd.addColorStop(1.0, '#0F0703');
+      }
+      ctx.fillStyle = discGrd;
+      ctx.fill();
+
+      ctx.strokeStyle = isWhite ? '#D4CBB8' : '#4A3222';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Concentric Specular Highlight Ring
+      ctx.beginPath();
+      ctx.arc(x, y, r * 0.52, 0, Math.PI * 2);
+      ctx.strokeStyle = isWhite ? 'rgba(166, 154, 130, 0.7)' : 'rgba(212, 175, 55, 0.4)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+
+    function drawBrassHinge(cx, cy, w) {
+      ctx.save();
+      let hGrd = ctx.createLinearGradient(cx - w/2, cy, cx + w/2, cy);
+      hGrd.addColorStop(0, '#FFF3CD'); hGrd.addColorStop(0.4, '#D4AF37');
+      hGrd.addColorStop(0.8, '#8B6B1B'); hGrd.addColorStop(1.0, '#D4AF37');
+      ctx.fillStyle = hGrd;
+      ctx.fillRect(cx - w/2, cy - 5, w, 10);
+      ctx.strokeStyle = '#4A380D'; ctx.lineWidth = 1;
+      ctx.strokeRect(cx - w/2, cy - 5, w, 10);
+
+      ctx.fillStyle = '#3B2A08';
+      ctx.beginPath(); ctx.arc(cx - w/3, cy, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + w/3, cy, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    function getDieOpacity(dieIndex) {
+      let isDouble = state.dice.length === 4;
+      let totalMoves = state.dice.length;
+      let remainingCount = state.remainingDice.length;
+      let usedMoves = totalMoves - remainingCount;
+
+      if (isDouble) {
+        if (dieIndex === 0) {
+          if (usedMoves >= 2) return 0.20;
+          if (usedMoves === 1) return 0.55;
+          return 1.0;
+        } else {
+          if (usedMoves >= 4) return 0.20;
+          if (usedMoves === 3) return 0.55;
+          return 1.0;
+        }
+      } else {
+        let val = state.dice[dieIndex];
+        let availableCount = state.remainingDice.filter(d => d === val).length;
+        let instanceIdx = 0;
+        for (let i = 0; i < dieIndex; i++) {
+          if (state.dice[i] === val) instanceIdx++;
+        }
+        let isUsed = instanceIdx >= availableCount;
+        return isUsed ? 0.25 : 1.0;
+      }
+    }
+
+    function updateUI() {
+      document.getElementById('white-turn').style.display = (state.turn === 'white' && !state.winner) ? 'block' : 'none';
+      document.getElementById('black-turn').style.display = (state.turn === 'black' && !state.winner) ? 'block' : 'none';
+      document.getElementById('white-off-count').innerText = state.whiteOff;
+      document.getElementById('black-off-count').innerText = state.blackOff;
+      document.getElementById('roll-btn').disabled = state.dice.length > 0 || isRolling || state.winner != null;
+      if (state.winner) {
+        document.getElementById('status-msg').innerText = `🏆 ${state.winner.toUpperCase()} MAÇI KAZANDI!`;
+      } else {
+        document.getElementById('status-msg').innerText = state.dice.length > 0 ? 'Hamlenizi Yapın!' : 'Zar Atın!';
+      }
+    }
+
+    window.addEventListener('resize', draw);
+    window.addEventListener('DOMContentLoaded', () => { initGame(); setTimeout(draw, 50); });
+    window.addEventListener('load', () => { draw(); });
+    initGame();
+  </script>
+</body>
+</html>
