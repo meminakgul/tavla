@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import '../engine/backgammon_ai.dart';
+import '../models/board_theme.dart';
+import '../models/user_profile.dart';
+import '../services/auth_service.dart';
+import 'customization_dialog.dart';
+import 'profile_dialog.dart';
 import 'game_screen.dart';
 import 'settings_dialog.dart';
 import 'how_to_play_dialog.dart';
@@ -14,6 +19,8 @@ class MainMenuScreen extends StatefulWidget {
 class _MainMenuScreenState extends State<MainMenuScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   AIDifficulty _aiDifficulty = AIDifficulty.master;
+  BoardThemeId _boardTheme = BoardThemeId.classicWalnut;
+  DiceThemeId _diceTheme = DiceThemeId.ivory;
 
   @override
   void initState() {
@@ -37,6 +44,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> with SingleTickerProvid
           gameMode: mode,
           isVsAI: isVsAI,
           aiDifficulty: _aiDifficulty,
+          boardThemeId: _boardTheme,
+          diceThemeId: _diceTheme,
         ),
       ),
     );
@@ -128,6 +137,109 @@ class _MainMenuScreenState extends State<MainMenuScreen> with SingleTickerProvid
                   ],
                 ),
               ),
+            ),
+          ),
+
+          // 2. Top Player Profile & Chips Header Bar
+          Positioned(
+            top: 16,
+            left: 20,
+            right: 20,
+            child: ValueListenableBuilder<UserProfile?>(
+              valueListenable: AuthService().currentUserNotifier,
+              builder: (context, profile, _) {
+                final user = profile ?? AuthService().currentUser;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Player Profile Button
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const ProfileDialog(),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1C1009),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: const Color(0xFF3D210F),
+                              radius: 18,
+                              child: Text(user.avatarEmoji, style: const TextStyle(fontSize: 18)),
+                            ),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  user.displayName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                Text(
+                                  'Seviye ${user.level}',
+                                  style: const TextStyle(
+                                    color: Color(0xFFD4AF37),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.edit, color: Colors.white54, size: 14),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Chip Balance Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1C1009),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFFFD700), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Text('💰 ', style: TextStyle(fontSize: 16)),
+                          Text(
+                            '${user.chips}',
+                            style: const TextStyle(
+                              color: Color(0xFFFFD700),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
 
@@ -236,7 +348,31 @@ class _MainMenuScreenState extends State<MainMenuScreen> with SingleTickerProvid
                         ),
                         const SizedBox(height: 14),
 
-                        // 3. AYARLAR
+                        // 3. TAHTA & ZAR ÖZELLEŞTİR
+                        _buildMenuButton(
+                          text: 'TAHTA & ZAR ÖZELLEŞTİR',
+                          icon: Icons.palette,
+                          gradientColors: [const Color(0xFF8E24AA), const Color(0xFF4A148C)],
+                          textColor: Colors.white,
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => CustomizationDialog(
+                                currentBoardTheme: _boardTheme,
+                                currentDiceTheme: _diceTheme,
+                                onSave: (board, dice) {
+                                  setState(() {
+                                    _boardTheme = board;
+                                    _diceTheme = dice;
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 14),
+
+                        // 4. AYARLAR
                         _buildMenuButton(
                           text: 'AYARLAR',
                           icon: Icons.settings,

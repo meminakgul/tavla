@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../engine/backgammon_ai.dart';
+import '../services/audio_service.dart';
 
 class SettingsDialog extends StatefulWidget {
   final AIDifficulty currentDifficulty;
@@ -17,13 +18,15 @@ class SettingsDialog extends StatefulWidget {
 
 class _SettingsDialogState extends State<SettingsDialog> {
   late AIDifficulty _difficulty;
-  bool _soundEnabled = true;
+  late bool _soundEnabled;
 
   @override
   void initState() {
     super.initState();
     _difficulty = widget.currentDifficulty;
+    _soundEnabled = AudioService().soundEnabled;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +116,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   onChanged: (val) {
                     setState(() {
                       _soundEnabled = val;
+                      AudioService().soundEnabled = val;
                     });
                   },
                 ),

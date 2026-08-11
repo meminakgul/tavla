@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import '../models/board_theme.dart';
 
 /// Luxury 3D Perspective Backgammon Board Painter
 class BoardPainter extends CustomPainter {
   final int? selectedPointIndex;
   final List<int> validTargetIndices;
+  final BoardThemeData themeData;
 
   BoardPainter({
     this.selectedPointIndex,
     this.validTargetIndices = const [],
-  });
+    BoardThemeData? themeData,
+  }) : themeData = themeData ?? BoardThemeData.presets.first;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -30,11 +33,11 @@ class BoardPainter extends CustomPainter {
 
     // Frame Texture Gradient
     final Paint framePaint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         colors: [
-          Color(0xFF5A3319), // Highlight top-left
-          Color(0xFF3D210F), // Main mahogany
-          Color(0xFF261307), // Deep shadow bottom-right
+          themeData.frameColor.withValues(alpha: 0.9),
+          themeData.frameColor,
+          themeData.frameColor.withValues(alpha: 0.7),
         ],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -44,7 +47,7 @@ class BoardPainter extends CustomPainter {
 
     // 3D Frame Outer Bevel Lines
     final Paint bevelLight = Paint()
-      ..color = const Color(0xFF7E4A28)
+      ..color = themeData.accentColor.withValues(alpha: 0.6)
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
     canvas.drawRRect(boardFrame, bevelLight);
@@ -59,7 +62,7 @@ class BoardPainter extends CustomPainter {
     final RRect innerFrame = RRect.fromRectAndRadius(innerRect, const Radius.circular(10));
 
     // Inner Surface Base Floor Color
-    final Paint floorPaint = Paint()..color = const Color(0xFF140C07);
+    final Paint floorPaint = Paint()..color = themeData.boardBg;
     canvas.drawRRect(innerFrame, floorPaint);
 
     // Inner Shadow (Gömülme hissi veren İç Gölge)
@@ -125,8 +128,8 @@ class BoardPainter extends CustomPainter {
               : isValidTarget
                   ? [const Color(0xFF00E676), const Color(0xFF00897B)]
                   : isDark
-                      ? [const Color(0xFFA32B20), const Color(0xFF661711)]
-                      : [const Color(0xFFD9C496), const Color(0xFFA69165)],
+                      ? [themeData.pointDark, themeData.pointDark.withValues(alpha: 0.7)]
+                      : [themeData.pointLight, themeData.pointLight.withValues(alpha: 0.7)],
           begin: isTop ? Alignment.topCenter : Alignment.bottomCenter,
           end: isTop ? Alignment.bottomCenter : Alignment.topCenter,
         ).createShader(pointBounds)

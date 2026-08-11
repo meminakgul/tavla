@@ -18,33 +18,124 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       min-height: 100vh;
       min-height: 100dvh;
-      padding: 6px;
+      padding: max(8px, env(safe-area-inset-top)) 6px 8px 6px;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
     .rotate-hint {
       display: none;
-      background: linear-gradient(135deg, #D4AF37, #8B6B1B);
+      background: linear-gradient(135deg, #FFD700, #D4AF37);
       color: #000;
-      font-weight: bold;
-      font-size: 12px;
-      padding: 6px 14px;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 8px 16px;
       border-radius: 20px;
       margin-bottom: 6px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(212,175,55,0.6);
+      width: 100%;
+      max-width: 900px;
     }
     @media (max-width: 768px) and (orientation: portrait) {
       .rotate-hint { display: block; }
     }
+    @media (orientation: landscape) and (max-height: 750px) {
+      body {
+        padding: 4px !important;
+        justify-content: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+      }
+      .rotate-hint {
+        display: none !important;
+      }
+      header {
+        position: absolute !important;
+        top: 6px !important;
+        left: 12px !important;
+        z-index: 200 !important;
+        margin: 0 !important;
+        width: auto !important;
+      }
+      header button {
+        padding: 4px 12px !important;
+        font-size: 11px !important;
+        border-radius: 14px !important;
+        background: rgba(28, 16, 9, 0.9) !important;
+        backdrop-filter: blur(6px) !important;
+        border: 1px solid rgba(212,175,55,0.7) !important;
+        color: #D4AF37 !important;
+      }
+      .hud {
+        position: absolute !important;
+        top: 6px !important;
+        right: 12px !important;
+        left: auto !important;
+        transform: none !important;
+        width: auto !important;
+        max-width: 440px !important;
+        z-index: 150 !important;
+        background: rgba(18, 10, 6, 0.92) !important;
+        backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(212,175,55,0.7) !important;
+        border-radius: 16px !important;
+        padding: 3px 12px !important;
+        margin: 0 !important;
+        font-size: 10.5px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.8) !important;
+        gap: 12px !important;
+      }
+      .player-info {
+        gap: 6px !important;
+      }
+      .player-info div {
+        font-size: 10px !important;
+      }
+      .avatar {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      .turn-badge {
+        font-size: 9px !important;
+      }
+      #status-msg {
+        font-size: 11px !important;
+      }
+      .board-container {
+        position: relative !important;
+        height: calc(100dvh - 10px) !important;
+        max-height: calc(100dvh - 10px) !important;
+        width: auto !important;
+        max-width: calc((100dvh - 10px) * 1.42) !important;
+        aspect-ratio: 1.42 / 1 !important;
+        margin: 0 auto !important;
+      }
+      .controls {
+        position: absolute !important;
+        bottom: 10px !important;
+        right: 16px !important;
+        z-index: 200 !important;
+        margin: 0 !important;
+      }
+      .controls button {
+        padding: 8px 22px !important;
+        font-size: 13px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 16px rgba(212,175,55,0.6) !important;
+      }
+    }
     header {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: space-between;
       width: 100%;
       max-width: 900px;
       margin-bottom: 4px;
+      padding: 0 4px;
     }
     .hud {
       display: flex;
@@ -81,13 +172,16 @@
       position: relative;
       width: 100%;
       max-width: 900px;
-      max-height: calc(100vh - 120px);
-      max-height: calc(100dvh - 120px);
-      aspect-ratio: 1.4;
+      aspect-ratio: 1.4 / 1;
+      height: auto;
+      max-height: calc(100dvh - 140px);
       background: #140C07;
       border-radius: 16px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.9);
       touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     canvas {
       width: 100%;
@@ -196,6 +290,22 @@
 <body>
   <!-- 1. Tavla Evrimi Main Menu Overlay -->
   <div id="main-menu" class="overlay-screen">
+    <!-- Top Player Header Bar -->
+    <div style="position: absolute; top: 16px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100;">
+      <div onclick="openModal('profile-modal')" style="background: rgba(28,16,9,0.9); border: 1.5px solid #D4AF37; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+        <span id="user-avatar" style="font-size: 22px;">🧔🏻‍♂️</span>
+        <div style="display: flex; flex-direction: column;">
+          <span id="user-name" style="font-weight: bold; color: #FFF; font-size: 13px;">Misafir_1001</span>
+          <span id="user-level" style="color: #D4AF37; font-size: 11px;">Seviye 1</span>
+        </div>
+        <span style="color: rgba(255,255,255,0.5); font-size: 12px;">✏️</span>
+      </div>
+
+      <div style="background: rgba(28,16,9,0.9); border: 1.5px solid #FFD700; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-weight: bold; color: #FFD700; font-size: 15px;">
+        <span>💰</span> <span id="user-chips">1000</span>
+      </div>
+    </div>
+
     <div class="gold-badge">
       <h1>TAVLA EVRİMİ</h1>
       <p>PREMIUM BACKGAMMON EXPERIENCE</p>
@@ -204,10 +314,70 @@
     <div class="menu-btn-list">
       <button class="menu-btn btn-gold" onclick="startMode('ai')">🤖 YAPAY ZEKAYA KARŞI (KLASİK)</button>
       <button class="menu-btn btn-blue" onclick="openOnlineModal()">🔵 ÇEVRİMİÇİ / 2 OYUNCULU MOD</button>
+      <button class="menu-btn" style="background: linear-gradient(180deg, #8E24AA, #4A148C); color:#FFF;" onclick="openModal('custom-modal')">🎨 TAHTA & ZAR ÖZELLEŞTİR</button>
+      <button class="menu-btn" style="background: linear-gradient(180deg, #2E7D32, #1B5E20); color:#FFF;" onclick="toggleFullScreen()">📱 UYGULAMA MODU (TAM EKRAN)</button>
       <button class="menu-btn btn-orange" onclick="openModal('settings-modal')">⚙️ AYARLAR</button>
       <button class="menu-btn btn-amber" onclick="openModal('guide-modal')">❓ NASIL OYNANIR</button>
     </div>
     <div style="position: absolute; bottom: 15px; font-size: 11px; color: rgba(255,255,255,0.4);">Versiyon 1.5 - Oyun Atölyesi</div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="menu-modal">
+    <h3 style="color:#D4AF37; margin-bottom:15px;">👤 OYUNCU PROFİLİ</h3>
+    <div style="text-align:center; margin-bottom:15px;">
+      <div id="profile-avatar-display" style="font-size:44px; background:#2C1A10; border:2px solid #D4AF37; width:76px; height:76px; line-height:76px; border-radius:50%; margin:0 auto 10px auto;">🧔🏻‍♂️</div>
+      <label style="display:block; margin-bottom:5px; font-size:12px; color:#AAA;">Avatar Seçin:</label>
+      <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-bottom:15px;">
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🧔🏻‍♂️')">🧔🏻‍♂️</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('👑')">👑</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🦁')">🦁</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🎲')">🎲</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🦅')">🦅</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🐉')">🐉</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🏆')">🏆</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🎩')">🎩</span>
+      </div>
+    </div>
+    <div style="margin-bottom:15px;">
+      <label style="display:block; margin-bottom:6px; font-weight:bold;">Oyuncu Adı:</label>
+      <input type="text" id="profile-name-input" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#FFF; border:1px solid #D4AF37; font-weight:bold;" placeholder="İsminizi yazın">
+    </div>
+    <div style="display:flex; justify-content:space-around; background:#140C07; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; border:1px solid #3A2416;">
+      <div><div style="color:#FFD700; font-size:11px;">💰 JETON</div><div id="modal-chips" style="font-weight:bold; font-size:14px;">1000</div></div>
+      <div><div style="color:#66BB6A; font-size:11px;">🏆 KAZANMA</div><div id="modal-wins" style="font-weight:bold; font-size:14px;">0</div></div>
+      <div><div style="color:#29B6F6; font-size:11px;">📊 KAZANMA %</div><div id="modal-winrate" style="font-weight:bold; font-size:14px;">%0.0</div></div>
+    </div>
+    <button class="menu-btn btn-gold" onclick="saveWebProfile()">KAYDET VE KAPAT</button>
+  </div>
+
+  <!-- Customization Modal -->
+  <div id="custom-modal" class="menu-modal">
+    <h3 style="color:#D4AF37; margin-bottom:15px;">🎨 TAHTA & ZAR ÖZELLEŞTİR</h3>
+    <div style="margin-bottom:15px;">
+      <label style="display:block; margin-bottom:8px; font-weight:bold;">Tahta Teması Seçin:</label>
+      <select id="board-theme-select" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#D4AF37; border:1px solid #D4AF37;" onchange="changeBoardTheme(this.value)">
+        <option value="walnut">🪵 Klasik Ceviz Ahşap</option>
+        <option value="fenerbahce">💛💙 Sarı-Lacivert (Fenerbahçe)</option>
+        <option value="ottoman">⚜️ Geleneksel Motifli Ahşap (Siyah & Kemik)</option>
+        <option value="tropical">🦩 Tropikal Flamingo & Zümrüt</option>
+        <option value="green">🟩 Kına & Sedef (Yeşil Çuha)</option>
+        <option value="marble">🏛️ Kraliyet Mermeri & Altın</option>
+        <option value="midnight">🌌 Gece Safiri (Midnight Velvet)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block; margin-bottom:8px; font-weight:bold;">Zar Rengi Seçin:</label>
+      <select id="dice-theme-select" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#D4AF37; border:1px solid #D4AF37;" onchange="changeDiceTheme(this.value)">
+        <option value="ivory">⚪ Klasik Fildişi</option>
+        <option value="fbYellow">💛💙 Kanarya Sarı-Lacivert</option>
+        <option value="gold">👑 Altın Kaplama</option>
+        <option value="red">🔴 Yakut Kırmızı</option>
+        <option value="black">🖤 Obsidyen Siyah</option>
+        <option value="green">🟢 Zümrüt Yeşil</option>
+      </select>
+    </div>
+    <button class="menu-btn btn-gold" onclick="closeModal('custom-modal')">KAYDET VE KAPAT</button>
   </div>
 
   <!-- 2. Online Mode Selection Submodal -->
@@ -231,6 +401,10 @@
         <option value="master" selected>Usta AI</option>
       </select>
     </div>
+    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; background:#140C07; padding:10px 14px; border-radius:8px; border:1px solid #3A2416;">
+      <span style="font-weight:bold; color:#FFF; display:flex; align-items:center; gap:8px;">🔊 Ses Efektleri</span>
+      <input type="checkbox" id="sound-effects-toggle" checked style="width:20px; height:20px; accent-color:#D4AF37; cursor:pointer;" onchange="SoundFX.soundEnabled = this.checked">
+    </div>
     <button class="menu-btn btn-gold" onclick="closeModal('settings-modal')">KAYDET VE KAPAT</button>
   </div>
 
@@ -246,10 +420,21 @@
     <button class="menu-btn btn-gold" onclick="closeModal('guide-modal')">KAPAT</button>
   </div>
 
+  <!-- 5. Exit Confirmation Modal -->
+  <div id="exit-modal" class="menu-modal">
+    <h3 style="color:#D4AF37; text-align:center; margin-bottom:12px;">⚠️ MAÇTAN ÇIKILSIN MI?</h3>
+    <p style="font-size:13.5px; color:#EEE; text-align:center; margin-bottom:18px; line-height:1.4;">
+      Ana menüye dönerseniz mevcut maçı kaybedeceksiniz. Devam etmek istiyor musunuz?
+    </p>
+    <div style="display:flex; gap:10px;">
+      <button class="menu-btn" style="background:#C62828; color:#FFF; flex:1;" onclick="confirmExitToMainMenu()">EVET, ÇIK</button>
+      <button class="menu-btn btn-gold" style="flex:1;" onclick="closeModal('exit-modal')">İPTAL</button>
+    </div>
+  </div>
+
   <div class="rotate-hint">📱 En iyi deneyim için telefonunuzu YATAY çevirin!</div>
-  <header style="justify-content: space-between; margin-bottom: 6px; width:100%; max-width:900px;">
-    <button id="main-menu-btn" onclick="showMainMenu()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px;">🏠 ANA MENÜ</button>
-    <button id="reset-btn" onclick="initGame()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px; box-shadow: none;">🔄 YENİ MAÇ</button>
+  <header style="justify-content: flex-start; margin-bottom: 6px; width:100%; max-width:900px;">
+    <button id="main-menu-btn" onclick="requestExitToMainMenu()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px;">🏠 ANA MENÜ</button>
   </header>
 
   <div class="hud">
@@ -274,7 +459,6 @@
 
   <div class="board-container" id="board-box">
     <canvas id="boardCanvas"></canvas>
-    <div id="toast" class="toast"></div>
   </div>
 
   <div class="controls">
@@ -284,7 +468,6 @@
   <script>
     const canvas = document.getElementById('boardCanvas');
     const ctx = canvas.getContext('2d');
-    const toastEl = document.getElementById('toast');
 
     let state = {
       points: Array(24).fill(null).map(() => ({ count: 0, owner: null })),
@@ -298,6 +481,126 @@
     let isVsAI = true;
     let isAIBusy = false;
 
+    let boardThemes = {
+      walnut: { bg: '#140C07', frame: '#3D210F', dark: '#A32B20', light: '#D9C496', accent: '#D4AF37' },
+      fenerbahce: { bg: '#070D1E', frame: '#03060F', dark: '#0F1D3F', light: '#FFD700', accent: '#FFD700' },
+      ottoman: { bg: '#D4AF77', frame: '#191816', dark: '#1E1C19', light: '#F4F1EA', accent: '#D4AF37' },
+      tropical: { bg: '#0C2E22', frame: '#0A241B', dark: '#2C5E43', light: '#E2D5C3', accent: '#FF6B6B' },
+      green: { bg: '#10331E', frame: '#0A2013', dark: '#6B1D1B', light: '#F5E6CC', accent: '#D4AF37' },
+      marble: { bg: '#E0DACF', frame: '#222222', dark: '#1C1C1C', light: '#D4AF37', accent: '#D4AF37' },
+      midnight: { bg: '#060B14', frame: '#03050A', dark: '#D500F9', light: '#00E5FF', accent: '#00E5FF' }
+    };
+    let currentBoardTheme = 'walnut';
+
+    let diceThemes = {
+      ivory: { bg: '#FAF6EE', dot: '#1E110A', border: '#D4AF37' },
+      fbYellow: { bg: '#FFD700', dot: '#0A1228', border: '#0F1D3F' },
+      gold: { bg: '#D4AF37', dot: '#1A1A1A', border: '#FFF0A5' },
+      red: { bg: '#B71C1C', dot: '#FFFFFF', border: '#FF5252' },
+      black: { bg: '#1A1A1A', dot: '#FFD700', border: '#D4AF37' },
+      green: { bg: '#1B5E20', dot: '#FFFFFF', border: '#66BB6A' }
+    };
+    let currentDiceTheme = 'ivory';
+
+    let userProfile = {
+      name: 'Misafir_' + Math.floor(1000 + Math.random() * 9000),
+      avatar: '🧔🏻‍♂️',
+      chips: 1000,
+      level: 1,
+      wins: 0,
+      losses: 0
+    };
+
+    function loadWebProfile() {
+      let saved = localStorage.getItem('tavla_user_profile');
+      if (saved) {
+        try { Object.assign(userProfile, JSON.parse(saved)); } catch(e){}
+      }
+      updateWebProfileUI();
+    }
+
+    function saveWebProfile() {
+      let nameInput = document.getElementById('profile-name-input').value.trim();
+      if (nameInput) userProfile.name = nameInput;
+      localStorage.setItem('tavla_user_profile', JSON.stringify(userProfile));
+      updateWebProfileUI();
+      closeModal('profile-modal');
+    }
+
+    function setWebAvatar(emoji) {
+      userProfile.avatar = emoji;
+      document.getElementById('profile-avatar-display').innerText = emoji;
+    }
+
+    function updateWebProfileUI() {
+      if (!document.getElementById('user-avatar')) return;
+      document.getElementById('user-avatar').innerText = userProfile.avatar;
+      document.getElementById('user-name').innerText = userProfile.name;
+      document.getElementById('user-level').innerText = 'Seviye ' + userProfile.level;
+      document.getElementById('user-chips').innerText = userProfile.chips;
+
+      document.getElementById('profile-avatar-display').innerText = userProfile.avatar;
+      document.getElementById('profile-name-input').value = userProfile.name;
+      document.getElementById('modal-chips').innerText = userProfile.chips;
+      document.getElementById('modal-wins').innerText = userProfile.wins;
+
+      let total = userProfile.wins + userProfile.losses;
+      let wr = total > 0 ? ((userProfile.wins / total) * 100).toFixed(1) : '0.0';
+      document.getElementById('modal-winrate').innerText = '%' + wr;
+    }
+
+    function changeBoardTheme(val) {
+      currentBoardTheme = val;
+      draw();
+    }
+
+    function changeDiceTheme(val) {
+      currentDiceTheme = val;
+      draw();
+    }
+
+    // Real Recorded MP3 Audio Engine (Exact Sounds, Clean Playback)
+    const SoundFX = {
+      soundEnabled: true,
+
+      play(file) {
+        if (!this.soundEnabled) return;
+        try {
+          let a = new Audio('assets/sounds/' + file);
+          a.volume = 1.0;
+          let p = a.play();
+          if (p !== undefined) {
+            p.catch(() => {});
+          }
+        } catch(e){}
+      },
+
+      playDiceRoll() { this.play('dice_roll.mp3'); },
+      playCheckerSelect() { this.play('checker_select.mp3'); },
+      playCheckerMove() { this.play('checker_move.mp3'); },
+      playCheckerSnap() { this.play('checker_move.mp3'); },
+      playCheckerHit() { this.play('checker_hit.mp3'); },
+      playBearOff() { this.play('checker_move.mp3'); },
+      playUndo() { this.play('checker_select.mp3'); },
+      playTimerTick() { this.play('checker_select.mp3'); },
+      playGameWin() { this.play('game_win.mp3'); },
+      playGameLose() { this.play('game_lose.mp3'); }
+    };
+
+    window.addEventListener('click', () => { SoundFX.getCtx(); });
+    window.addEventListener('touchstart', () => { SoundFX.getCtx(); });
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        let el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
     function openModal(id) {
       document.getElementById(id).style.display = 'block';
     }
@@ -310,7 +613,16 @@
       openModal('online-modal');
     }
 
-    function showMainMenu() {
+    function requestExitToMainMenu() {
+      if (state.winner != null) {
+        confirmExitToMainMenu();
+      } else {
+        openModal('exit-modal');
+      }
+    }
+
+    function confirmExitToMainMenu() {
+      closeModal('exit-modal');
       document.getElementById('main-menu').style.display = 'flex';
     }
 
@@ -331,13 +643,7 @@
       initGame();
     }
 
-    function showToast(msg, duration = 2400) {
-      toastEl.innerText = msg;
-      toastEl.style.display = 'block';
-      setTimeout(() => {
-        toastEl.style.display = 'none';
-      }, duration);
-    }
+
 
     function initGame() {
       state.points = Array(24).fill(null).map(() => ({ count: 0, owner: null }));
@@ -372,6 +678,7 @@
 
     function rollDice() {
       if (state.dice.length > 0 || isRolling || activeMoveAnim || state.winner != null) return;
+      SoundFX.playDiceRoll();
       isRolling = true;
       document.getElementById('roll-btn').disabled = true;
 
@@ -578,20 +885,20 @@
         ctx.lineTo(pts[3].x, pts[3].y);
         ctx.closePath();
 
-        let baseShade = Math.floor(235 * r.lightInt);
-        ctx.fillStyle = `rgb(${baseShade}, ${Math.floor(baseShade * 0.96)}, ${Math.floor(baseShade * 0.88)})`;
+        let dTheme = diceThemes[currentDiceTheme] || diceThemes.ivory;
+        ctx.fillStyle = dTheme.bg;
         ctx.fill();
         ctx.lineWidth = 1.8;
-        ctx.strokeStyle = '#7A5C14';
+        ctx.strokeStyle = dTheme.border;
         ctx.stroke();
 
-        draw3DPips(pts, r.face.val, r.lightInt);
+        draw3DPips(pts, r.face.val, r.lightInt, dTheme.dot);
       });
 
       ctx.restore();
     }
 
-    function draw3DPips(quad, val, light) {
+    function draw3DPips(quad, val, light, dotColor) {
       let center = {
         x: (quad[0].x + quad[1].x + quad[2].x + quad[3].x) / 4,
         y: (quad[0].y + quad[1].y + quad[2].y + quad[3].y) / 4
@@ -610,8 +917,7 @@
       };
 
       let offsets = pipOffsets[val] || [[0, 0]];
-      let pipShade = Math.floor(40 * light);
-      ctx.fillStyle = `rgb(${pipShade}, ${pipShade}, ${pipShade})`;
+      ctx.fillStyle = dotColor || '#000000';
 
       let quadWidth = Math.hypot(quad[1].x - quad[0].x, quad[1].y - quad[0].y);
       let r = Math.max(2.0, Math.min(4.5, quadWidth * 0.08));
@@ -651,18 +957,22 @@
     }
 
     function checkAITurn() {
-      if (!isVsAI || state.winner || isRolling || activeMoveAnim || isAIBusy) return;
-      if (state.turn !== 'black') return;
+      if (!isVsAI || state.winner || isRolling || activeMoveAnim) return;
+      if (state.turn !== 'black') {
+        isAIBusy = false;
+        return;
+      }
 
+      if (isAIBusy) return;
       isAIBusy = true;
 
       if (state.dice.length === 0 && !isRolling) {
         setTimeout(() => {
-          if (state.turn === 'black' && state.dice.length === 0) {
+          isAIBusy = false;
+          if (state.turn === 'black' && state.dice.length === 0 && !isRolling) {
             rollDice();
           }
-          isAIBusy = false;
-        }, 700);
+        }, 400);
         return;
       }
 
@@ -675,7 +985,7 @@
           let move = getAIBestMove();
           isAIBusy = false;
           if (move) applyMoveWithWaypointAnim(move);
-        }, 850);
+        }, 600);
       } else {
         isAIBusy = false;
       }
@@ -704,17 +1014,45 @@
       if (st.blackOff === 15) return 100000;
       if (st.whiteOff === 15) return -100000;
 
-      score += st.blackOff * 50 - st.whiteOff * 50;
-      score -= st.blackBar * 120 - st.whiteBar * 120;
+      score += st.blackOff * 200 - st.whiteOff * 200;
+      score -= st.blackBar * 200 - st.whiteBar * 200;
+
+      let consecutiveBlackPoints = 0;
 
       for (let i = 0; i < 24; i++) {
         let pt = st.points[i];
-        if (!pt.owner || pt.count === 0) continue;
-        if (pt.owner === 'black') {
-          if (pt.count === 1) score -= (i >= 18 ? 45 : 30);
-          else if (pt.count >= 2) score += (i >= 18 ? 60 : 25);
+        
+        // --- 1. ADIM GELİŞTİRMESİ: Ardışık Kapı (Prime / Duvar) Bonusu ---
+        if (pt.owner === 'black' && pt.count >= 2) {
+          consecutiveBlackPoints++;
+          if (consecutiveBlackPoints >= 2) {
+            // Yan yana alınan her kapıda katlanarak artan stratejik bonus
+            score += consecutiveBlackPoints * 15; 
+          }
         } else {
-          if (pt.count === 1) score += 30;
+          consecutiveBlackPoints = 0;
+        }
+
+        if (!pt.owner || pt.count === 0) continue;
+        
+        if (pt.owner === 'black') {
+          if (pt.count === 1) {
+            let penalty = i >= 18 ? 60 : 40;
+            if (st.whiteBar > 0) penalty = 150; // Rakip bardayken açık vermeye çok ağır ceza!
+            score -= penalty;
+          }
+          else if (pt.count >= 2) {
+            // Kapı alma (blockade) önceliği
+            score += (i >= 18 ? 90 : 45); 
+            
+            // --- 1. ADIM GELİŞTİRMESİ: Yığılma (Stacking) Cezası ---
+            if (pt.count > 4) {
+              // 4'ten fazla olan her pul için -20 ceza (esnekliği kaybetmemek için)
+              score -= (pt.count - 4) * 20;
+            }
+          }
+        } else {
+          if (pt.count === 1) score += 30; // Rakibin açığını yakalamak (hit) için teşvik
         }
       }
       return score;
@@ -975,6 +1313,7 @@
     window.addEventListener('touchend', endDrag);
 
     function startDrag(e) {
+      if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
       if (state.dice.length === 0 || isRolling || activeMoveAnim) return;
       let pos = getCanvasCoords(e);
       let clickedPt = getPointFromCoords(pos.x, pos.y);
@@ -1029,6 +1368,7 @@
 
     function moveDrag(e) {
       if (!dragItem) return;
+      if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
       let pos = getCanvasCoords(e);
       dragItem.currentX = pos.x;
       dragItem.currentY = pos.y;
@@ -1037,6 +1377,7 @@
 
     function endDrag(e) {
       if (!dragItem) return;
+      if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
       let pos = getCanvasCoords(e);
       let targetPt = getPointFromCoords(pos.x, pos.y);
 
@@ -1066,12 +1407,15 @@
       if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toast';
-        toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(212,175,55,0.95); color:#000; padding:10px 20px; border-radius:20px; font-weight:bold; font-size:14px; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.5); transition:opacity 0.3s;';
         document.body.appendChild(toast);
       }
-      toast.innerText = msg;
+      toast.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(30,17,10,0.95); color:#FFF; padding:20px 40px; border-radius:16px; border: 2px solid #D4AF37; font-weight:600; font-size:18px; letter-spacing:0.5px; z-index:9999; box-shadow:0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(212,175,55,0.4); text-align:center; transition:opacity 0.3s ease-in-out; pointer-events:none; min-width: 300px; display:flex; flex-direction:column; align-items:center; justify-content:center;';
+      toast.innerHTML = msg.replace(/\n/g, '<br>');
       toast.style.opacity = '1';
-      setTimeout(() => { toast.style.opacity = '0'; }, duration);
+      
+      // Clear previous timeout if any
+      if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+      toast.hideTimeout = setTimeout(() => { toast.style.opacity = '0'; }, duration);
     }
 
     function getPointCenter(idx) {
@@ -1195,6 +1539,7 @@
         state.validMoves = [];
         updateUI();
         draw();
+        SoundFX.playGameWin();
         setTimeout(() => {
           showToast(`🏆 TEBRİKLER! ${winnerName.toUpperCase()} OYUNCU MAÇI KAZANDI! 🎉`, 5000);
         }, 150);
@@ -1212,6 +1557,7 @@
       }
 
       if (m.isOff) {
+        SoundFX.playBearOff();
         if (state.turn === 'white') state.whiteOff++;
         else state.blackOff++;
         if (checkWinCondition()) return;
@@ -1219,9 +1565,11 @@
         let targetPt = state.points[m.to];
         let opp = state.turn === 'white' ? 'black' : 'white';
         if (targetPt.owner === opp && targetPt.count === 1) {
+          SoundFX.playCheckerHit();
           if (opp === 'white') state.whiteBar++; else state.blackBar++;
           targetPt.count = 1; targetPt.owner = state.turn;
         } else {
+          SoundFX.playCheckerMove();
           targetPt.count++; targetPt.owner = state.turn;
         }
       }
@@ -1242,6 +1590,7 @@
 
       updateUI();
       draw();
+      checkAITurn();
     }
 
     function getPointFromCoords(x, y) {
@@ -1300,16 +1649,19 @@
       ctx.scale(dpr, dpr);
 
       let frameBorder = 14;
-      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6, triH = h * 0.42;
+      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+      let triH = Math.min(h * 0.42, (halfW - frameBorder) * 1.8);
+
+      let theme = boardThemes[currentBoardTheme] || boardThemes.walnut;
 
       // 1. Outer Embossed Mahogany Frame
-      ctx.fillStyle = '#3D210F';
+      ctx.fillStyle = theme.frame;
       ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = '#7E4A28'; ctx.lineWidth = 3;
+      ctx.strokeStyle = theme.accent; ctx.lineWidth = 3;
       ctx.strokeRect(2, 2, w - 4, h - 4);
 
       // 2. Recessed Inner Floor Surface
-      ctx.fillStyle = '#140C07';
+      ctx.fillStyle = theme.bg;
       ctx.fillRect(frameBorder, frameBorder, w - (frameBorder * 2), h - (frameBorder * 2));
 
       // Inner Shadows for Recessed Floor
@@ -1341,8 +1693,8 @@
         let ptGrd = ctx.createLinearGradient(0, isTop ? frameBorder : h - frameBorder, 0, isTop ? frameBorder + triH : h - frameBorder - triH);
         if (isSel) { ptGrd.addColorStop(0, '#66BB6A'); ptGrd.addColorStop(1, '#2E7D32'); }
         else if (isTarget) { ptGrd.addColorStop(0, '#00E676'); ptGrd.addColorStop(1, '#00897B'); }
-        else if (isDark) { ptGrd.addColorStop(0, '#A32B20'); ptGrd.addColorStop(1, '#661711'); }
-        else { ptGrd.addColorStop(0, '#D9C496'); ptGrd.addColorStop(1, '#A69165'); }
+        else if (isDark) { ptGrd.addColorStop(0, theme.dark); ptGrd.addColorStop(1, theme.dark); }
+        else { ptGrd.addColorStop(0, theme.light); ptGrd.addColorStop(1, theme.light); }
 
         ctx.fillStyle = ptGrd;
         ctx.fill();
@@ -1360,7 +1712,7 @@
 
           for (let c = 0; c < renderCount; c++) {
             let cx = left + ptW / 2;
-            let cy = isTop ? (frameBorder + 18 + r + c * r * 1.7) : (h - frameBorder - 18 - r - c * r * 1.7);
+            let cy = isTop ? (frameBorder + r + 2 + c * r * 1.7) : (h - frameBorder - r - 2 - c * r * 1.7);
             draw3DCylindricalChecker(cx, cy, r, pt.owner);
           }
         }
@@ -1586,20 +1938,23 @@
     }
 
     function updateUI() {
+      let isHumanTurn = !isVsAI || state.turn === 'white';
       document.getElementById('white-turn').style.display = (state.turn === 'white' && !state.winner) ? 'block' : 'none';
       document.getElementById('black-turn').style.display = (state.turn === 'black' && !state.winner) ? 'block' : 'none';
       document.getElementById('white-off-count').innerText = state.whiteOff;
       document.getElementById('black-off-count').innerText = state.blackOff;
-      document.getElementById('roll-btn').disabled = state.dice.length > 0 || isRolling || state.winner != null;
+      document.getElementById('roll-btn').disabled = state.dice.length > 0 || isRolling || state.winner != null || !isHumanTurn;
       if (state.winner) {
         document.getElementById('status-msg').innerText = `🏆 ${state.winner.toUpperCase()} MAÇI KAZANDI!`;
+      } else if (!isHumanTurn) {
+        document.getElementById('status-msg').innerText = '🤖 Yapay Zeka Düşünüyor...';
       } else {
         document.getElementById('status-msg').innerText = state.dice.length > 0 ? 'Hamlenizi Yapın!' : 'Zar Atın!';
       }
     }
 
     window.addEventListener('resize', draw);
-    window.addEventListener('DOMContentLoaded', () => { initGame(); setTimeout(draw, 50); });
+    window.addEventListener('DOMContentLoaded', () => { loadWebProfile(); initGame(); setTimeout(draw, 50); });
     window.addEventListener('load', () => { draw(); });
     initGame();
   </script>

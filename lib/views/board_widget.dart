@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/board_state.dart';
+import '../models/board_theme.dart';
 import '../models/player.dart';
 import '../models/point.dart';
 import 'board_painter.dart';
@@ -10,6 +11,7 @@ class BoardWidget extends StatelessWidget {
   final Function(int pointIndex) onPointTapped;
   final Function(PlayerType player) onBarTapped;
   final Function() onBearOffTapped;
+  final BoardThemeData? boardTheme;
 
   const BoardWidget({
     super.key,
@@ -17,6 +19,7 @@ class BoardWidget extends StatelessWidget {
     required this.onPointTapped,
     required this.onBarTapped,
     required this.onBearOffTapped,
+    this.boardTheme,
   });
 
   @override
@@ -50,6 +53,7 @@ class BoardWidget extends StatelessWidget {
                   painter: BoardPainter(
                     selectedPointIndex: state.selectedPoint,
                     validTargetIndices: validTargetIndices,
+                    themeData: boardTheme,
                   ),
                 ),
               ),

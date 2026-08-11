@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../models/board_theme.dart';
 
 /// Clean, Reliable 2D Backgammon Dice Widget
 class DiceWidget extends StatefulWidget {
@@ -8,6 +9,7 @@ class DiceWidget extends StatefulWidget {
   final bool isRolling;
   final VoidCallback? onRollPressed;
   final bool canRoll;
+  final DiceThemeData? diceTheme;
 
   const DiceWidget({
     super.key,
@@ -16,6 +18,7 @@ class DiceWidget extends StatefulWidget {
     this.isRolling = false,
     this.onRollPressed,
     this.canRoll = true,
+    this.diceTheme,
   });
 
   @override
@@ -135,15 +138,17 @@ class _DiceWidgetState extends State<DiceWidget> with SingleTickerProviderStateM
   }
 
   Widget _buildDie({required int value, required double opacity}) {
+    final theme = widget.diceTheme ?? DiceThemeData.presets.first;
+
     return Opacity(
       opacity: opacity,
       child: Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: const Color(0xFFFAF6EE),
+          color: theme.diceBg,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFD4AF37), width: 2),
+          border: Border.all(color: theme.borderColor, width: 2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.4),
@@ -153,13 +158,13 @@ class _DiceWidgetState extends State<DiceWidget> with SingleTickerProviderStateM
           ],
         ),
         child: Center(
-          child: _buildDieFace(value),
+          child: _buildDieFace(value, theme.dotColor),
         ),
       ),
     );
   }
 
-  Widget _buildDieFace(int val) {
+  Widget _buildDieFace(int val, Color dotColor) {
     final Map<int, List<Alignment>> dotPositions = {
       1: [Alignment.center],
       2: [const Alignment(-0.55, -0.55), const Alignment(0.55, 0.55)],
@@ -196,8 +201,8 @@ class _DiceWidgetState extends State<DiceWidget> with SingleTickerProviderStateM
           child: Container(
             width: 7,
             height: 7,
-            decoration: const BoxDecoration(
-              color: Color(0xFF1E110A),
+            decoration: BoxDecoration(
+              color: dotColor,
               shape: BoxShape.circle,
             ),
           ),

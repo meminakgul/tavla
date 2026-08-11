@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/board_state.dart';
+import '../models/board_theme.dart';
 import '../models/player.dart';
 import '../models/move.dart';
 import '../engine/backgammon_engine.dart';
 import '../engine/backgammon_ai.dart';
+import '../services/audio_service.dart';
+import '../services/auth_service.dart';
 import 'board_widget.dart';
 import 'dice_widget.dart';
 
@@ -13,12 +16,16 @@ class GameScreen extends StatefulWidget {
   final GameMode gameMode;
   final bool isVsAI;
   final AIDifficulty aiDifficulty;
+  final BoardThemeId boardThemeId;
+  final DiceThemeId diceThemeId;
 
   const GameScreen({
     super.key,
     this.gameMode = GameMode.classic,
     this.isVsAI = true,
     this.aiDifficulty = AIDifficulty.master,
+    this.boardThemeId = BoardThemeId.classicWalnut,
+    this.diceThemeId = DiceThemeId.ivory,
   });
 
   @override
@@ -80,6 +87,7 @@ class _GameScreenState extends State<GameScreen> {
   void _rollDice() {
     if (_state.dice.isNotEmpty || _state.winner != null || _state.isRolling) return;
 
+    AudioService().playDiceRoll();
     List<int> rolled = _engine.rollDice();
 
     setState(() {
@@ -95,13 +103,7 @@ class _GameScreenState extends State<GameScreen> {
       newState.validMoves = _engine.getValidMoves(newState);
 
       if (newState.validMoves.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${newState.currentTurn.displayName} için oynanabilir hamle yok! Sıra devrediliyor.'),
-            duration: const Duration(seconds: 2),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        _showCenterWarning('${newState.currentTurn.displayName} için oynanabilir hamle yok! Sıra devrediliyor.');
         Future.delayed(const Duration(seconds: 2), () {
           if (!mounted) return;
           setState(() {
@@ -161,13 +163,7 @@ class _GameScreenState extends State<GameScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Önce KINIZDAKI (BAR) pulunuzu oyuna sokmalısınız!'),
-          duration: Duration(seconds: 1),
-          backgroundColor: Colors.amber,
-        ),
-      );
+      _showCenterWarning('Önce KINIZDAKI (BAR) pulunuzu oyuna sokmalısınız!');
       return;
     }
 
@@ -181,12 +177,7 @@ class _GameScreenState extends State<GameScreen> {
         setState(() {
           _state.selectedPoint = null;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bu pul için oynanabilir hamle yok!'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        _showCenterWarning('Bu pul için oynanabilir hamle yok!');
       }
     } else {
       setState(() {
@@ -224,6 +215,14 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _applyMove(BackgammonMove move) {
+    if (move.isHit) {
+      AudioService().playCheckerHit();
+    } else if (move.isBearOff) {
+      AudioService().playBearOff();
+    } else {
+      AudioService().playCheckerMove();
+    }
+
     setState(() {
       _state = _engine.executeMove(_state, move);
     });
@@ -236,70 +235,186 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _showWinnerDialog(PlayerType winner) {
+    bool isHumanWin = winner == PlayerType.white;
+    AuthService().recordGameResult(isWin: isHumanWin, chipsWon: isHumanWin ? 250 : 0);
+    AudioService().playGameWin();
+    
     showDialog(
       context: context,
       barrierDismissible: false,
+      barrierColor: Colors.black87,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF2C190E),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFD4AF37), width: 2),
-          ),
-          title: Center(
-            child: Text(
-              'TEBRİKLER! 🏆',
-              style: TextStyle(
-                color: winner == PlayerType.white ? Colors.white : const Color(0xFFD4AF37),
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            width: 400, // Sabit genişlik verilerek metnin sıkışması (vertical scrunch) önleniyor.
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E110A).withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFD4AF37), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                )
+              ],
             ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.emoji_events,
-                color: Color(0xFFD4AF37),
-                size: 64,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '${winner.displayName} Oyuncu Maçı Kazandı!',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.emoji_events,
+                  color: Color(0xFFD4AF37),
+                  size: 80,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _resetGame();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD4AF37),
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                const SizedBox(height: 16),
+                Text(
+                  'TEBRİKLER! 🏆',
+                  style: TextStyle(
+                    color: winner == PlayerType.white ? Colors.white : const Color(0xFFD4AF37),
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2.0,
+                    fontSize: 28,
                   ),
                 ),
-                child: const Text(
-                  'YENİ MAÇ BAŞLAT',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(height: 12),
+                Text(
+                  '${winner.displayName} Oyuncu Maçı Kazandı! 🎉',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _resetGame();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD4AF37),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 8,
+                  ),
+                  child: const Text(
+                    'YENİ MAÇ BAŞLAT',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.2),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
+    );
+  }
+
+  void _showCenterWarning(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black45,
+      builder: (ctx) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (ctx.mounted && Navigator.canPop(ctx)) {
+            Navigator.pop(ctx);
+          }
+        });
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E110A).withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                )
+              ],
+            ),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _onHomePressed() {
+    if (_state.winner != null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2C190E),
+        title: const Text('Ana Menüye Dön', style: TextStyle(color: Colors.white)),
+        content: const Text('Devam eden bir maçınız var. Çıkmak istediğinize emin misiniz?', style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('İptal', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Çıkış', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onRefreshPressed() {
+    if (_state.winner != null) {
+      _resetGame();
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2C190E),
+        title: const Text('Maç Yeniden Başlatılsın mı?', style: TextStyle(color: Colors.white)),
+        content: const Text('Mevcut maç sıfırlanacak.', style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('İptal', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _resetGame();
+            },
+            child: const Text('Evet, Sıfırla', style: TextStyle(color: Colors.amberAccent)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -336,34 +451,12 @@ class _GameScreenState extends State<GameScreen> {
           IconButton(
             icon: const Icon(Icons.home, color: Color(0xFFD4AF37)),
             tooltip: 'Ana Menü',
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: _onHomePressed,
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFFD4AF37)),
             tooltip: 'Yeniden Başlat',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  backgroundColor: const Color(0xFF2C190E),
-                  title: const Text('Maç Yeniden Başlatılsın mı?', style: TextStyle(color: Colors.white)),
-                  content: const Text('Mevcut maç sıfırlanacak.', style: TextStyle(color: Colors.white70)),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('İptal', style: TextStyle(color: Colors.grey)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        _resetGame();
-                      },
-                      child: const Text('Evet, Sıfırla', style: TextStyle(color: Colors.amberAccent)),
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: _onRefreshPressed,
           ),
         ],
       ),
@@ -376,35 +469,35 @@ class _GameScreenState extends State<GameScreen> {
               isCurrentTurn: _state.currentTurn == PlayerType.black,
             ),
 
-            const Spacer(),
-
-            // Backgammon Board Canvas & Overlay
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: BoardWidget(
-                state: _state,
-                onPointTapped: _onPointTapped,
-                onBarTapped: _onBarTapped,
-                onBearOffTapped: _onBearOffTapped,
+            // Backgammon Board Canvas & Overlay (Dynamically scaled to fit available height)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Center(
+                  child: BoardWidget(
+                    state: _state,
+                    onPointTapped: _onPointTapped,
+                    onBarTapped: _onBarTapped,
+                    onBearOffTapped: _onBearOffTapped,
+                    boardTheme: BoardThemeData.getById(widget.boardThemeId),
+                  ),
+                ),
               ),
             ),
 
-            const SizedBox(height: 12),
-
             // Dice & Controls Area
             Container(
-              height: 56,
+              height: 52,
               alignment: Alignment.center,
               child: DiceWidget(
                 diceValues: _state.dice,
                 remainingDice: _state.remainingDice,
                 isRolling: _state.isRolling,
-                canRoll: _state.dice.isEmpty,
+                canRoll: _state.dice.isEmpty && (!widget.isVsAI || _state.currentTurn == PlayerType.white),
                 onRollPressed: _rollDice,
+                diceTheme: DiceThemeData.getById(widget.diceThemeId),
               ),
             ),
-
-            const Spacer(),
 
             // Beyaz Oyuncu HUD
             _buildPlayerHeader(
@@ -412,7 +505,7 @@ class _GameScreenState extends State<GameScreen> {
               isCurrentTurn: _state.currentTurn == PlayerType.white,
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
           ],
         ),
       ),

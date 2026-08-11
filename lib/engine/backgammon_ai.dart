@@ -71,8 +71,18 @@ class BackgammonAI {
 
       if (pt.owner == aiPlayer) {
         if (pt.checkersCount == 1) {
-          // Unprotected Blot (-35 penalty, worse if near home or opponent bar)
-          score -= isHomeBoard ? 45.0 : 30.0;
+          // Unprotected Blot
+          if (isHomeBoard) {
+            // Kendi iç alanımızda açık vermek risklidir. 
+            // Eğer rakibin BAR'da (kırık) taşı varsa, bu açığı vurma ihtimali çok yüksek olduğu için cezayı devasa yapıyoruz.
+            if (state.getBarCount(opponent) > 0) {
+              score -= 150.0; // Rakip bardayken içerde açık verme cezası
+            } else {
+              score -= 60.0;  // Normal iç alan açık cezası (45'ten 60'a çıkarıldı)
+            }
+          } else {
+            score -= 30.0; // Dış alan açık cezası
+          }
         } else if (pt.checkersCount >= 2) {
           // Secured Point (Kapı Alma)
           score += 25.0;
