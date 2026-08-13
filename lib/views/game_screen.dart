@@ -8,7 +8,6 @@ import '../engine/backgammon_ai.dart';
 import '../services/audio_service.dart';
 import '../services/auth_service.dart';
 import 'board_widget.dart';
-import 'dice_widget.dart';
 
 enum GameMode { classic, cards }
 
@@ -463,16 +462,52 @@ class _GameScreenState extends State<GameScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Siyah Oyuncu HUD
-            _buildPlayerHeader(
-              player: PlayerType.black,
-              isCurrentTurn: _state.currentTurn == PlayerType.black,
+            // Top Compact Player HUD Bar (Moves player info out of the way to the top edges)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF180F0A),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 1),
+              ),
+              child: Row(
+                children: [
+                  // Siyah Oyuncu Badge (Sol)
+                  _buildCompactPlayerBadge(
+                    player: PlayerType.black,
+                    isCurrentTurn: _state.currentTurn == PlayerType.black,
+                  ),
+
+                  const Spacer(),
+
+                  // Turn / Game Status Message (Orta)
+                  Text(
+                    _state.winner != null
+                        ? '🏆 ${_state.winner!.displayName.toUpperCase()} KAZANDI!'
+                        : (_state.currentTurn == PlayerType.white ? '🟢 SIRA BEYAZDA' : '🔴 SIRA SİYAHTA'),
+                    style: TextStyle(
+                      color: _state.winner != null ? const Color(0xFFD4AF37) : Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Beyaz Oyuncu Badge (Sağ)
+                  _buildCompactPlayerBadge(
+                    player: PlayerType.white,
+                    isCurrentTurn: _state.currentTurn == PlayerType.white,
+                  ),
+                ],
+              ),
             ),
 
-            // Backgammon Board Canvas & Overlay (Dynamically scaled to fit available height)
+            // Backgammon Board Canvas & Overlay (Fills Maximum Screen Height & Width!)
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 child: Center(
                   child: BoardWidget(
                     state: _state,
@@ -480,39 +515,22 @@ class _GameScreenState extends State<GameScreen> {
                     onBarTapped: _onBarTapped,
                     onBearOffTapped: _onBearOffTapped,
                     boardTheme: BoardThemeData.getById(widget.boardThemeId),
+                    canRoll: _state.dice.isEmpty && (!widget.isVsAI || _state.currentTurn == PlayerType.white),
+                    onRollPressed: _rollDice,
+                    diceTheme: DiceThemeData.getById(widget.diceThemeId),
                   ),
                 ),
               ),
             ),
-
-            // Dice & Controls Area
-            Container(
-              height: 52,
-              alignment: Alignment.center,
-              child: DiceWidget(
-                diceValues: _state.dice,
-                remainingDice: _state.remainingDice,
-                isRolling: _state.isRolling,
-                canRoll: _state.dice.isEmpty && (!widget.isVsAI || _state.currentTurn == PlayerType.white),
-                onRollPressed: _rollDice,
-                diceTheme: DiceThemeData.getById(widget.diceThemeId),
-              ),
-            ),
-
-            // Beyaz Oyuncu HUD
-            _buildPlayerHeader(
-              player: PlayerType.white,
-              isCurrentTurn: _state.currentTurn == PlayerType.white,
-            ),
-
-            const SizedBox(height: 4),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPlayerHeader({
+
+
+  Widget _buildCompactPlayerBadge({
     required PlayerType player,
     required bool isCurrentTurn,
   }) {
@@ -521,109 +539,62 @@ class _GameScreenState extends State<GameScreen> {
     int barCount = _state.getBarCount(player);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isCurrentTurn
-            ? const Color(0xFF2C190E)
-            : const Color(0xFF180F0A),
-        borderRadius: BorderRadius.circular(12),
+        color: isCurrentTurn ? const Color(0xFF2C190E) : Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isCurrentTurn ? const Color(0xFFD4AF37) : Colors.white10,
-          width: isCurrentTurn ? 2 : 1,
+          color: isCurrentTurn ? const Color(0xFFD4AF37) : Colors.white24,
+          width: isCurrentTurn ? 1.5 : 1,
         ),
-        boxShadow: isCurrentTurn
-            ? [
-                BoxShadow(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ]
-            : [],
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 18,
+            height: 18,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isWhite ? Colors.white : Colors.black,
-              border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+              border: Border.all(color: const Color(0xFFD4AF37), width: 1),
             ),
-            child: isWhite
-                ? const Icon(Icons.circle, color: Colors.grey, size: 16)
-                : const Icon(Icons.circle, color: Colors.white38, size: 16),
           ),
-          const SizedBox(width: 12),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                player.displayName,
+          const SizedBox(width: 6),
+          Text(
+            player.displayName,
+            style: TextStyle(
+              color: isCurrentTurn ? Colors.white : Colors.white70,
+              fontWeight: isCurrentTurn ? FontWeight.bold : FontWeight.normal,
+              fontSize: 12,
+            ),
+          ),
+          if (barCount > 0) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Kırık: $barCount',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              if (isCurrentTurn)
-                const Text(
-                  '● SIRA SENDE',
-                  style: TextStyle(
-                    color: Color(0xFF00E676),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
-                  ),
-                ),
-            ],
-          ),
-
-          const Spacer(),
-
-          if (barCount > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: Colors.redAccent.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.redAccent, width: 1),
-              ),
-              child: Text(
-                'KIRIK: $barCount',
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                  fontSize: 10,
                 ),
               ),
             ),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Toplanan: $offCount / 15',
-                style: const TextStyle(
-                  color: Color(0xFFD4AF37),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              SizedBox(
-                width: 80,
-                height: 4,
-                child: LinearProgressIndicator(
-                  value: offCount / 15.0,
-                  backgroundColor: Colors.white10,
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
-                ),
-              ),
-            ],
+          ],
+          const SizedBox(width: 8),
+          Text(
+            '🏆 $offCount/15',
+            style: const TextStyle(
+              color: Color(0xFFD4AF37),
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
           ),
         ],
       ),

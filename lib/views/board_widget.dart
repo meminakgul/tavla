@@ -4,6 +4,7 @@ import '../models/board_theme.dart';
 import '../models/player.dart';
 import '../models/point.dart';
 import 'board_painter.dart';
+import 'dice_widget.dart';
 
 /// Premium 2.5D Backgammon Board & Crisp Checkers Widget
 class BoardWidget extends StatelessWidget {
@@ -12,6 +13,9 @@ class BoardWidget extends StatelessWidget {
   final Function(PlayerType player) onBarTapped;
   final Function() onBearOffTapped;
   final BoardThemeData? boardTheme;
+  final bool canRoll;
+  final VoidCallback? onRollPressed;
+  final DiceThemeData? diceTheme;
 
   const BoardWidget({
     super.key,
@@ -20,6 +24,9 @@ class BoardWidget extends StatelessWidget {
     required this.onBarTapped,
     required this.onBearOffTapped,
     this.boardTheme,
+    this.canRoll = true,
+    this.onRollPressed,
+    this.diceTheme,
   });
 
   @override
@@ -81,11 +88,28 @@ class BoardWidget extends StatelessWidget {
                 checkerSize: checkerSize,
               ),
 
-              // 4. Bearing Off Area (Right Outer Rim)
+              // 4. Bearing Off Area (Right Outer Rim Tray Slot)
               _buildBearOffArea(
                 width: width,
                 height: height,
                 checkerSize: checkerSize,
+              ),
+
+              // 5. Centered 3D Dice & Roll Controls Overlay (Right in center of board!)
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: false,
+                  child: Center(
+                    child: DiceWidget(
+                      diceValues: state.dice,
+                      remainingDice: state.remainingDice,
+                      isRolling: state.isRolling,
+                      canRoll: canRoll,
+                      onRollPressed: onRollPressed,
+                      diceTheme: diceTheme,
+                    ),
+                  ),
+                ),
               ),
             ],
           );
@@ -318,7 +342,6 @@ class BoardWidget extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildBearOffArea({
     required double width,
     required double height,
@@ -328,8 +351,8 @@ class BoardWidget extends StatelessWidget {
 
     return Positioned(
       right: 2,
-      top: height * 0.35,
-      height: height * 0.30,
+      top: height * 0.18,
+      height: height * 0.64,
       width: 28,
       child: DragTarget<int>(
         onWillAcceptWithDetails: (details) {
@@ -357,96 +380,108 @@ class BoardWidget extends StatelessWidget {
                   color: isHovered || canBearOff ? Colors.amberAccent : const Color(0xFF553311),
                   width: 2,
                 ),
-            boxShadow: canBearOff
-                ? [
-                    BoxShadow(
-                      color: Colors.amberAccent.withValues(alpha: 0.4),
-                      blurRadius: 8,
-                    ),
-                  ]
-                : [],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // White Bear Off Counter Badge
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        border: Border.all(color: Colors.amber, width: 1),
+                boxShadow: canBearOff
+                    ? [
+                        BoxShadow(
+                          color: Colors.amberAccent.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                        ),
+                      ]
+                    : [],
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // White Bear Off Counter Badge
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                border: Border.all(color: Colors.amber, width: 1),
+                              ),
+                            ),
+                            Text(
+                              '${state.whiteOff}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${state.whiteOff}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+
+                      const SizedBox(height: 4),
+
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.exit_to_app,
+                            color: canBearOff ? Colors.amberAccent : Colors.white24,
+                            size: 16,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'OFF',
+                            style: TextStyle(
+                              color: canBearOff ? Colors.amberAccent : Colors.white38,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(height: 4),
+
+                      // Black Bear Off Counter Badge
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Column(
+                          children: [
+                            Text(
+                              '${state.blackOff}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF22130A),
+                                border: Border.all(color: Colors.amber, width: 1),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.exit_to_app,
-                    color: canBearOff ? Colors.amberAccent : Colors.white24,
-                    size: 16,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'OFF',
-                    style: TextStyle(
-                      color: canBearOff ? Colors.amberAccent : Colors.white38,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Black Bear Off Counter Badge
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Column(
-                  children: [
-                    Text(
-                      '${state.blackOff}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFF22130A),
-                        border: Border.all(color: Colors.amber, width: 1),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  ),
-);
+            ),
+          );
+        },
+      ),
+    );
   }
 
   /// Builds a High-Resolution Crisp 2.5D Tactile Checker Widget

@@ -219,11 +219,52 @@ class BoardPainter extends CustomPainter {
     )..layout();
     tp.paint(canvas, Offset(barLeft + (barWidth - tp.width) / 2, height / 2 - tp.height / 2));
 
+    // 5. Dedicated 3D Bear-Off Tray Slot on Right Outer Frame Rim
+    _drawBearOffTraySlot(canvas, size, frameBorder);
+
     // Brass Corner Protectors on Frame
     _drawCornerBrass(canvas, const Offset(6, 6), size);
     _drawCornerBrass(canvas, Offset(width - 6, 6), size);
     _drawCornerBrass(canvas, Offset(6, height - 6), size);
     _drawCornerBrass(canvas, Offset(width - 6, height - 6), size);
+  }
+
+  void _drawBearOffTraySlot(Canvas canvas, Size boardSize, double frameBorder) {
+    final double width = boardSize.width;
+    final double height = boardSize.height;
+    final Rect trayRect = Rect.fromLTWH(
+      width - 28,
+      frameBorder + 8,
+      24,
+      height - (frameBorder * 2) - 16,
+    );
+    final RRect trayRRect = RRect.fromRectAndRadius(trayRect, const Radius.circular(8));
+
+    // Recessed Tray Interior Shadow & Floor
+    final Paint trayBg = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF150A05), Color(0xFF281409), Color(0xFF120703)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(trayRect);
+    canvas.drawRRect(trayRRect, trayBg);
+
+    // Gold Bevel Rim Border
+    final Paint trayBorder = Paint()
+      ..color = const Color(0xFFD4AF37).withValues(alpha: 0.6)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+    canvas.drawRRect(trayRRect, trayBorder);
+
+    // Middle Brass Divider Strip
+    final Paint divider = Paint()
+      ..color = const Color(0xFF8B6B1B)
+      ..strokeWidth = 1.5;
+    canvas.drawLine(
+      Offset(trayRect.left + 2, trayRect.center.dy),
+      Offset(trayRect.right - 2, trayRect.center.dy),
+      divider,
+    );
   }
 
   void _drawBrassHinge(Canvas canvas, Offset center, double width) {
