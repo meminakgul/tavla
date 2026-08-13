@@ -28,15 +28,15 @@
     }
     .rotate-hint {
       display: none;
-      background: linear-gradient(135deg, #FFD700, #D4AF37);
-      color: #000;
-      font-weight: 900;
+      background: #3D210F;
+      color: #E5DAC8;
+      border: 1px solid #785A3C;
+      font-weight: 600;
       font-size: 13px;
       padding: 8px 16px;
-      border-radius: 20px;
+      border-radius: 6px;
       margin-bottom: 6px;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(212,175,55,0.6);
       width: 100%;
       max-width: 900px;
     }
@@ -45,139 +45,161 @@
     }
     @media (orientation: landscape) and (max-height: 750px) {
       body {
-        padding: 4px !important;
+        padding: 0 !important;
         justify-content: center !important;
         position: relative !important;
         overflow: hidden !important;
       }
-      .rotate-hint {
-        display: none !important;
-      }
-      header {
-        position: absolute !important;
-        top: 6px !important;
-        left: 12px !important;
-        z-index: 200 !important;
-        margin: 0 !important;
-        width: auto !important;
-      }
-      header button {
-        padding: 4px 12px !important;
-        font-size: 11px !important;
-        border-radius: 14px !important;
-        background: rgba(28, 16, 9, 0.9) !important;
-        backdrop-filter: blur(6px) !important;
-        border: 1px solid rgba(212,175,55,0.7) !important;
-        color: #D4AF37 !important;
-      }
-      .hud {
-        position: absolute !important;
-        top: 6px !important;
-        right: 12px !important;
-        left: auto !important;
-        transform: none !important;
-        width: auto !important;
-        max-width: 440px !important;
-        z-index: 150 !important;
-        background: rgba(18, 10, 6, 0.92) !important;
-        backdrop-filter: blur(8px) !important;
-        border: 1px solid rgba(212,175,55,0.7) !important;
-        border-radius: 16px !important;
-        padding: 3px 12px !important;
-        margin: 0 !important;
-        font-size: 10.5px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.8) !important;
-        gap: 12px !important;
-      }
-      .player-info {
-        gap: 6px !important;
-      }
-      .player-info div {
-        font-size: 10px !important;
-      }
-      .avatar {
-        width: 18px !important;
-        height: 18px !important;
-      }
-      .turn-badge {
-        font-size: 9px !important;
-      }
-      #status-msg {
-        font-size: 11px !important;
-      }
+      .rotate-hint { display: none !important; }
+      
+      /* Make board maximize height in landscape */
       .board-container {
-        position: relative !important;
-        height: calc(100dvh - 10px) !important;
-        max-height: calc(100dvh - 10px) !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
         width: auto !important;
-        max-width: calc((100dvh - 10px) * 1.42) !important;
-        aspect-ratio: 1.42 / 1 !important;
+        max-width: calc(100dvh * 1.42) !important;
         margin: 0 auto !important;
       }
-      .controls {
-        position: absolute !important;
-        bottom: 10px !important;
-        right: 16px !important;
-        z-index: 200 !important;
-        margin: 0 !important;
-      }
-      .controls button {
-        padding: 8px 22px !important;
-        font-size: 13px !important;
-        border-radius: 20px !important;
-        box-shadow: 0 4px 16px rgba(212,175,55,0.6) !important;
-      }
     }
-    header {
+    /* -------------------------------------
+       UNIVERSAL UI OVERLAY (PORTRAIT & LANDSCAPE) 
+       ------------------------------------- */
+    .game-ui-layer {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .ui-corner {
+      position: absolute;
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .ui-top-left {
+      top: max(16px, env(safe-area-inset-top));
+      left: max(16px, env(safe-area-inset-left));
+      align-items: flex-start;
+    }
+    
+    .ui-top-right {
+      top: max(16px, env(safe-area-inset-top));
+      right: max(16px, env(safe-area-inset-right));
+      align-items: flex-end;
+      text-align: right;
+    }
+    
+    .ui-top-center {
+      top: max(16px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      align-items: center;
+      text-align: center;
+    }
+
+    .ui-bottom-right {
+      bottom: max(24px, env(safe-area-inset-bottom));
+      right: max(24px, env(safe-area-inset-right));
+      align-items: flex-end;
+    }
+
+    /* HUD Typography & Elements */
+    .player-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #E5DAC8;
+      letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 900px;
-      margin-bottom: 4px;
-      padding: 0 4px;
+      gap: 6px;
     }
-    .hud {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      max-width: 900px;
-      background: #180E09;
-      border: 1px solid #D4AF37;
-      border-radius: 10px;
-      padding: 6px 12px;
-      margin-bottom: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-    }
-    .player-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .avatar {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 2px solid #D4AF37;
-    }
-    .avatar.white { background: #FFF; }
-    .avatar.black { background: #111; }
-    .turn-badge {
-      color: #00E676;
-      font-weight: bold;
+    .player-score {
       font-size: 11px;
+      color: #A68045;
+      margin-top: 2px;
     }
+    .player-score span {
+      font-weight: bold;
+      color: #E5DAC8;
+    }
+    
+    .indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .white-indicator { background: #FFFBF0; border: 1px solid #C2B196; }
+    .black-indicator { background: #1C1008; border: 1px solid #362215; }
+
+    .turn-indicator {
+      font-size: 11px;
+      color: #B89959;
+      font-weight: 600;
+      letter-spacing: 1px;
+      background: rgba(18, 10, 6, 0.7);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(184, 153, 89, 0.2);
+    }
+    
+    .status-msg {
+      font-size: 12px;
+      color: #A68045;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      background: rgba(18, 10, 6, 0.7);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* Buttons */
+    .hud-action-group {
+      display: flex;
+      gap: 8px;
+    }
+    .hud-action-btn {
+      background: #1C1008;
+      color: #B89959;
+      border: 1px solid #5A3E26;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .hud-action-btn:hover { background: #2A170C; border-color: #785A3C; color: #E5DAC8; }
+    
+    .hud-primary-btn {
+      background: #3A1310;
+      color: #E5DAC8;
+      border: 1px solid #7A5333;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      letter-spacing: 1.5px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    }
+    .hud-primary-btn:hover { background: #4A1612; border-color: #9C7043; transform: translateY(-1px); }
+    .hud-primary-btn:disabled { background: #1A0E09; color: #665C50; border-color: #332115; cursor: not-allowed; box-shadow: none; transform: none; }
+    
     .board-container {
       position: relative;
       width: 100%;
       max-width: 900px;
       aspect-ratio: 1.4 / 1;
       height: auto;
-      max-height: calc(100dvh - 140px);
+      max-height: calc(100dvh - 20px);
       background: #140C07;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
       touch-action: none;
       display: flex;
       align-items: center;
@@ -188,33 +210,21 @@
       height: 100%;
       display: block;
       cursor: pointer;
-      border-radius: 16px;
     }
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 8px;
-    }
-    button {
-      background: linear-gradient(135deg, #D4AF37, #AA820A);
-      color: #000;
-      border: none;
-      font-weight: bold;
-      font-size: 15px;
-      padding: 10px 26px;
-      border-radius: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(212,175,55,0.4);
-      transition: all 0.2s;
-    }
-    button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(212,175,55,0.6); }
-    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+
+
 
     .overlay-screen {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at center, #2A160A 0%, #140C07 60%, #0D0704 100%);
+      background-color: #120A07;
+      background-image: 
+        url("data:image/svg+xml,%3Csvg width='240' height='400' viewBox='0 0 240 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 30,160 60,0' fill='rgba(255,255,255,0.015)'/%3E%3Cpolygon points='60,0 90,160 120,0' fill='rgba(0,0,0,0.02)'/%3E%3Cpolygon points='120,0 150,160 180,0' fill='rgba(255,255,255,0.015)'/%3E%3Cpolygon points='180,0 210,160 240,0' fill='rgba(0,0,0,0.02)'/%3E%3Cpolygon points='0,400 30,240 60,400' fill='rgba(0,0,0,0.02)'/%3E%3Cpolygon points='60,400 90,240 120,400' fill='rgba(255,255,255,0.015)'/%3E%3Cpolygon points='120,400 150,240 180,400' fill='rgba(0,0,0,0.02)'/%3E%3Cpolygon points='180,400 210,240 240,400' fill='rgba(255,255,255,0.015)'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.08 0.3' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0, 0 0.9 0 0 0, 0 0.8 0 0 0, 0 0 0 0.08 0' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.8'/%3E%3C/svg%3E"),
+        radial-gradient(circle at center, rgba(184, 153, 89, 0.05) 0%, rgba(10, 5, 3, 0.7) 70%, rgba(5, 2, 1, 1) 100%);
+      background-size: 240px 400px, 150px 150px, 100% 100%;
+      background-blend-mode: normal, multiply, normal;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -223,67 +233,118 @@
       padding: 20px;
     }
     .gold-badge {
-      background: #1C1009;
-      border: 3px solid #D4AF37;
-      border-radius: 20px;
-      padding: 16px 36px;
       text-align: center;
-      box-shadow: 0 0 30px rgba(212,175,55,0.4);
-      margin-bottom: 30px;
+      margin-bottom: 40px;
+      padding: 10px;
+      position: relative;
     }
     .gold-badge h1 {
-      color: #D4AF37;
-      font-size: 32px;
-      font-weight: 900;
-      letter-spacing: 4px;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+      color: #C2AB80;
+      font-size: 34px;
+      font-weight: normal;
+      letter-spacing: 6px;
+      font-family: 'Times New Roman', Times, serif;
+      position: relative;
+      display: inline-block;
+      padding: 0 40px;
     }
-    .gold-badge p {
-      color: #FFF;
+    .gold-badge h1::before, .gold-badge h1::after {
+      content: "✦";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
       font-size: 11px;
-      letter-spacing: 2px;
-      opacity: 0.8;
+      color: rgba(184, 153, 89, 0.4);
+    }
+    .gold-badge h1::before { left: 10px; }
+    .gold-badge h1::after { right: 10px; }
+    .gold-badge p {
+      color: #E5DAC8;
+      font-size: 10px;
+      letter-spacing: 3px;
+      opacity: 0.6;
+      margin-top: 6px;
+      font-weight: 400;
     }
     .menu-btn-list {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
       width: 100%;
-      max-width: 340px;
+      max-width: 380px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .menu-btn {
       width: 100%;
-      padding: 14px 20px;
-      font-size: 15px;
-      font-weight: bold;
-      border-radius: 28px;
-      border: 1px solid rgba(212,175,55,0.6);
+      padding: 18px 24px;
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      background: #1C100B;
+      border: 1px solid rgba(184, 153, 89, 0.4);
+      border-bottom: 2px solid rgba(184, 153, 89, 0.5);
+      color: #E5DAC8;
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      justify-content: flex-start;
+      gap: 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), inset 0 -1px 0 rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease-out;
+      position: relative;
+    }
+    .menu-btn:hover { 
+      background: #22140D;
+      border-color: rgba(212, 175, 55, 0.6);
+      border-bottom: 2px solid rgba(212, 175, 55, 0.8);
+      color: #FFF;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 6px 12px rgba(0,0,0,0.7);
+      transform: translateY(-1px);
+    }
+    .menu-btn:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+      border-bottom: 1px solid rgba(184, 153, 89, 0.2);
+    }
+    .menu-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      fill: #B89959;
+      opacity: 0.8;
       transition: all 0.2s;
     }
-    .btn-gold { background: linear-gradient(180deg, #D4AF37, #997A15); color: #000; }
-    .btn-blue { background: linear-gradient(180deg, #0288D1, #01579B); color: #FFF; }
-    .btn-orange { background: linear-gradient(180deg, #E65100, #BF360C); color: #FFF; }
-    .btn-amber { background: linear-gradient(180deg, #F57F17, #E65100); color: #FFF; }
+    .menu-btn:hover svg {
+      opacity: 1;
+      fill: #FFD700;
+    }
+    .menu-btn-primary { 
+      background: #3A1310;
+      border-color: rgba(212, 175, 55, 0.5);
+      border-bottom: 2px solid rgba(212, 175, 55, 0.7);
+      color: #E5DAC8;
+    }
+    .menu-btn-primary:hover {
+      background: #4A1612;
+      border-color: rgba(255, 215, 0, 0.7);
+      border-bottom: 2px solid rgba(255, 215, 0, 0.9);
+      color: #FFF;
+    }
     .menu-modal {
       display: none;
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: #1E110A;
-      border: 2px solid #D4AF37;
-      border-radius: 18px;
+      background: #120A07;
+      border: 1px solid #947743;
+      border-radius: 8px;
       padding: 24px;
       width: 90%;
       max-width: 440px;
       z-index: 1100;
-      box-shadow: 0 0 40px rgba(0,0,0,0.9);
-      color: #FFF;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+      color: #E5DAC8;
     }
   </style>
 </head>
@@ -291,18 +352,29 @@
   <!-- 1. Tavla Evrimi Main Menu Overlay -->
   <div id="main-menu" class="overlay-screen">
     <!-- Top Player Header Bar -->
-    <div style="position: absolute; top: 16px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100;">
-      <div onclick="openModal('profile-modal')" style="background: rgba(28,16,9,0.9); border: 1.5px solid #D4AF37; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer;">
-        <span id="user-avatar" style="font-size: 22px;">🧔🏻‍♂️</span>
-        <div style="display: flex; flex-direction: column;">
-          <span id="user-name" style="font-weight: bold; color: #FFF; font-size: 13px;">Misafir_1001</span>
-          <span id="user-level" style="color: #D4AF37; font-size: 11px;">Seviye 1</span>
+    <div style="position: absolute; top: 20px; left: 30px; right: 30px; display: flex; justify-content: space-between; align-items: center; z-index: 100;">
+      <!-- Profile HUD -->
+      <div onclick="openModal('profile-modal')" style="display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; padding: 4px; border-radius: 4px;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(184,153,89,0.4); display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(184,153,89,0.15) 0%, transparent 80%); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+          <span id="user-avatar" style="font-size: 16px; color: #E5DAC8; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">◈</span>
         </div>
-        <span style="color: rgba(255,255,255,0.5); font-size: 12px;">✏️</span>
+        <div style="display: flex; flex-direction: column;">
+          <span id="user-name" style="font-weight: 600; color: #E5DAC8; font-size: 13px; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Misafir_1001</span>
+          <span id="user-level" style="color: rgba(184,153,89,0.8); font-size: 9px; letter-spacing: 1.5px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">SEVİYE 1</span>
+          
+          <div style="width: 120px; margin-top: 4px; display: flex; flex-direction: column; gap: 3px;">
+            <div style="width: 100%; height: 4px; background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden; border: 1px solid rgba(184,153,89,0.2);">
+              <div id="user-xp-bar" style="width: 0%; height: 100%; background: #B89959; transition: width 0.3s ease;"></div>
+            </div>
+            <span id="user-xp-text" style="color: rgba(229,218,200,0.6); font-size: 8px; font-weight: 600; letter-spacing: 0.5px;">0 / 500 XP</span>
+          </div>
+        </div>
       </div>
 
-      <div style="background: rgba(28,16,9,0.9); border: 1.5px solid #FFD700; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-weight: bold; color: #FFD700; font-size: 15px;">
-        <span>💰</span> <span id="user-chips">1000</span>
+      <!-- Coins HUD -->
+      <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #E5DAC8; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: none; stroke: #B89959; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+        <span id="user-chips" style="letter-spacing: 0.5px;">1000</span>
       </div>
     </div>
 
@@ -312,148 +384,216 @@
     </div>
 
     <div class="menu-btn-list">
-      <button class="menu-btn btn-gold" onclick="startMode('ai')">🤖 YAPAY ZEKAYA KARŞI (KLASİK)</button>
-      <button class="menu-btn btn-blue" onclick="openOnlineModal()">🔵 ÇEVRİMİÇİ / 2 OYUNCULU MOD</button>
-      <button class="menu-btn" style="background: linear-gradient(180deg, #8E24AA, #4A148C); color:#FFF;" onclick="openModal('custom-modal')">🎨 TAHTA & ZAR ÖZELLEŞTİR</button>
-      <button class="menu-btn" style="background: linear-gradient(180deg, #2E7D32, #1B5E20); color:#FFF;" onclick="toggleFullScreen()">📱 UYGULAMA MODU (TAM EKRAN)</button>
-      <button class="menu-btn btn-orange" onclick="openModal('settings-modal')">⚙️ AYARLAR</button>
-      <button class="menu-btn btn-amber" onclick="openModal('guide-modal')">❓ NASIL OYNANIR</button>
+      <button id="main-login-btn" class="menu-btn" style="border-color: #B89959; color: #B89959;" onclick="openModal('login-modal')">
+        <svg viewBox="0 0 24 24"><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2ZM12,19.2A7.2,7.2,0,0,1,6.54,16.5c.06-1.82,3.64-2.82,5.46-2.82s5.4,1,5.46,2.82A7.2,7.2,0,0,1,12,19.2Zm6.87-4.21A8.91,8.91,0,0,0,12,12.3c-2.48,0-7.46,1.24-7.87,3.69v-.29A8.34,8.34,0,1,1,12,20.34,8.31,8.31,0,0,1,3.66,12a8.34,8.34,0,0,1,15.21,3.01Z"/><path d="M12,11.1A3.6,3.6,0,1,0,8.4,7.5,3.6,3.6,0,0,0,12,11.1Zm0-5.7A2.1,2.1,0,1,1,9.9,7.5,2.1,2.1,0,0,1,12,5.4Z"/></svg>
+        HESABINI BAĞLA / GİRİŞ YAP
+      </button>
+      <button class="menu-btn menu-btn-primary" onclick="startMode('ai')">
+        <svg viewBox="0 0 24 24"><path d="M19,10H18V7a2,2,0,0,0-2-2H8A2,2,0,0,0,6,7v3H5a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2H6v1a2,2,0,0,0,2,2h8a2,2,0,0,0,2-2V18h1a2,2,0,0,0,2-2V12A2,2,0,0,0,19,10Zm-2,7H7V7H17ZM9,9h2v2H9Zm4,0h2v2H13Z"/></svg>
+        YAPAY ZEKAYA KARŞI (KLASİK)
+      </button>
+      <button class="menu-btn" onclick="openOnlineModal()">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        ÇEVRİMİÇİ / 2 OYUNCULU MOD
+      </button>
+      <button class="menu-btn" onclick="openModal('custom-modal')">
+        <svg viewBox="0 0 24 24"><path d="M19,3H5A2,2,0,0,0,3,5V19a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2V5A2,2,0,0,0,19,3Zm-7.5,3.5a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,11.5,6.5Zm-4,11a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,7.5,17.5Zm0-7a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,7.5,10.5Zm9,7a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,16.5,17.5Zm0-7a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,16.5,10.5Z"/></svg>
+        TAHTA & ZAR ÖZELLEŞTİR
+      </button>
+      <button class="menu-btn" onclick="openModal('settings-modal')">
+        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c.04-.3.06-.61.06-.94,0-.32-.02-.64-.06-.94l2.03-1.58a.49.49,0,0,0,.12-.61l-1.92-3.32a.488.488,0,0,0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4,2.81a.5.5,0,0,0-.49-.41H9.99a.5.5,0,0,0-.49.41l-.36,2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488,0,0,0-.59.22L2.62,8.87a.49.49,0,0,0,.12.61l2.03,1.58c-.05.3-.09.62-.09.94s.02.64.06.94l-2.03,1.58a.49.49,0,0,0-.12.61l1.92,3.32a.488.488,0,0,0,.59.22l2.39-.96c.5.38,1.03.7,1.62.94l.36,2.54c.05.24.24.41.49.41h4.08c.25,0,.44-.17.49-.41l.36-2.54c.59-.24,1.13-.56,1.62-.94l2.39.96a.488.488,0,0,0,.59-.22l1.92-3.32a.49.49,0,0,0-.12-.61l-2.03-1.58zM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6,3.6,1.62,3.6,3.6-1.62,3.6-3.6,3.6z"/></svg>
+        AYARLAR
+      </button>
+      <button class="menu-btn" onclick="openModal('guide-modal')">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/></svg>
+        NASIL OYNANIR
+      </button>
     </div>
-    <div style="position: absolute; bottom: 15px; font-size: 11px; color: rgba(255,255,255,0.4);">Versiyon 1.5 - Oyun Atölyesi</div>
+    <div style="position: absolute; bottom: 15px; font-size: 9px; color: rgba(229,218,200,0.2); letter-spacing: 1px;">VERSİYON 1.5 - OYUN ATÖLYESİ</div>
   </div>
 
   <!-- Profile Modal -->
   <div id="profile-modal" class="menu-modal">
-    <h3 style="color:#D4AF37; margin-bottom:15px;">👤 OYUNCU PROFİLİ</h3>
+    <h3 style="color:#B89959; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">OYUNCU PROFİLİ</h3>
     <div style="text-align:center; margin-bottom:15px;">
-      <div id="profile-avatar-display" style="font-size:44px; background:#2C1A10; border:2px solid #D4AF37; width:76px; height:76px; line-height:76px; border-radius:50%; margin:0 auto 10px auto;">🧔🏻‍♂️</div>
-      <label style="display:block; margin-bottom:5px; font-size:12px; color:#AAA;">Avatar Seçin:</label>
-      <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-bottom:15px;">
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🧔🏻‍♂️')">🧔🏻‍♂️</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('👑')">👑</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🦁')">🦁</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🎲')">🎲</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🦅')">🦅</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🐉')">🐉</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🏆')">🏆</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('🎩')">🎩</span>
+      <div id="profile-avatar-display" style="font-size:36px; background:#1C100B; border:1px solid rgba(184,153,89,0.5); width:76px; height:76px; line-height:76px; border-radius:50%; margin:0 auto 10px auto; color:#E5DAC8;">◈</div>
+      <label style="display:block; margin-bottom:5px; font-size:11px; color:#A68045; letter-spacing: 1px;">AVATAR SEÇİN:</label>
+      <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:15px; color:#E5DAC8;">
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('◈')">◈</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('◆')">◆</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♙')">♙</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♞')">♞</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♚')">♚</span>
+        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♛')">♛</span>
       </div>
     </div>
     <div style="margin-bottom:15px;">
-      <label style="display:block; margin-bottom:6px; font-weight:bold;">Oyuncu Adı:</label>
-      <input type="text" id="profile-name-input" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#FFF; border:1px solid #D4AF37; font-weight:bold;" placeholder="İsminizi yazın">
+      <label style="display:block; margin-bottom:6px; font-weight:600; font-size: 11px; letter-spacing: 1px; color:#E5DAC8;">OYUNCU ADI:</label>
+      <input type="text" id="profile-name-input" style="width:100%; padding:12px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); font-weight:600; outline: none;" placeholder="İsminizi yazın">
     </div>
-    <div style="display:flex; justify-content:space-around; background:#140C07; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; border:1px solid #3A2416;">
-      <div><div style="color:#FFD700; font-size:11px;">💰 JETON</div><div id="modal-chips" style="font-weight:bold; font-size:14px;">1000</div></div>
-      <div><div style="color:#66BB6A; font-size:11px;">🏆 KAZANMA</div><div id="modal-wins" style="font-weight:bold; font-size:14px;">0</div></div>
-      <div><div style="color:#29B6F6; font-size:11px;">📊 KAZANMA %</div><div id="modal-winrate" style="font-weight:bold; font-size:14px;">%0.0</div></div>
+    <div style="display:flex; justify-content:space-around; background:#1C100B; padding:12px; border-radius:4px; margin-bottom:20px; text-align:center; border:1px solid rgba(184,153,89,0.2);">
+      <div><div style="color:#A68045; font-size:9px; letter-spacing:1px;">COIN</div><div id="modal-chips" style="font-weight:600; font-size:14px; color:#E5DAC8;">1000</div></div>
+      <div><div style="color:#A68045; font-size:9px; letter-spacing:1px;">KAZANMA</div><div id="modal-wins" style="font-weight:600; font-size:14px; color:#E5DAC8;">0</div></div>
+      <div><div style="color:#A68045; font-size:9px; letter-spacing:1px;">KAZANMA %</div><div id="modal-winrate" style="font-weight:600; font-size:14px; color:#E5DAC8;">%0.0</div></div>
     </div>
-    <button class="menu-btn btn-gold" onclick="saveWebProfile()">KAYDET VE KAPAT</button>
+    <button class="menu-btn menu-btn-primary" onclick="saveWebProfile()">KAYDET VE KAPAT</button>
   </div>
 
   <!-- Customization Modal -->
   <div id="custom-modal" class="menu-modal">
-    <h3 style="color:#D4AF37; margin-bottom:15px;">🎨 TAHTA & ZAR ÖZELLEŞTİR</h3>
+    <h3 style="color:#B89959; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">TAHTA & ZAR ÖZELLEŞTİR</h3>
     <div style="margin-bottom:15px;">
-      <label style="display:block; margin-bottom:8px; font-weight:bold;">Tahta Teması Seçin:</label>
-      <select id="board-theme-select" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#D4AF37; border:1px solid #D4AF37;" onchange="changeBoardTheme(this.value)">
-        <option value="walnut">🪵 Klasik Ceviz Ahşap</option>
-        <option value="fenerbahce">💛💙 Sarı-Lacivert (Fenerbahçe)</option>
-        <option value="ottoman">⚜️ Geleneksel Motifli Ahşap (Siyah & Kemik)</option>
-        <option value="tropical">🦩 Tropikal Flamingo & Zümrüt</option>
-        <option value="green">🟩 Kına & Sedef (Yeşil Çuha)</option>
-        <option value="marble">🏛️ Kraliyet Mermeri & Altın</option>
-        <option value="midnight">🌌 Gece Safiri (Midnight Velvet)</option>
+      <label style="display:block; margin-bottom:8px; font-weight:600; font-size:11px; letter-spacing:1px; color:#E5DAC8;">TAHTA TEMASI:</label>
+      <select id="board-theme-select" style="width:100%; padding:12px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); outline:none;" onchange="changeBoardTheme(this.value)">
+        <option value="walnut">Klasik Ceviz Ahşap</option>
+        <option value="fenerbahce">Sarı-Lacivert</option>
+        <option value="ottoman">Geleneksel Motifli Ahşap</option>
+        <option value="tropical">Tropikal</option>
+        <option value="green">Kına & Sedef (Yeşil Çuha)</option>
+        <option value="marble">Kraliyet Mermeri</option>
+        <option value="midnight">Gece Safiri</option>
       </select>
     </div>
-    <div style="margin-bottom:20px;">
-      <label style="display:block; margin-bottom:8px; font-weight:bold;">Zar Rengi Seçin:</label>
-      <select id="dice-theme-select" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#D4AF37; border:1px solid #D4AF37;" onchange="changeDiceTheme(this.value)">
-        <option value="ivory">⚪ Klasik Fildişi</option>
-        <option value="fbYellow">💛💙 Kanarya Sarı-Lacivert</option>
-        <option value="gold">👑 Altın Kaplama</option>
-        <option value="red">🔴 Yakut Kırmızı</option>
-        <option value="black">🖤 Obsidyen Siyah</option>
-        <option value="green">🟢 Zümrüt Yeşil</option>
+    <div style="margin-bottom:24px;">
+      <label style="display:block; margin-bottom:8px; font-weight:600; font-size:11px; letter-spacing:1px; color:#E5DAC8;">ZAR RENGİ:</label>
+      <select id="dice-theme-select" style="width:100%; padding:12px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); outline:none;" onchange="changeDiceTheme(this.value)">
+        <option value="ivory">Klasik Fildişi</option>
+        <option value="fbYellow">Sarı-Lacivert</option>
+        <option value="gold">Mat Altın</option>
+        <option value="red">Koyu Kırmızı</option>
+        <option value="black">Siyah</option>
+        <option value="green">Yeşil</option>
       </select>
     </div>
-    <button class="menu-btn btn-gold" onclick="closeModal('custom-modal')">KAYDET VE KAPAT</button>
+    <button class="menu-btn menu-btn-primary" onclick="closeModal('custom-modal')">KAYDET VE KAPAT</button>
   </div>
 
   <!-- 2. Online Mode Selection Submodal -->
   <div id="online-modal" class="menu-modal">
-    <h3 style="color:#D4AF37; text-align:center; margin-bottom:18px;">ÇEVRİMİÇİ MOD SEÇİMİ</h3>
+    <h3 style="color:#B89959; text-align:center; margin-bottom:20px; font-weight: 300; letter-spacing: 2px;">ÇEVRİMİÇİ MOD SEÇİMİ</h3>
     <div class="menu-btn-list">
-      <button class="menu-btn btn-gold" onclick="startMode('2p-classic')">🟡 KLASİK ÇEVRİMİÇİ MOD</button>
-      <button class="menu-btn btn-blue" style="background: linear-gradient(180deg, #8E24AA, #4A148C);" onclick="startMode('2p-cards')">🟣 KARTLI ÖZEL GÜÇLER MODU</button>
-      <button class="menu-btn" style="background:#333; color:#FFF;" onclick="closeModal('online-modal')">İPTAL</button>
+      <button class="menu-btn menu-btn-primary" onclick="startMode('2p-classic')">KLASİK ÇEVRİMİÇİ MOD</button>
+      <button class="menu-btn" onclick="startMode('2p-cards')">KARTLI ÖZEL GÜÇLER MODU</button>
+      <button class="menu-btn" style="background:transparent; border:none; box-shadow:none; text-decoration:underline; padding-top:4px;" onclick="closeModal('online-modal')">İPTAL</button>
     </div>
   </div>
 
   <!-- 3. Settings Modal -->
   <div id="settings-modal" class="menu-modal">
-    <h3 style="color:#D4AF37; margin-bottom:15px;">⚙️ OYUN AYARLARI</h3>
+    <h3 style="color:#B89959; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">OYUN AYARLARI</h3>
     <div style="margin-bottom:15px;">
-      <label style="display:block; margin-bottom:8px; font-weight:bold;">Yapay Zeka Zorluk Seviyesi:</label>
-      <select id="ai-diff-select" style="width:100%; padding:10px; border-radius:8px; background:#140C07; color:#D4AF37; border:1px solid #D4AF37;">
+      <label style="display:block; margin-bottom:8px; font-weight:600; font-size:11px; letter-spacing:1px; color:#E5DAC8;">YAPAY ZEKA ZORLUK SEVİYESİ:</label>
+      <select id="ai-diff-select" style="width:100%; padding:12px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); outline:none;">
         <option value="easy">Kolay</option>
         <option value="medium">Orta</option>
         <option value="master" selected>Usta AI</option>
       </select>
     </div>
-    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; background:#140C07; padding:10px 14px; border-radius:8px; border:1px solid #3A2416;">
-      <span style="font-weight:bold; color:#FFF; display:flex; align-items:center; gap:8px;">🔊 Ses Efektleri</span>
-      <input type="checkbox" id="sound-effects-toggle" checked style="width:20px; height:20px; accent-color:#D4AF37; cursor:pointer;" onchange="SoundFX.soundEnabled = this.checked">
+    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; background:#1C100B; padding:12px 14px; border-radius:4px; border:1px solid rgba(184,153,89,0.3);">
+      <span style="font-weight:600; font-size:12px; color:#E5DAC8; display:flex; align-items:center; gap:8px;">SES EFEKTLERİ</span>
+      <input type="checkbox" id="sound-effects-toggle" checked style="width:20px; height:20px; accent-color:#B89959; cursor:pointer;" onchange="SoundFX.soundEnabled = this.checked">
     </div>
-    <button class="menu-btn btn-gold" onclick="closeModal('settings-modal')">KAYDET VE KAPAT</button>
+    <div class="menu-btn-list" style="margin-bottom:20px; gap:8px;">
+      <button class="menu-btn" onclick="toggleFullScreen()">UYGULAMA MODU (TAM EKRAN)</button>
+      <button id="settings-logout-btn" class="menu-btn" style="color: #c96b6b; display: none;" onclick="logoutUser()">HESAPTAN ÇIKIŞ YAP</button>
+    </div>
+    <button class="menu-btn menu-btn-primary" onclick="closeModal('settings-modal')">KAYDET VE KAPAT</button>
   </div>
 
   <!-- 4. Guide Modal -->
   <div id="guide-modal" class="menu-modal" style="max-height: 80vh; overflow-y: auto;">
-    <h3 style="color:#D4AF37; margin-bottom:12px;">❓ TAVLA NASIL OYNANIR?</h3>
-    <p style="font-size:13px; line-height:1.5; color:#DDD; margin-bottom:10px;">
-      <b>🎲 Zarlar:</b> Zar atın ve çıkan sayılar kadar taşlarınızı kendi ev borunuza doğru ilerletin. Çift zarlarda hamle hakkınız 4'e çıkar.<br><br>
-      <b>🛡️ Kırık Pul:</b> Kırılan pul kına düşer. Kındaki pul oyuna girmeden başka pul oynanamaz.<br><br>
-      <b>🏰 Kapı Alma:</b> En az 2 taşın olduğu yer kapıdır. Rakip basamaz.<br><br>
-      <b>🏆 Taş Toplama:</b> 15 taşın tamamını ev borusuna toplayan oyuncu taşları toplamaya başlar. İlk bitiren kazanır!
+    <h3 style="color:#B89959; margin-bottom:16px; font-weight: 300; letter-spacing: 2px;">TAVLA NASIL OYNANIR?</h3>
+    <p style="font-size:12px; line-height:1.6; color:#E5DAC8; margin-bottom:10px; opacity:0.9;">
+      <b>Zarlar:</b> Zar atın ve çıkan sayılar kadar taşlarınızı kendi ev borunuza doğru ilerletin. Çift zarlarda hamle hakkınız 4'e çıkar.<br><br>
+      <b>Kırık Pul:</b> Kırılan pul kına düşer. Kındaki pul oyuna girmeden başka pul oynanamaz.<br><br>
+      <b>Kapı Alma:</b> En az 2 taşın olduğu yer kapıdır. Rakip basamaz.<br><br>
+      <b>Taş Toplama:</b> 15 taşın tamamını ev borusuna toplayan oyuncu taşları toplamaya başlar. İlk bitiren kazanır!
     </p>
-    <button class="menu-btn btn-gold" onclick="closeModal('guide-modal')">KAPAT</button>
+    <button class="menu-btn menu-btn-primary" style="margin-top:10px;" onclick="closeModal('guide-modal')">KAPAT</button>
   </div>
 
   <!-- 5. Exit Confirmation Modal -->
   <div id="exit-modal" class="menu-modal">
-    <h3 style="color:#D4AF37; text-align:center; margin-bottom:12px;">⚠️ MAÇTAN ÇIKILSIN MI?</h3>
-    <p style="font-size:13.5px; color:#EEE; text-align:center; margin-bottom:18px; line-height:1.4;">
+    <h3 style="color:#B89959; text-align:center; margin-bottom:12px; font-weight: 300; letter-spacing: 2px;">MAÇTAN ÇIKILSIN MI?</h3>
+    <p style="font-size:12px; color:#E5DAC8; text-align:center; margin-bottom:24px; line-height:1.4; opacity:0.9;">
       Ana menüye dönerseniz mevcut maçı kaybedeceksiniz. Devam etmek istiyor musunuz?
     </p>
     <div style="display:flex; gap:10px;">
-      <button class="menu-btn" style="background:#C62828; color:#FFF; flex:1;" onclick="confirmExitToMainMenu()">EVET, ÇIK</button>
-      <button class="menu-btn btn-gold" style="flex:1;" onclick="closeModal('exit-modal')">İPTAL</button>
+      <button class="menu-btn" style="color:#c96b6b; flex:1;" onclick="confirmExitToMainMenu()">EVET, ÇIK</button>
+      <button class="menu-btn menu-btn-primary" style="flex:1;" onclick="closeModal('exit-modal')">İPTAL</button>
     </div>
   </div>
 
-  <div class="rotate-hint">📱 En iyi deneyim için telefonunuzu YATAY çevirin!</div>
-  <header style="justify-content: flex-start; margin-bottom: 6px; width:100%; max-width:900px;">
-    <button id="main-menu-btn" onclick="requestExitToMainMenu()" style="padding: 6px 16px; font-size: 13px; background: rgba(212,175,55,0.15); color: #D4AF37; border: 1px solid #D4AF37; border-radius: 16px;">🏠 ANA MENÜ</button>
-  </header>
+  <!-- 6. Login Modal -->
+  <div id="login-modal" class="menu-modal">
+    <h3 style="color:#B89959; text-align:center; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">GİRİŞ YAP</h3>
+    <p style="font-size:12px; color:#E5DAC8; text-align:center; margin-bottom:20px; opacity:0.8;">
+      Misafir hesabınızdaki verilerin kaybolmaması ve tüm cihazlardan ulaşmak için giriş yapın.
+    </p>
+    <div class="menu-btn-list" style="align-items: center;">
+      <!-- Google Sign In (GSI) Container -->
+      <div id="g_id_onload"
+           data-client_id="581828494451-1ll31a50hdb2dfjt4ho2rfcndaeketa7.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="pill"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="left">
+      </div>
+      
+      <!-- Mock Google button for immediate testing if Client ID is invalid -->
+      <button id="mock-google-btn" class="menu-btn" style="background: #E5DAC8; color: #120A07; width: 100%; max-width: 240px; margin-top: 10px;" onclick="mockGoogleLogin()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width:14px; height:14px;">
+        GOOGLE İLE TEST GİRİŞİ
+      </button>
 
-  <div class="hud">
-    <div class="player-info">
-      <div class="avatar white"></div>
-      <div>
-        <div style="font-weight:bold;">Beyaz Oyuncu</div>
-        <div id="white-turn" class="turn-badge">● SIRA SENDE</div>
-        <div style="font-size:11px; color:#D4AF37; margin-top:2px;">Toplanan: <span id="white-off-count" style="font-weight:bold; color:#FFF;">0</span> / 15</div>
+      <button class="menu-btn" style="background: #1877F2; color: #FFF; width: 100%; max-width: 240px; opacity: 0.6; cursor: not-allowed; margin-top: 10px;" onclick="alert('Facebook girişi çok yakında eklenecektir!')">
+        <span style="font-size: 16px; margin-right: 8px;">f</span> FACEBOOK İLE GİRİŞ
+      </button>
+      <button class="menu-btn" style="background: transparent; border: 1px solid rgba(184,153,89,0.3); color: #E5DAC8; margin-top: 15px; width: 100%;" onclick="closeModal('login-modal')">İPTAL</button>
+    </div>
+  </div>
+
+  <div class="rotate-hint" style="background: #B89959; color: #120A07; border-radius: 4px;">En iyi deneyim için telefonunuzu YATAY çevirin!</div>
+  <div class="game-ui-layer">
+    <!-- Top Left Corner -->
+    <div class="ui-corner ui-top-left">
+      <div class="hud-action-group">
+        <button id="main-menu-btn" onclick="requestExitToMainMenu()" class="hud-action-btn">ANA MENÜ</button>
+        <button onclick="ObjectiveService.showInGameObjectives()" class="hud-action-btn">HEDEFLER</button>
+      </div>
+      
+      <div class="player-hud">
+        <div class="player-name">BEYAZ OYUNCU <span class="indicator white-indicator"></span></div>
+        <div class="player-score">Toplanan: <span id="white-off-count">0</span> / 15</div>
       </div>
     </div>
-    <div id="status-msg" style="color:#D4AF37; font-weight:bold; font-size:14px;">Zar Atın!</div>
-    <div class="player-info">
-      <div>
-        <div style="font-weight:bold; text-align:right;">Siyah Oyuncu</div>
-        <div id="black-turn" class="turn-badge" style="display:none; text-align:right;">● SIRA SENDE</div>
-        <div style="font-size:11px; color:#D4AF37; margin-top:2px; text-align:right;">Toplanan: <span id="black-off-count" style="font-weight:bold; color:#FFF;">0</span> / 15</div>
+
+    <!-- Top Right Corner -->
+    <div class="ui-corner ui-top-right">
+      <div class="player-hud" style="text-align:right;">
+        <div class="player-name"><span class="indicator black-indicator"></span>SİYAH OYUNCU</div>
+        <div class="player-score">Toplanan: <span id="black-off-count">0</span> / 15</div>
       </div>
-      <div class="avatar black"></div>
+    </div>
+
+    <!-- Top Center -->
+    <div class="ui-corner ui-top-center">
+      <div id="white-turn" class="turn-indicator" style="display:none;">● SIRA SENDE</div>
+      <div id="black-turn" class="turn-indicator" style="display:none;">SIRA SENDE ●</div>
+      <div id="status-msg" class="status-msg">ZAR BEKLENİYOR</div>
+    </div>
+
+    <!-- Bottom Right Corner -->
+    <div class="ui-corner ui-bottom-right">
+      <button id="roll-btn" onclick="rollDice()" class="hud-primary-btn">ZAR AT</button>
     </div>
   </div>
 
@@ -461,8 +601,14 @@
     <canvas id="boardCanvas"></canvas>
   </div>
 
-  <div class="controls">
-    <button id="roll-btn" onclick="rollDice()">🎲 ZAR AT</button>
+  <!-- Objectives Modal (Used for both Pre-Match and In-Game) -->
+  <div id="objectives-modal" class="overlay-screen" style="display:none; z-index:200;" onclick="ObjectiveService.handleModalClick(event)">
+    <div class="modal-box" style="text-align:center; padding: 24px; min-width: 320px; max-width: 400px; cursor: default;">
+      <h2 id="objectives-modal-title" style="color: #D4AF37; margin-bottom: 16px; font-size: 18px; letter-spacing: 2px;">🎯 MAÇ HEDEFLERİ</h2>
+      <div id="objectives-modal-content" style="display:flex; flex-direction:column; gap:12px; text-align:left; margin-bottom: 24px;"></div>
+      <button id="objectives-modal-start-btn" class="menu-btn menu-btn-primary" style="width:100%; display:none;" onclick="ObjectiveService.startMatchFromModal()">OYUNA BAŞLA</button>
+      <button id="objectives-modal-close-btn" class="menu-btn" style="width:100%; display:none; background: transparent; border: 1px solid rgba(184,153,89,0.3); color: #E5DAC8;" onclick="closeModal('objectives-modal')">KAPAT</button>
+    </div>
   </div>
 
   <script>
@@ -482,7 +628,7 @@
     let isAIBusy = false;
 
     let boardThemes = {
-      walnut: { bg: '#140C07', frame: '#3D210F', dark: '#A32B20', light: '#D9C496', accent: '#D4AF37' },
+      walnut: { bg: '#17110C', frame: '#2E1A11', dark: '#6A2520', light: '#D8CAB3', accent: '#332115' },
       fenerbahce: { bg: '#070D1E', frame: '#03060F', dark: '#0F1D3F', light: '#FFD700', accent: '#FFD700' },
       ottoman: { bg: '#D4AF77', frame: '#191816', dark: '#1E1C19', light: '#F4F1EA', accent: '#D4AF37' },
       tropical: { bg: '#0C2E22', frame: '#0A241B', dark: '#2C5E43', light: '#E2D5C3', accent: '#FF6B6B' },
@@ -493,7 +639,7 @@
     let currentBoardTheme = 'walnut';
 
     let diceThemes = {
-      ivory: { bg: '#FAF6EE', dot: '#1E110A', border: '#D4AF37' },
+      ivory: { bg: '#EFEBE1', dot: '#1A0F0A', border: '#C2BAAA' },
       fbYellow: { bg: '#FFD700', dot: '#0A1228', border: '#0F1D3F' },
       gold: { bg: '#D4AF37', dot: '#1A1A1A', border: '#FFF0A5' },
       red: { bg: '#B71C1C', dot: '#FFFFFF', border: '#FF5252' },
@@ -504,11 +650,183 @@
 
     let userProfile = {
       name: 'Misafir_' + Math.floor(1000 + Math.random() * 9000),
-      avatar: '🧔🏻‍♂️',
+      avatar: '◈',
       chips: 1000,
       level: 1,
+      currentXP: 0,
+      totalXP: 0,
       wins: 0,
-      losses: 0
+      losses: 0,
+      isGuest: true
+    };
+
+    const ProgressionService = {
+      CONFIG: {
+        WIN_XP: 100,
+        LOSS_XP: 40
+      },
+      
+      // Calculate XP needed for NEXT level
+      // L1->L2 = 500, L2->L3 = 700, L3->L4 = 900...
+      getXPRequiredForNextLevel(currentLevel) {
+        return 300 + (currentLevel * 200); 
+      },
+
+      addXP(amount) {
+        if (amount <= 0) return { leveledUp: false, levelsGained: 0, gained: 0 };
+        
+        userProfile.totalXP = (userProfile.totalXP || 0) + amount;
+        userProfile.currentXP = (userProfile.currentXP || 0) + amount;
+        
+        let leveledUp = false;
+        let levelsGained = 0;
+        let req = this.getXPRequiredForNextLevel(userProfile.level);
+        
+        while (userProfile.currentXP >= req) {
+          userProfile.currentXP -= req;
+          userProfile.level++;
+          leveledUp = true;
+          levelsGained++;
+          req = this.getXPRequiredForNextLevel(userProfile.level);
+        }
+        
+        localStorage.setItem('tavla_user_profile', JSON.stringify(userProfile));
+        updateWebProfileUI();
+        
+        return { leveledUp, levelsGained, newLevel: userProfile.level, gained: amount };
+      },
+      
+      grantMatchXP(isWin) {
+        let amount = isWin ? this.CONFIG.WIN_XP : this.CONFIG.LOSS_XP;
+        return this.addXP(amount);
+      }
+    };
+
+    const ObjectiveService = {
+      definitions: [
+        { id: 'hit_1', name: 'Saldırgan', desc: 'Rakibin 1 taşını vur', target: 1, xp: 50, type: 'hit' },
+        { id: 'hit_2', name: 'Avcı', desc: 'Rakibin 2 taşını vur', target: 2, xp: 100, type: 'hit' },
+        { id: 'point_2', name: 'Duvar Ustası', desc: '2 kapı oluştur', target: 2, xp: 100, type: 'makePoint' },
+        { id: 'point_3', name: 'Kale Mimarı', desc: '3 kapı oluştur', target: 3, xp: 150, type: 'makePoint' },
+        { id: 'bearoff_3', name: 'Kaçış Planı', desc: '3 taş topla', target: 3, xp: 100, type: 'bearOff' },
+        { id: 'bearoff_5', name: 'Usta Toplayıcı', desc: '5 taş topla', target: 5, xp: 150, type: 'bearOff' }
+      ],
+      activeObjectives: [],
+      
+      initMatch() {
+        this.activeObjectives = [];
+        let shuffled = [...this.definitions].sort(() => 0.5 - Math.random());
+        let selected = [];
+        for (let def of shuffled) {
+          if (!selected.some(o => o.type === def.type)) {
+            selected.push({ ...def, progress: 0, completed: false });
+          }
+          if (selected.length === 3) break;
+        }
+        if(selected.length < 3) {
+          for(let def of shuffled) {
+            if(!selected.some(o => o.id === def.id)) {
+               selected.push({ ...def, progress: 0, completed: false });
+               if (selected.length === 3) break;
+            }
+          }
+        }
+        this.activeObjectives = selected;
+        // Don't call updateUI here, let it be called when modal is shown.
+      },
+
+      processEvent(eventType, player) {
+        if (player !== 'white') return; // Only process local player
+        let updated = false;
+        for (let obj of this.activeObjectives) {
+          if (!obj.completed && obj.type === eventType) {
+            obj.progress++;
+            if (obj.progress >= obj.target) {
+              obj.progress = obj.target;
+              obj.completed = true;
+              SoundFX.playCheckerSelect(); // subtle sound
+            }
+            updated = true;
+          }
+        }
+        // If the modal is currently open, update it
+        if (updated && document.getElementById('objectives-modal').style.display === 'block') {
+            this.updateUI();
+        }
+      },
+
+      showPreMatchObjectives() {
+        this.updateUI();
+        document.getElementById('objectives-modal-start-btn').style.display = 'block';
+        document.getElementById('objectives-modal-close-btn').style.display = 'none';
+        openModal('objectives-modal');
+      },
+
+      showInGameObjectives() {
+        this.updateUI();
+        document.getElementById('objectives-modal-start-btn').style.display = 'none';
+        document.getElementById('objectives-modal-close-btn').style.display = 'block';
+        openModal('objectives-modal');
+      },
+
+      startMatchFromModal() {
+        closeModal('objectives-modal');
+      },
+      
+      handleModalClick(e) {
+        if(e.target.id === 'objectives-modal') {
+           // Allow closing only if it's the in-game modal (close button is visible)
+           if (document.getElementById('objectives-modal-close-btn').style.display === 'block') {
+               closeModal('objectives-modal');
+           }
+        }
+      },
+
+      updateUI() {
+        let container = document.getElementById('objectives-modal-content');
+        if (!container) return;
+        
+        if (this.activeObjectives.length === 0) {
+            container.innerHTML = '<div style="color:#E5DAC8;">Hedef bulunamadı.</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let obj of this.activeObjectives) {
+            let color = obj.completed ? '#D4AF37' : '#E5DAC8';
+            let icon = obj.completed ? '✓' : '○';
+            let opacity = obj.completed ? '1.0' : '0.9';
+            let statusText = obj.completed ? 'TAMAMLANDI' : `${obj.progress} / ${obj.target}`;
+            
+            html += `
+              <div style="display:flex; flex-direction:column; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(184,153,89,0.2); border-radius:4px; opacity:${opacity}">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; color:${color}; font-weight:600;">
+                  <span>${icon} ${obj.name}</span>
+                  <span style="font-size:12px; color:#B89959;">+${obj.xp} XP</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:rgba(229,218,200,0.7); margin-top:4px;">
+                  <span>${obj.desc}</span>
+                  <span style="font-weight:bold; color:${color};">${statusText}</span>
+                </div>
+              </div>
+            `;
+        }
+        container.innerHTML = html;
+      },
+
+      getMatchRewards() {
+        let totalObjXP = 0;
+        let summary = [];
+        for (let obj of this.activeObjectives) {
+          if (obj.completed) {
+            totalObjXP += obj.xp;
+            summary.push({ name: obj.name, xp: obj.xp, completed: true });
+          } else {
+            summary.push({ name: obj.name, xp: 0, completed: false });
+          }
+        }
+        return { totalObjXP, summary };
+      }
     };
 
     function loadWebProfile() {
@@ -536,8 +854,16 @@
       if (!document.getElementById('user-avatar')) return;
       document.getElementById('user-avatar').innerText = userProfile.avatar;
       document.getElementById('user-name').innerText = userProfile.name;
-      document.getElementById('user-level').innerText = 'Seviye ' + userProfile.level;
+      document.getElementById('user-level').innerText = 'SEVİYE ' + userProfile.level;
       document.getElementById('user-chips').innerText = userProfile.chips;
+
+      let reqXP = ProgressionService.getXPRequiredForNextLevel(userProfile.level);
+      let curXP = userProfile.currentXP || 0;
+      let pct = Math.min(100, Math.max(0, (curXP / reqXP) * 100));
+      let xpBar = document.getElementById('user-xp-bar');
+      let xpText = document.getElementById('user-xp-text');
+      if(xpBar) xpBar.style.width = pct + '%';
+      if(xpText) xpText.innerText = curXP + ' / ' + reqXP + ' XP';
 
       document.getElementById('profile-avatar-display').innerText = userProfile.avatar;
       document.getElementById('profile-name-input').value = userProfile.name;
@@ -547,6 +873,69 @@
       let total = userProfile.wins + userProfile.losses;
       let wr = total > 0 ? ((userProfile.wins / total) * 100).toFixed(1) : '0.0';
       document.getElementById('modal-winrate').innerText = '%' + wr;
+
+      let loginBtn = document.getElementById('main-login-btn');
+      if (loginBtn) {
+        loginBtn.style.display = userProfile.isGuest ? 'flex' : 'none';
+      }
+      
+      let logoutBtn = document.getElementById('settings-logout-btn');
+      if (logoutBtn) {
+        logoutBtn.style.display = userProfile.isGuest ? 'none' : 'flex';
+      }
+    }
+
+    function logoutUser() {
+      if (confirm('Hesabınızdan çıkış yapmak istediğinize emin misiniz? (Tüm ilerlemeniz Google hesabınızda kalır)')) {
+        userProfile = {
+          name: 'Misafir_' + Math.floor(1000 + Math.random() * 9000),
+          avatar: '🧔🏻‍♂️',
+          chips: 1000,
+          level: 1,
+          wins: 0,
+          losses: 0,
+          isGuest: true
+        };
+        localStorage.setItem('tavla_user_profile', JSON.stringify(userProfile));
+        updateWebProfileUI();
+        closeModal('settings-modal');
+        alert('Çıkış yapıldı. Yeni bir misafir profili oluşturuldu.');
+      }
+    }
+
+    function handleCredentialResponse(response) {
+      try {
+        // Decode JWT token payload (Base64 URL Safe -> UTF-8 String)
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        
+        const payload = JSON.parse(jsonPayload);
+        userProfile.name = payload.name || payload.given_name || 'Google Kullanıcısı';
+        userProfile.isGuest = false;
+        userProfile.avatar = '◆'; 
+        
+        localStorage.setItem('tavla_user_profile', JSON.stringify(userProfile));
+        updateWebProfileUI();
+        closeModal('login-modal');
+        alert('Hoş geldin, ' + userProfile.name + '!');
+      } catch (err) {
+        console.error("Login parse error", err);
+      }
+    }
+
+    function mockGoogleLogin() {
+      userProfile.name = 'Emin_' + Math.floor(Math.random()*100);
+      userProfile.isGuest = false;
+      userProfile.avatar = '◆';
+      userProfile.chips += 500; // Bonus for logging in
+      
+      localStorage.setItem('tavla_user_profile', JSON.stringify(userProfile));
+      updateWebProfileUI();
+      closeModal('login-modal');
+      alert('Başarılı! Hesabınız bağlandı. (Hoşgeldin Bonusu: 500 Jeton eklendi!)');
     }
 
     function changeBoardTheme(val) {
@@ -634,13 +1023,12 @@
 
       if (mode === 'ai') {
         isVsAI = true;
-        showToast('🤖 Yapay Zekaya Karşı Maç Başladı!', 2000);
       } else {
         isVsAI = false;
-        showToast('👥 İki Kişilik Maç Başladı!', 2000);
       }
 
       initGame();
+      ObjectiveService.showPreMatchObjectives();
     }
 
 
@@ -664,11 +1052,13 @@
       state.winner = null;
       state.dice = []; state.remainingDice = [];
       state.selectedPoint = null; state.validMoves = [];
+      state.matchProcessed = false;
       dragItem = null;
       isRolling = false;
       dicePhysics = [];
       activeMoveAnim = null;
       updateUI();
+      ObjectiveService.initMatch();
       draw();
     }
 
@@ -741,7 +1131,8 @@
       let w = container ? container.clientWidth : canvas.clientWidth;
       let h = container ? container.clientHeight : canvas.clientHeight;
       let frameBorder = 14;
-      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+      let rightTrayW = 54;
+      let barW = 48, halfW = (w - barW - rightTrayW) / 2, ptW = (halfW - frameBorder) / 6;
 
       if (index === 24) return { x: halfW + barW / 2, y: 45 };
       if (index === -1) return { x: halfW + barW / 2, y: h - 45 };
@@ -764,7 +1155,8 @@
       let container = canvas.parentElement;
       let w = container ? container.clientWidth : canvas.clientWidth;
       let h = container ? container.clientHeight : canvas.clientHeight;
-      let barLeft = (w - 48) / 2;
+      let rightTrayW = 54;
+      let barLeft = (w - 48 - rightTrayW) / 2;
       let barRight = barLeft + 48;
       let barCenter = barLeft + 24;
 
@@ -1423,15 +1815,16 @@
       let w = container ? container.clientWidth : canvas.clientWidth;
       let h = container ? container.clientHeight : canvas.clientHeight;
       let frameBorder = 14;
-      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+      let rightTrayW = 54;
+      let barW = 48, halfW = (w - barW - rightTrayW) / 2, ptW = (halfW - frameBorder) / 6;
 
       // BAR indices
       if (idx === 24 && state.turn === 'white') return { x: halfW + barW / 2, y: 45 };
       if (idx === -1 && state.turn === 'black') return { x: halfW + barW / 2, y: h - 45 };
 
-      // Bear-Off targets
-      if (idx === -1 && state.turn === 'white') return { x: w - 10, y: h * 0.3 };
-      if (idx === 24 && state.turn === 'black') return { x: w - 10, y: h * 0.7 };
+      // Bear-Off targets (Trays)
+      if (idx === -1 && state.turn === 'white') return { x: w - rightTrayW / 2, y: h - 45 }; // White to bottom tray
+      if (idx === 24 && state.turn === 'black') return { x: w - rightTrayW / 2, y: 45 }; // Black to top tray
 
       let isTop = idx >= 12;
       let left = frameBorder;
@@ -1537,11 +1930,46 @@
         state.dice = [];
         state.remainingDice = [];
         state.validMoves = [];
+        
+        let xpResult = null;
+        let objRewards = null;
+        if (!state.matchProcessed) {
+            state.matchProcessed = true;
+            let isWin = (winnerName === 'Beyaz');
+            
+            objRewards = ObjectiveService.getMatchRewards();
+            let baseXP = isWin ? ProgressionService.CONFIG.WIN_XP : ProgressionService.CONFIG.LOSS_XP;
+            let totalEarned = baseXP + objRewards.totalObjXP;
+            
+            xpResult = ProgressionService.addXP(totalEarned);
+        }
+
         updateUI();
         draw();
         SoundFX.playGameWin();
         setTimeout(() => {
-          showToast(`🏆 TEBRİKLER! ${winnerName.toUpperCase()} OYUNCU MAÇI KAZANDI! 🎉`, 5000);
+          let msg = `🏆 TEBRİKLER! ${winnerName.toUpperCase()} OYUNCU MAÇI KAZANDI! 🎉\n\n`;
+          if (xpResult) {
+             let isWin = (winnerName === 'Beyaz');
+             let baseStr = isWin ? 'GALİBİYET' : 'MAĞLUBİYET';
+             let baseXP = isWin ? ProgressionService.CONFIG.WIN_XP : ProgressionService.CONFIG.LOSS_XP;
+             msg += `${baseStr}: +${baseXP} XP\n\nHEDEFLER:\n`;
+             
+             if (objRewards) {
+                 for (let obj of objRewards.summary) {
+                     let icon = obj.completed ? '✓' : '✕';
+                     msg += `${icon} ${obj.name}: +${obj.xp} XP\n`;
+                 }
+             }
+             
+             msg += `\n⭐ TOPLAM: +${xpResult.gained} XP KAZANDINIZ!`;
+             
+             if (xpResult.leveledUp) {
+                 msg += `\n\n🌟 SEVİYE ATLADINIZ! YENİ SEVİYE: ${xpResult.newLevel}`;
+                 SoundFX.playGameWin(); // Extra sound for level up
+             }
+          }
+          showToast(msg, 7000);
         }, 150);
         return true;
       }
@@ -1558,8 +1986,12 @@
 
       if (m.isOff) {
         SoundFX.playBearOff();
-        if (state.turn === 'white') state.whiteOff++;
-        else state.blackOff++;
+        if (state.turn === 'white') {
+          state.whiteOff++;
+          ObjectiveService.processEvent('bearOff', 'white');
+        } else {
+          state.blackOff++;
+        }
         if (checkWinCondition()) return;
       } else {
         let targetPt = state.points[m.to];
@@ -1568,9 +2000,13 @@
           SoundFX.playCheckerHit();
           if (opp === 'white') state.whiteBar++; else state.blackBar++;
           targetPt.count = 1; targetPt.owner = state.turn;
+          ObjectiveService.processEvent('hit', state.turn);
         } else {
           SoundFX.playCheckerMove();
           targetPt.count++; targetPt.owner = state.turn;
+          if (targetPt.count === 2) {
+            ObjectiveService.processEvent('makePoint', state.turn);
+          }
         }
       }
 
@@ -1600,14 +2036,15 @@
       if (!w || !h) return null;
 
       let frameBorder = 14;
-      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+      let rightTrayW = 54;
+      let barW = 48, halfW = (w - barW - rightTrayW) / 2, ptW = (halfW - frameBorder) / 6;
 
       if (x > halfW && x < halfW + barW) {
         return y < h / 2 ? 24 : -1;
       }
 
-      // Detect Bear-Off Zone (Right outer frame rim)
-      if (x >= w - frameBorder - 10 && canBearOff(state.turn)) {
+      // Detect Bear-Off Zone (Right Tray Area)
+      if (x >= w - rightTrayW - frameBorder && canBearOff(state.turn)) {
         return state.turn === 'white' ? -1 : 24;
       }
 
@@ -1615,7 +2052,7 @@
       let idx = null;
 
       if (!isTop) {
-        if (x >= halfW + barW && x < w - frameBorder) {
+        if (x >= halfW + barW && x < w - rightTrayW) {
           let col = Math.floor((x - (halfW + barW)) / ptW);
           idx = 5 - col;
         } else if (x >= frameBorder && x < halfW) {
@@ -1626,7 +2063,7 @@
         if (x >= frameBorder && x < halfW) {
           let col = Math.floor((x - frameBorder) / ptW);
           idx = 12 + col;
-        } else if (x >= halfW + barW && x < w - frameBorder) {
+        } else if (x >= halfW + barW && x < w - rightTrayW) {
           let col = Math.floor((x - (halfW + barW)) / ptW);
           idx = 18 + col;
         }
@@ -1649,7 +2086,8 @@
       ctx.scale(dpr, dpr);
 
       let frameBorder = 14;
-      let barW = 48, halfW = (w - barW) / 2, ptW = (halfW - frameBorder) / 6;
+      let rightTrayW = 54;
+      let barW = 48, halfW = (w - barW - rightTrayW) / 2, ptW = (halfW - frameBorder) / 6;
       let triH = Math.min(h * 0.42, (halfW - frameBorder) * 1.8);
 
       let theme = boardThemes[currentBoardTheme] || boardThemes.walnut;
@@ -1657,18 +2095,65 @@
       // 1. Outer Embossed Mahogany Frame
       ctx.fillStyle = theme.frame;
       ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = theme.accent; ctx.lineWidth = 3;
-      ctx.strokeRect(2, 2, w - 4, h - 4);
+      ctx.strokeStyle = '#0F0804'; ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, w - 2, h - 2);
 
       // 2. Recessed Inner Floor Surface
-      ctx.fillStyle = theme.bg;
-      ctx.fillRect(frameBorder, frameBorder, w - (frameBorder * 2), h - (frameBorder * 2));
+      let floorGrd = ctx.createRadialGradient((w-rightTrayW)/2, h/2, h*0.2, (w-rightTrayW)/2, h/2, w);
+      floorGrd.addColorStop(0, theme.bg);
+      floorGrd.addColorStop(1, '#0B0805');
+      ctx.fillStyle = floorGrd;
+      ctx.fillRect(frameBorder, frameBorder, w - frameBorder - rightTrayW, h - (frameBorder * 2));
 
-      // Inner Shadows for Recessed Floor
-      let innerGrd = ctx.createLinearGradient(0, frameBorder, 0, frameBorder + 20);
-      innerGrd.addColorStop(0, 'rgba(0,0,0,0.85)'); innerGrd.addColorStop(1, 'transparent');
-      ctx.fillStyle = innerGrd;
-      ctx.fillRect(frameBorder, frameBorder, w - frameBorder * 2, 20);
+      // Inner Shadows for Recessed Floor (Ambient Occlusion)
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(frameBorder - 1.5, frameBorder - 1.5, w - frameBorder - rightTrayW + 3, h - frameBorder * 2 + 3);
+
+      // 2.5. Bearing Off Trays (Right Side)
+      let trayLeft = w - rightTrayW;
+      let trayTop = frameBorder;
+      let trayH = h - frameBorder * 2;
+      
+      // Draw wooden separator between board and tray
+      ctx.fillStyle = theme.frame;
+      ctx.fillRect(trayLeft - 4, 0, 4, h);
+      ctx.strokeStyle = '#0F0804'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(trayLeft - 4, 0); ctx.lineTo(trayLeft - 4, h); ctx.stroke();
+      
+      // Draw Tray backgrounds
+      ctx.fillStyle = '#1A0E08'; // Dark deep wood
+      ctx.fillRect(trayLeft, trayTop, rightTrayW - frameBorder, trayH);
+      
+      // Inner shadow for tray depth
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(trayLeft + 1.5, trayTop + 1.5, rightTrayW - frameBorder - 3, trayH - 3);
+
+      // Split into top (Black) and bottom (White)
+      ctx.fillStyle = '#0F0804'; // Divider
+      ctx.fillRect(trayLeft, h/2 - 2, rightTrayW - frameBorder, 4);
+
+      // Draw Collected Checkers in Trays
+      let trayCx = trayLeft + (rightTrayW - frameBorder) / 2;
+      let trayCheckerR = Math.min(ptW * 0.44, 17);
+      let stackSpacing = Math.min(trayCheckerR * 2.2, (trayH / 2 - 20) / 15);
+
+      // White collected (Bottom Tray)
+      let wCount = state.whiteOff;
+      if (dragItem && dragItem.from === -1 && state.turn === 'white') wCount--;
+      for (let i = 0; i < wCount; i++) {
+        let cy = h - trayTop - trayCheckerR - 6 - i * stackSpacing;
+        draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'white');
+      }
+
+      // Black collected (Top Tray)
+      let bCount = state.blackOff;
+      if (dragItem && dragItem.from === 24 && state.turn === 'black') bCount--;
+      for (let i = 0; i < bCount; i++) {
+        let cy = trayTop + trayCheckerR + 6 + i * stackSpacing;
+        draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'black');
+      }
 
       // 3. Draw 24 Points with Exact Separation at Center Bar
       for (let i = 0; i < 24; i++) {
@@ -1691,15 +2176,15 @@
         ctx.closePath();
 
         let ptGrd = ctx.createLinearGradient(0, isTop ? frameBorder : h - frameBorder, 0, isTop ? frameBorder + triH : h - frameBorder - triH);
-        if (isSel) { ptGrd.addColorStop(0, '#66BB6A'); ptGrd.addColorStop(1, '#2E7D32'); }
-        else if (isTarget) { ptGrd.addColorStop(0, '#00E676'); ptGrd.addColorStop(1, '#00897B'); }
+        if (isSel) { ptGrd.addColorStop(0, '#5E4322'); ptGrd.addColorStop(1, '#3E2A12'); }
+        else if (isTarget) { ptGrd.addColorStop(0, '#3A4232'); ptGrd.addColorStop(1, '#222A1A'); }
         else if (isDark) { ptGrd.addColorStop(0, theme.dark); ptGrd.addColorStop(1, theme.dark); }
-        else { ptGrd.addColorStop(0, theme.light); ptGrd.addColorStop(1, theme.light); }
+        else { ptGrd.addColorStop(0, theme.light); ptGrd.addColorStop(1, '#C7B79E'); }
 
         ctx.fillStyle = ptGrd;
         ctx.fill();
-        ctx.strokeStyle = isSel ? '#FFD700' : isTarget ? '#00E676' : (isDark ? '#4A100B' : '#806E48');
-        ctx.lineWidth = isSel || isTarget ? 2.5 : 1.2;
+        ctx.strokeStyle = isSel ? '#F2EBDF' : isTarget ? '#9CCB86' : (isDark ? 'rgba(0,0,0,0.4)' : 'rgba(100,60,30,0.1)');
+        ctx.lineWidth = isSel || isTarget ? 1.5 : 1.0;
         ctx.stroke();
 
         // Checkers Stacking with 2.5D Rim
@@ -1724,35 +2209,31 @@
       let barH = h - (frameBorder * 2) + 4;
 
       // Drop Shadows onto left & right floor halves
-      let sL = ctx.createLinearGradient(barLeft - 14, 0, barLeft, 0);
-      sL.addColorStop(0, 'transparent'); sL.addColorStop(1, 'rgba(0,0,0,0.8)');
-      ctx.fillStyle = sL; ctx.fillRect(barLeft - 14, frameBorder, 14, h - frameBorder * 2);
+      let sL = ctx.createLinearGradient(barLeft - 10, 0, barLeft, 0);
+      sL.addColorStop(0, 'transparent'); sL.addColorStop(1, 'rgba(0,0,0,0.6)');
+      ctx.fillStyle = sL; ctx.fillRect(barLeft - 10, frameBorder, 10, h - frameBorder * 2);
 
-      let sR = ctx.createLinearGradient(barLeft + barW, 0, barLeft + barW + 14, 0);
-      sR.addColorStop(0, 'rgba(0,0,0,0.8)'); sR.addColorStop(1, 'transparent');
-      ctx.fillStyle = sR; ctx.fillRect(barLeft + barW, frameBorder, 14, h - frameBorder * 2);
+      let sR = ctx.createLinearGradient(barLeft + barW, 0, barLeft + barW + 10, 0);
+      sR.addColorStop(0, 'rgba(0,0,0,0.6)'); sR.addColorStop(1, 'transparent');
+      ctx.fillStyle = sR; ctx.fillRect(barLeft + barW, frameBorder, 10, h - frameBorder * 2);
 
-      // Raised Beam Top Surface
+      // Raised Beam Top Surface (natural dark walnut)
       let beamGrd = ctx.createLinearGradient(barLeft, 0, barLeft + barW, 0);
-      beamGrd.addColorStop(0.0, '#6E3E20');
-      beamGrd.addColorStop(0.5, '#4E2A14');
-      beamGrd.addColorStop(1.0, '#3B1E0D');
+      beamGrd.addColorStop(0.0, '#3A2113');
+      beamGrd.addColorStop(0.5, '#2A170C');
+      beamGrd.addColorStop(1.0, '#1F1008');
       ctx.fillStyle = beamGrd;
       ctx.fillRect(barLeft, barTop, barW, barH);
 
-      // Bevel Highlights
-      ctx.strokeStyle = '#9E5C32'; ctx.lineWidth = 2;
+      // Bevel Highlights (subtle)
+      ctx.strokeStyle = '#4A2E1B'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(barLeft, barTop); ctx.lineTo(barLeft, barTop + barH); ctx.stroke();
-      ctx.strokeStyle = '#1F0E05';
+      ctx.strokeStyle = '#0F0804';
       ctx.beginPath(); ctx.moveTo(barLeft + barW, barTop); ctx.lineTo(barLeft + barW, barTop + barH); ctx.stroke();
 
-      // Brass Hinges
-      drawBrassHinge(barLeft + barW / 2, h / 3.8, barW - 10);
-      drawBrassHinge(barLeft + barW / 2, h - h / 3.8, barW - 10);
-
-      // BAR Label Engraving
-      ctx.fillStyle = '#D4AF37'; ctx.font = '900 11px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('BAR', barLeft + barW / 2, h / 2 + 4);
+      // Brass Hinges (subtle)
+      drawBrassHinge(barLeft + barW / 2, h / 4, barW - 16);
+      drawBrassHinge(barLeft + barW / 2, h - h / 4, barW - 16);
 
       // Draw BAR Checkers (Resting ON TOP of Raised 3D Center Beam)
       let visWhiteBar = (dragItem && dragItem.from === 24) ? state.whiteBar - 1 : state.whiteBar;
@@ -1848,64 +2329,82 @@
       if (!r || r <= 0 || isNaN(r)) return;
       let isWhite = owner === 'white';
 
-      // 1. 3D Contact Shadow
       ctx.save();
+      
+      // 1. Cast Shadow (directional)
       ctx.beginPath();
-      ctx.ellipse(x + 2, y + r * 0.4, r * 0.95, r * 0.45, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.ellipse(x + 2, y + r * 0.4, r * 0.95, r * 0.85, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(10, 5, 2, 0.65)';
       ctx.fill();
-      ctx.restore();
+      
+      // Ambient occlusion directly beneath
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 0.1, r * 0.98, r * 0.98, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fill();
 
-      // 2. 3D Side Thickness Wall Extrusion
+      // 2. 3D Side Thickness (Extrusion)
       ctx.beginPath();
-      ctx.arc(x, y + 3, r, 0, Math.PI * 2);
-      ctx.fillStyle = isWhite ? '#9E9585' : '#150D07';
+      ctx.arc(x, y + 4.5, r, 0, Math.PI * 2);
+      ctx.fillStyle = isWhite ? '#A89E8D' : '#140C07';
       ctx.fill();
-      ctx.strokeStyle = isWhite ? '#7A7060' : '#0A0503';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 3. 3D Cylinder Top Disc Surface
+      // 3. Top Disc Surface (Radial gradient for material curve)
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
-      let discGrd = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+      let discGrd = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.05, x, y, r);
       if (isWhite) {
-        discGrd.addColorStop(0, '#FFFFFF');
-        discGrd.addColorStop(0.6, '#EBE5D8');
-        discGrd.addColorStop(1.0, '#C7BDA9');
+        discGrd.addColorStop(0, '#FFFBF0'); // Warm ivory highlight
+        discGrd.addColorStop(0.5, '#E5D8C0');
+        discGrd.addColorStop(1.0, '#C2B196');
       } else {
-        discGrd.addColorStop(0, '#3A2417');
-        discGrd.addColorStop(0.6, '#22130A');
-        discGrd.addColorStop(1.0, '#0F0703');
+        discGrd.addColorStop(0, '#362215'); // Espresso highlight
+        discGrd.addColorStop(0.6, '#1C1008');
+        discGrd.addColorStop(1.0, '#0F0804');
       }
       ctx.fillStyle = discGrd;
       ctx.fill();
 
-      ctx.strokeStyle = isWhite ? '#D4CBB8' : '#4A3222';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Concentric Specular Highlight Ring
-      ctx.beginPath();
-      ctx.arc(x, y, r * 0.52, 0, Math.PI * 2);
-      ctx.strokeStyle = isWhite ? 'rgba(166, 154, 130, 0.7)' : 'rgba(212, 175, 55, 0.4)';
+      // Outer rim edge
+      ctx.strokeStyle = isWhite ? '#F2EBDF' : '#331D11';
       ctx.lineWidth = 1.2;
       ctx.stroke();
+
+      // 4. Inner concave groove (typical backgammon checker design)
+      ctx.beginPath();
+      ctx.arc(x, y, r * 0.65, 0, Math.PI * 2);
+      let innerGrd = ctx.createLinearGradient(x, y - r, x, y + r);
+      if (isWhite) {
+        innerGrd.addColorStop(0, '#B3A186');
+        innerGrd.addColorStop(1, '#FFFDF7');
+      } else {
+        innerGrd.addColorStop(0, '#050302');
+        innerGrd.addColorStop(1, '#331D11');
+      }
+      ctx.strokeStyle = innerGrd;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      
+      ctx.restore();
     }
 
     function drawBrassHinge(cx, cy, w) {
       ctx.save();
       let hGrd = ctx.createLinearGradient(cx - w/2, cy, cx + w/2, cy);
-      hGrd.addColorStop(0, '#FFF3CD'); hGrd.addColorStop(0.4, '#D4AF37');
-      hGrd.addColorStop(0.8, '#8B6B1B'); hGrd.addColorStop(1.0, '#D4AF37');
+      hGrd.addColorStop(0, '#A68A56'); hGrd.addColorStop(0.4, '#735F3A');
+      hGrd.addColorStop(0.8, '#4A3C22'); hGrd.addColorStop(1.0, '#735F3A');
       ctx.fillStyle = hGrd;
-      ctx.fillRect(cx - w/2, cy - 5, w, 10);
-      ctx.strokeStyle = '#4A380D'; ctx.lineWidth = 1;
-      ctx.strokeRect(cx - w/2, cy - 5, w, 10);
+      ctx.fillRect(cx - w/2, cy - 4, w, 8);
+      ctx.strokeStyle = '#261C0E'; ctx.lineWidth = 1;
+      ctx.strokeRect(cx - w/2, cy - 4, w, 8);
 
-      ctx.fillStyle = '#3B2A08';
-      ctx.beginPath(); ctx.arc(cx - w/3, cy, 1.8, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + w/3, cy, 1.8, 0, Math.PI*2); ctx.fill();
+      // Screws
+      ctx.fillStyle = '#1A1208';
+      ctx.beginPath(); ctx.arc(cx - w/3, cy, 1.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + w/3, cy, 1.2, 0, Math.PI*2); ctx.fill();
       ctx.restore();
     }
 
@@ -1945,11 +2444,17 @@
       document.getElementById('black-off-count').innerText = state.blackOff;
       document.getElementById('roll-btn').disabled = state.dice.length > 0 || isRolling || state.winner != null || !isHumanTurn;
       if (state.winner) {
-        document.getElementById('status-msg').innerText = `🏆 ${state.winner.toUpperCase()} MAÇI KAZANDI!`;
+        document.getElementById('status-msg').innerText = `MAÇ BİTTİ - ${state.winner.toUpperCase()} KAZANDI`;
       } else if (!isHumanTurn) {
-        document.getElementById('status-msg').innerText = '🤖 Yapay Zeka Düşünüyor...';
+        document.getElementById('status-msg').innerText = 'RAKİP BEKLENİYOR...';
       } else {
-        document.getElementById('status-msg').innerText = state.dice.length > 0 ? 'Hamlenizi Yapın!' : 'Zar Atın!';
+        if (state.dice.length > 0) {
+          let d1 = state.dice[0];
+          let d2 = state.dice[1] !== undefined ? state.dice[1] : state.dice[0];
+          document.getElementById('status-msg').innerText = `ZAR [ ${d1} - ${d2} ]`;
+        } else {
+          document.getElementById('status-msg').innerText = 'ZAR BEKLENİYOR';
+        }
       }
     }
 
@@ -1958,5 +2463,6 @@
     window.addEventListener('load', () => { draw(); });
     initGame();
   </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
