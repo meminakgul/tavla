@@ -342,9 +342,148 @@
       padding: 24px;
       width: 90%;
       max-width: 440px;
+      background: #E5DAC8;
       z-index: 1100;
       box-shadow: 0 10px 40px rgba(0,0,0,0.9);
       color: #E5DAC8;
+    }
+    
+    /* Mode Selection UI */
+    .mode-card {
+      background: #1C100B;
+      border: 1px solid rgba(184,153,89,0.2);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mode-card:hover {
+      background: #24150E;
+    }
+    .mode-card.selected {
+      border: 1px solid #D4AF37;
+      background: rgba(212, 175, 55, 0.1);
+      box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.05);
+    }
+    .mode-title {
+      color: #E5DAC8;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .mode-desc {
+      color: #A68045;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* Combo UI Feedback */
+    .combo-feedback {
+      position: absolute;
+      top: 130px;
+      left: 20px;
+      background: rgba(15, 8, 4, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 6px;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+      transition: opacity 0.25s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .combo-feedback.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .combo-feedback.hide {
+      opacity: 0;
+      transform: translateY(-15px) scale(0.95);
+      transition: opacity 0.4s ease-in, transform 0.4s ease-in;
+    }
+    .combo-title {
+      color: #E5DAC8;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    .combo-xp {
+      color: #B89959;
+      font-weight: 500;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    
+    .combo-x5 {
+      border-color: rgba(212, 175, 55, 0.6);
+      background: rgba(20, 10, 5, 0.9);
+    }
+    .combo-x7 {
+      border-color: rgba(212, 175, 55, 0.8);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+    }
+    
+    /* Reveal Feedback UI */
+    #reveal-feedback {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #1C100B;
+      border: 1px solid rgba(184,153,89,0.4);
+      border-radius: 6px;
+      padding: 10px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    }
+    #reveal-feedback.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .reveal-title {
+      color: #D4AF37;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+    .reveal-subtitle {
+      color: #E5DAC8;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .combo-x7 .combo-title {
+      color: #D4AF37;
+      font-weight: 700;
+    }
+    .combo-x7 .combo-xp {
+      color: #E5DAC8;
+    }
+    .combo-x10 {
+      border-color: #D4AF37;
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+      background: rgba(26, 14, 8, 0.95);
+    }
+    .combo-x10 .combo-title {
+      color: #FFF;
+      font-weight: 700;
+      font-size: 15px;
+      text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+    }
+    .combo-x10 .combo-xp {
+      color: #D4AF37;
     }
   </style>
 </head>
@@ -388,9 +527,9 @@
         <svg viewBox="0 0 24 24"><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2ZM12,19.2A7.2,7.2,0,0,1,6.54,16.5c.06-1.82,3.64-2.82,5.46-2.82s5.4,1,5.46,2.82A7.2,7.2,0,0,1,12,19.2Zm6.87-4.21A8.91,8.91,0,0,0,12,12.3c-2.48,0-7.46,1.24-7.87,3.69v-.29A8.34,8.34,0,1,1,12,20.34,8.31,8.31,0,0,1,3.66,12a8.34,8.34,0,0,1,15.21,3.01Z"/><path d="M12,11.1A3.6,3.6,0,1,0,8.4,7.5,3.6,3.6,0,0,0,12,11.1Zm0-5.7A2.1,2.1,0,1,1,9.9,7.5,2.1,2.1,0,0,1,12,5.4Z"/></svg>
         HESABINI BAĞLA / GİRİŞ YAP
       </button>
-      <button class="menu-btn menu-btn-primary" onclick="startMode('ai')">
+      <button class="menu-btn menu-btn-primary" onclick="openModal('mode-modal')">
         <svg viewBox="0 0 24 24"><path d="M19,10H18V7a2,2,0,0,0-2-2H8A2,2,0,0,0,6,7v3H5a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2H6v1a2,2,0,0,0,2,2h8a2,2,0,0,0,2-2V18h1a2,2,0,0,0,2-2V12A2,2,0,0,0,19,10Zm-2,7H7V7H17ZM9,9h2v2H9Zm4,0h2v2H13Z"/></svg>
-        YAPAY ZEKAYA KARŞI (KLASİK)
+        OYNA
       </button>
       <button class="menu-btn" onclick="openOnlineModal()">
         <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -410,6 +549,26 @@
       </button>
     </div>
     <div style="position: absolute; bottom: 15px; font-size: 9px; color: rgba(229,218,200,0.2); letter-spacing: 1px;">VERSİYON 1.5 - OYUN ATÖLYESİ</div>
+  </div>
+
+  <!-- Mode Selection Modal -->
+  <div id="mode-modal" class="menu-modal" style="width: 320px;">
+    <h3 style="color:#B89959; text-align:center; margin-bottom:20px; font-weight: 300; letter-spacing: 2px;">OYUN MODU SEÇ</h3>
+    
+    <div id="mode-classic" class="mode-card selected" onclick="selectMode('ai')">
+       <div class="mode-title">KLASİK TAVLA</div>
+       <div class="mode-desc">Geleneksel tavla deneyimi.<br>Tüm taşlar oyun boyunca görünür.</div>
+    </div>
+    
+    <div id="mode-dark" class="mode-card" onclick="selectMode('dark')">
+       <div class="mode-title">KARANLIK TAVLA</div>
+       <div class="mode-desc">Rakibinin taşlarını göremezsin.<br>Sadece kapılarını takip edebilirsin.<br>Her 3 tam turda tüm taşlar kısa süreliğine görünür.</div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="menu-btn" style="flex: 1; background: transparent; border: 1px solid rgba(184,153,89,0.3); color: #E5DAC8;" onclick="closeModal('mode-modal')">GERİ</button>
+      <button class="menu-btn menu-btn-primary" style="flex: 1;" onclick="startSelectedMode()">OYUNA BAŞLA</button>
+    </div>
   </div>
 
   <!-- Profile Modal -->
@@ -562,6 +721,12 @@
   </div>
 
   <div class="rotate-hint" style="background: #B89959; color: #120A07; border-radius: 4px;">En iyi deneyim için telefonunuzu YATAY çevirin!</div>
+  
+  <div id="reveal-feedback">
+    <div class="reveal-title">REVEAL</div>
+    <div class="reveal-subtitle">TAHTA 10 SANİYELİĞİNE AÇILDI</div>
+  </div>
+
   <div class="game-ui-layer">
     <!-- Top Left Corner -->
     <div class="ui-corner ui-top-left">
@@ -621,8 +786,13 @@
       whiteOff: 0, blackOff: 0,
       turn: 'white',
       dice: [], remainingDice: [],
-      selectedPoint: null, validMoves: []
+      selectedPoint: null, validMoves: [],
+      highestWhiteCombo: 0, highestBlackCombo: 0, matchComboXP: 0,
+      turnCounter: 0, isRevealActive: false
     };
+
+    let currentGameMode = 'NORMAL'; // 'NORMAL' veya 'DARK_TAVLA'
+    const DARK_TAVLA_REVEAL_DURATION = 2000;
 
     let isVsAI = true;
     let isAIBusy = false;
@@ -701,6 +871,89 @@
         return this.addXP(amount);
       }
     };
+
+    const ComboService = {
+      CONFIG: {
+        THRESHOLDS: {
+          3: 10,
+          5: 25,
+          7: 35,
+          10: 50
+        },
+        REPEAT_AFTER_10: 10
+      },
+      
+      processComboIncrease(player, currentCombo) {
+        if (player !== 'white') return; // Sadece oyuncuya XP verilir
+        
+        let reward = 0;
+        if (this.CONFIG.THRESHOLDS[currentCombo]) {
+          reward = this.CONFIG.THRESHOLDS[currentCombo];
+        } else if (currentCombo > 10) {
+          reward = this.CONFIG.REPEAT_AFTER_10;
+        }
+        
+        if (reward > 0) {
+          ProgressionService.addXP(reward);
+          state.matchComboXP += reward;
+          
+          if (typeof showComboFeedback === 'function') {
+            showComboFeedback(currentCombo, reward);
+          }
+        }
+      }
+    };
+
+    function showRevealUI() {
+      let fb = document.getElementById('reveal-feedback');
+      if (fb) {
+         fb.classList.remove('hide');
+         fb.classList.add('show');
+      }
+    }
+
+    function hideRevealUI() {
+      let fb = document.getElementById('reveal-feedback');
+      if (fb) {
+         fb.classList.remove('show');
+         fb.classList.add('hide');
+      }
+    }
+
+    let comboTimeout = null;
+    function showComboFeedback(comboValue, xpReward) {
+      let feedback = document.getElementById('combo-feedback');
+      if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.id = 'combo-feedback';
+        feedback.className = 'combo-feedback';
+        feedback.innerHTML = `<div class="combo-title" id="combo-title"></div><div class="combo-xp" id="combo-xp"></div>`;
+        document.getElementById('game-ui-layer').appendChild(feedback);
+      }
+
+      if (comboTimeout) clearTimeout(comboTimeout);
+
+      let title = document.getElementById('combo-title');
+      let xp = document.getElementById('combo-xp');
+
+      title.innerText = `COMBO ×${comboValue}`;
+      xp.innerText = `+${xpReward} XP`;
+
+      feedback.className = 'combo-feedback';
+      if (comboValue >= 10) feedback.classList.add('combo-x10');
+      else if (comboValue >= 7) feedback.classList.add('combo-x7');
+      else if (comboValue >= 5) feedback.classList.add('combo-x5');
+      else feedback.classList.add('combo-x3');
+
+      // Trigger reflow to restart CSS transition
+      void feedback.offsetWidth;
+      feedback.classList.add('show');
+
+      comboTimeout = setTimeout(() => {
+        feedback.classList.remove('show');
+        feedback.classList.add('hide');
+      }, 1400);
+    }
 
     const ObjectiveService = {
       definitions: [
@@ -1015,16 +1268,42 @@
       document.getElementById('main-menu').style.display = 'flex';
     }
 
+    let selectedGameMode = 'ai'; // Default
+
+    function selectMode(mode) {
+      selectedGameMode = mode;
+      document.getElementById('mode-classic').classList.remove('selected');
+      document.getElementById('mode-dark').classList.remove('selected');
+      
+      if (mode === 'ai') {
+        document.getElementById('mode-classic').classList.add('selected');
+      } else {
+        document.getElementById('mode-dark').classList.add('selected');
+      }
+    }
+
+    function startSelectedMode() {
+      closeModal('mode-modal');
+      startMode(selectedGameMode);
+    }
+
     function startMode(mode) {
       closeModal('online-modal');
       closeModal('settings-modal');
       closeModal('guide-modal');
+      closeModal('mode-modal');
       document.getElementById('main-menu').style.display = 'none';
 
-      if (mode === 'ai') {
+      if (mode === 'ai' || mode === 'dark') {
         isVsAI = true;
       } else {
         isVsAI = false;
+      }
+      
+      if (mode === 'dark') {
+        currentGameMode = 'DARK_TAVLA';
+      } else {
+        currentGameMode = 'NORMAL';
       }
 
       initGame();
@@ -1048,6 +1327,11 @@
 
       state.whiteBar = 0; state.blackBar = 0;
       state.whiteOff = 0; state.blackOff = 0;
+      state.whiteCombo = 0; state.blackCombo = 0;
+      state.highestWhiteCombo = 0; state.highestBlackCombo = 0;
+      state.matchComboXP = 0;
+      state.turnCounter = 0;
+      state.isRevealActive = false;
       state.turn = 'white';
       state.winner = null;
       state.dice = []; state.remainingDice = [];
@@ -1057,6 +1341,13 @@
       isRolling = false;
       dicePhysics = [];
       activeMoveAnim = null;
+      
+      let fb = document.getElementById('combo-feedback');
+      if (fb) {
+         fb.classList.remove('show');
+         fb.classList.add('hide');
+      }
+      
       updateUI();
       ObjectiveService.initMatch();
       draw();
@@ -1392,7 +1683,7 @@
 
       valid.forEach(m => {
         let temp = simulateSingleMoveState(state, m);
-        let score = evaluateBoardForAI(temp);
+        let score = evaluateBoardForAI(temp, state);
         if (score > maxScore) {
           maxScore = score;
           bestMove = m;
@@ -1401,13 +1692,19 @@
       return bestMove;
     }
 
-    function evaluateBoardForAI(st) {
+    function evaluateBoardForAI(st, origState = null) {
       let score = 0;
       if (st.blackOff === 15) return 100000;
       if (st.whiteOff === 15) return -100000;
+      
+      let effectiveWhiteBar = st.whiteBar;
+      if (origState && currentGameMode === 'DARK_TAVLA' && !origState.isRevealActive) {
+         // Blind AI: AI ignores increases in whiteBar, meaning it doesn't intentionally hunt hits.
+         effectiveWhiteBar = origState.whiteBar;
+      }
 
       score += st.blackOff * 200 - st.whiteOff * 200;
-      score -= st.blackBar * 200 - st.whiteBar * 200;
+      score -= st.blackBar * 200 - effectiveWhiteBar * 200;
 
       let consecutiveBlackPoints = 0;
 
@@ -1444,7 +1741,14 @@
             }
           }
         } else {
-          if (pt.count === 1) score += 30; // Rakibin açığını yakalamak (hit) için teşvik
+          // White pieces (opponent)
+          let ignoreWhite = false;
+          if (origState && currentGameMode === 'DARK_TAVLA' && !origState.isRevealActive) {
+             if (pt.count < 2) ignoreWhite = true; // AI doesn't see single hidden checkers
+          }
+          if (!ignoreWhite) {
+            if (pt.count === 1) score += 30; // Rakibin açığını yakalamak (hit) için teşvik
+          }
         }
       }
       return score;
@@ -1515,8 +1819,28 @@
         if (targetPt.owner === opp && targetPt.count === 1) {
           if (opp === 'white') temp.whiteBar++; else temp.blackBar++;
           targetPt.count = 1; targetPt.owner = temp.turn;
+          
+          // Combo System: Hit opponent
+          if (temp.turn === 'white') {
+            temp.whiteCombo++;
+            if (temp.whiteCombo > temp.highestWhiteCombo) temp.highestWhiteCombo = temp.whiteCombo;
+          } else {
+            temp.blackCombo++;
+            if (temp.blackCombo > temp.highestBlackCombo) temp.highestBlackCombo = temp.blackCombo;
+          }
+          if (opp === 'white') temp.whiteCombo = 0; else temp.blackCombo = 0;
         } else {
           targetPt.count++; targetPt.owner = temp.turn;
+          if (targetPt.count === 2) {
+            // Combo System: Make point
+            if (temp.turn === 'white') {
+              temp.whiteCombo++;
+              if (temp.whiteCombo > temp.highestWhiteCombo) temp.highestWhiteCombo = temp.whiteCombo;
+            } else {
+              temp.blackCombo++;
+              if (temp.blackCombo > temp.highestBlackCombo) temp.highestBlackCombo = temp.blackCombo;
+            }
+          }
         }
       }
 
@@ -1929,6 +2253,8 @@
         state.winner = winnerName;
         state.dice = [];
         state.remainingDice = [];
+        state.whiteCombo = 0;
+        state.blackCombo = 0;
         state.validMoves = [];
         
         let xpResult = null;
@@ -1962,7 +2288,18 @@
                  }
              }
              
-             msg += `\n⭐ TOPLAM: +${xpResult.gained} XP KAZANDINIZ!`;
+             if (state.matchComboXP > 0 && isWin) {
+                 msg += `🔥 COMBO BAŞARISI: +${state.matchComboXP} XP\n`;
+                 if (state.highestWhiteCombo > 0) {
+                     msg += `   (En Yüksek Seri: x${state.highestWhiteCombo})\n`;
+                 }
+             }
+             
+             // Gained from addXP includes base + objectives + anything added during match
+             // But wait, xpResult.gained is only what was passed to addXP at the end.
+             // We want to show TOTAL gained this match including matchComboXP.
+             let totalMatchGained = xpResult.gained + (isWin ? state.matchComboXP : 0);
+             msg += `\n⭐ TOPLAM: +${totalMatchGained} XP KAZANDINIZ!`;
              
              if (xpResult.leveledUp) {
                  msg += `\n\n🌟 SEVİYE ATLADINIZ! YENİ SEVİYE: ${xpResult.newLevel}`;
@@ -2001,11 +2338,34 @@
           if (opp === 'white') state.whiteBar++; else state.blackBar++;
           targetPt.count = 1; targetPt.owner = state.turn;
           ObjectiveService.processEvent('hit', state.turn);
+          
+          // Combo System: Hit opponent
+          if (state.turn === 'white') {
+            state.whiteCombo++;
+            if (state.whiteCombo > state.highestWhiteCombo) state.highestWhiteCombo = state.whiteCombo;
+            ComboService.processComboIncrease('white', state.whiteCombo);
+          } else {
+            state.blackCombo++;
+            if (state.blackCombo > state.highestBlackCombo) state.highestBlackCombo = state.blackCombo;
+            ComboService.processComboIncrease('black', state.blackCombo);
+          }
+          if (opp === 'white') state.whiteCombo = 0; else state.blackCombo = 0;
         } else {
           SoundFX.playCheckerMove();
           targetPt.count++; targetPt.owner = state.turn;
           if (targetPt.count === 2) {
             ObjectiveService.processEvent('makePoint', state.turn);
+            
+            // Combo System: Make point
+            if (state.turn === 'white') {
+              state.whiteCombo++;
+              if (state.whiteCombo > state.highestWhiteCombo) state.highestWhiteCombo = state.whiteCombo;
+              ComboService.processComboIncrease('white', state.whiteCombo);
+            } else {
+              state.blackCombo++;
+              if (state.blackCombo > state.highestBlackCombo) state.highestBlackCombo = state.blackCombo;
+              ComboService.processComboIncrease('black', state.blackCombo);
+            }
           }
         }
       }
@@ -2017,6 +2377,23 @@
 
       if (state.remainingDice.length === 0) {
         state.turn = state.turn === 'white' ? 'black' : 'white';
+        
+        if (currentGameMode === 'DARK_TAVLA') {
+           if (!state.isRevealActive) {
+              state.turnCounter++;
+              if (state.turnCounter >= 6) {
+                 state.isRevealActive = true;
+                 showRevealUI();
+                 setTimeout(() => {
+                    state.isRevealActive = false;
+                    state.turnCounter = 0;
+                    hideRevealUI();
+                    draw();
+                 }, 10000);
+              }
+           }
+        }
+        
         state.dice = [];
         state.remainingDice = [];
         state.validMoves = [];
@@ -2092,6 +2469,9 @@
 
       let theme = boardThemes[currentBoardTheme] || boardThemes.walnut;
 
+      let viewer = isVsAI ? 'white' : state.turn;
+      let isFogMode = (currentGameMode === 'DARK_TAVLA');
+      let forceReveal = (currentGameMode === 'DARK_TAVLA' && state.isRevealActive);
       // 1. Outer Embossed Mahogany Frame
       ctx.fillStyle = theme.frame;
       ctx.fillRect(0, 0, w, h);
@@ -2142,17 +2522,27 @@
       // White collected (Bottom Tray)
       let wCount = state.whiteOff;
       if (dragItem && dragItem.from === -1 && state.turn === 'white') wCount--;
-      for (let i = 0; i < wCount; i++) {
-        let cy = h - trayTop - trayCheckerR - 6 - i * stackSpacing;
-        draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'white');
+      let showWhiteOff = true;
+      if (isFogMode && !forceReveal && viewer !== 'white') showWhiteOff = false;
+      
+      if (showWhiteOff) {
+        for (let i = 0; i < wCount; i++) {
+          let cy = h - trayTop - trayCheckerR - 6 - i * stackSpacing;
+          draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'white');
+        }
       }
 
       // Black collected (Top Tray)
       let bCount = state.blackOff;
       if (dragItem && dragItem.from === 24 && state.turn === 'black') bCount--;
-      for (let i = 0; i < bCount; i++) {
-        let cy = trayTop + trayCheckerR + 6 + i * stackSpacing;
-        draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'black');
+      let showBlackOff = true;
+      if (isFogMode && !forceReveal && viewer !== 'black') showBlackOff = false;
+      
+      if (showBlackOff) {
+        for (let i = 0; i < bCount; i++) {
+          let cy = trayTop + trayCheckerR + 6 + i * stackSpacing;
+          draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'black');
+        }
       }
 
       // 3. Draw 24 Points with Exact Separation at Center Bar
@@ -2175,30 +2565,102 @@
         }
         ctx.closePath();
 
+        let pt = state.points[i];
+        let isOwnPoint = pt.owner === viewer && pt.count > 0;
+        
+        let isLegalDestination = false;
+        let isOpponentGateTarget = false;
+        
+        if (isFogMode && state.selectedPoint !== null && state.turn === viewer) {
+            isLegalDestination = state.validMoves.some(m => m.to === i && m.from === state.selectedPoint);
+            
+            if (!isLegalDestination) {
+                // Check if it's blocked by a gate
+                let uniqueDice = [...new Set(state.remainingDice)];
+                let p = viewer;
+                
+                uniqueDice.forEach(die => {
+                   let target = p === 'white' ? (state.selectedPoint - die) : (state.selectedPoint + die);
+                   if (target === i) {
+                       let tgtPt = state.points[i];
+                       if (tgtPt && tgtPt.owner && tgtPt.owner !== p && tgtPt.count >= 2) {
+                           isOpponentGateTarget = true;
+                       }
+                   }
+                });
+                
+                if (state.remainingDice.length >= 2) {
+                   let d1 = state.remainingDice[0];
+                   let d2 = state.remainingDice[1];
+                   let inter1 = p === 'white' ? (state.selectedPoint - d1) : (state.selectedPoint + d1);
+                   let inter2 = p === 'white' ? (state.selectedPoint - d2) : (state.selectedPoint + d2);
+                   let combTarget = p === 'white' ? (state.selectedPoint - d1 - d2) : (state.selectedPoint + d1 + d2);
+                   
+                   if (combTarget === i) {
+                       let path1Valid = isValidTargetForState(state, inter1, p);
+                       let path2Valid = isValidTargetForState(state, inter2, p);
+                       if (path1Valid || path2Valid) {
+                           let tgtPt = state.points[i];
+                           if (tgtPt && tgtPt.owner && tgtPt.owner !== p && tgtPt.count >= 2) {
+                               isOpponentGateTarget = true;
+                           }
+                       }
+                   }
+                }
+            }
+        } else {
+            isLegalDestination = state.validMoves.some(m => m.to === i && m.from === state.selectedPoint);
+        }
+
         let ptGrd = ctx.createLinearGradient(0, isTop ? frameBorder : h - frameBorder, 0, isTop ? frameBorder + triH : h - frameBorder - triH);
-        if (isSel) { ptGrd.addColorStop(0, '#5E4322'); ptGrd.addColorStop(1, '#3E2A12'); }
-        else if (isTarget) { ptGrd.addColorStop(0, '#3A4232'); ptGrd.addColorStop(1, '#222A1A'); }
-        else if (isDark) { ptGrd.addColorStop(0, theme.dark); ptGrd.addColorStop(1, theme.dark); }
-        else { ptGrd.addColorStop(0, theme.light); ptGrd.addColorStop(1, '#C7B79E'); }
+        
+        if (isSel) { 
+            ptGrd.addColorStop(0, '#5E4322'); ptGrd.addColorStop(1, '#3E2A12'); 
+        } else if (isLegalDestination && isFogMode) {
+            ptGrd.addColorStop(0, '#E5DAC8'); ptGrd.addColorStop(1, '#B89959'); // Sıcak fildişi
+        } else if (isOpponentGateTarget && isFogMode) {
+            ptGrd.addColorStop(0, '#5C1010'); ptGrd.addColorStop(1, '#3A0808'); // Koyu kırmızı / bordo
+        } else if (isLegalDestination && !isFogMode) {
+            ptGrd.addColorStop(0, '#3A4232'); ptGrd.addColorStop(1, '#222A1A'); // Normal yeşil
+        } else if (isFogMode && !isOwnPoint) {
+            ptGrd.addColorStop(0, '#100905'); ptGrd.addColorStop(1, '#050201'); // Neredeyse siyah fog
+        } else if (isDark) { 
+            ptGrd.addColorStop(0, theme.dark); ptGrd.addColorStop(1, theme.dark); 
+        } else { 
+            ptGrd.addColorStop(0, theme.light); ptGrd.addColorStop(1, '#C7B79E'); 
+        }
 
         ctx.fillStyle = ptGrd;
         ctx.fill();
-        ctx.strokeStyle = isSel ? '#F2EBDF' : isTarget ? '#9CCB86' : (isDark ? 'rgba(0,0,0,0.4)' : 'rgba(100,60,30,0.1)');
-        ctx.lineWidth = isSel || isTarget ? 1.5 : 1.0;
+        
+        if (isLegalDestination && isFogMode) ctx.strokeStyle = '#D4AF37'; 
+        else if (isOpponentGateTarget && isFogMode) ctx.strokeStyle = '#8B0000';
+        else ctx.strokeStyle = isSel ? '#F2EBDF' : isLegalDestination ? '#9CCB86' : (isFogMode && !isOwnPoint ? 'rgba(0,0,0,0.8)' : (isDark ? 'rgba(0,0,0,0.4)' : 'rgba(100,60,30,0.1)'));
+        
+        ctx.lineWidth = isSel || isLegalDestination || isOpponentGateTarget ? 1.5 : 1.0;
         ctx.stroke();
 
         // Checkers Stacking with 2.5D Rim
-        let pt = state.points[i];
         if (pt.count > 0) {
-          let count = Math.min(pt.count, 5);
-          let r = Math.min(ptW * 0.44, 17);
+          let isVisible = true;
+          
+          if (isFogMode && !forceReveal) {
+            if (pt.owner !== viewer) {
+                isVisible = false;
+            }
+          }
 
-          let renderCount = (dragItem && dragItem.from === i) ? count - 1 : count;
-
-          for (let c = 0; c < renderCount; c++) {
-            let cx = left + ptW / 2;
-            let cy = isTop ? (frameBorder + r + 2 + c * r * 1.7) : (h - frameBorder - r - 2 - c * r * 1.7);
-            draw3DCylindricalChecker(cx, cy, r, pt.owner);
+          if (isVisible) {
+            let count = Math.min(pt.count, 5);
+            let r = Math.min(ptW * 0.44, 17);
+  
+            let renderCount = (dragItem && dragItem.from === i) ? count - 1 : count;
+            
+            for (let c = 0; c < renderCount; c++) {
+              let cx = left + ptW / 2;
+              let cy = isTop ? (frameBorder + r + 2 + c * r * 1.7) : (h - frameBorder - r - 2 - c * r * 1.7);
+              draw3DCylindricalChecker(cx, cy, r, pt.owner);
+            }
           }
         }
       }
@@ -2238,8 +2700,17 @@
       // Draw BAR Checkers (Resting ON TOP of Raised 3D Center Beam)
       let visWhiteBar = (dragItem && dragItem.from === 24) ? state.whiteBar - 1 : state.whiteBar;
       let visBlackBar = (dragItem && dragItem.from === -1) ? state.blackBar - 1 : state.blackBar;
-      if (visWhiteBar > 0) draw3DCylindricalChecker(barLeft + barW / 2, 45, 17, 'white');
-      if (visBlackBar > 0) draw3DCylindricalChecker(barLeft + barW / 2, h - 45, 17, 'black');
+      
+      let showWhiteBar = true;
+      let showBlackBar = true;
+      
+      if (isFogMode && !forceReveal) {
+         if (viewer !== 'white') showWhiteBar = false;
+         if (viewer !== 'black') showBlackBar = false;
+      }
+      
+      if (visWhiteBar > 0 && showWhiteBar) draw3DCylindricalChecker(barLeft + barW / 2, 45, 17, 'white');
+      if (visBlackBar > 0 && showBlackBar) draw3DCylindricalChecker(barLeft + barW / 2, h - 45, 17, 'black');
 
       if (dragItem) {
         draw3DCylindricalChecker(dragItem.currentX, dragItem.currentY, 18, state.turn);
@@ -2247,8 +2718,12 @@
 
       // Render Active Waypoint Move Checker (Traveling Along Arc Trajectory OVER the BAR)
       if (activeMoveAnim) {
-        let pos = interpolateWaypoints(activeMoveAnim.waypoints, moveRatio);
-        draw3DCylindricalChecker(pos.x, pos.y, 18, activeMoveAnim.owner);
+        let isVisibleAnim = true;
+        if (isFogMode && !forceReveal && activeMoveAnim.owner !== viewer) isVisibleAnim = false;
+        if (isVisibleAnim) {
+           let pos = interpolateWaypoints(activeMoveAnim.waypoints, moveRatio);
+           draw3DCylindricalChecker(pos.x, pos.y, 18, activeMoveAnim.owner);
+        }
       }
 
       // ------------------------------------------------
