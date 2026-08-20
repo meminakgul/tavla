@@ -32,7 +32,10 @@ function createDefaultUserProfile(userId, name, email = '') {
       totalHits: 0,
       totalDoubles: 0,
       totalMarsa: 0,
-      highestCombo: 0
+      highestCombo: 0,
+      currentStreak: 0,
+      highestStreak: 0,
+      diceHistory: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}
     },
     unlockedAchievements: []
   };
@@ -89,13 +92,15 @@ function loadUserProfile(userId) {
         parsed.stats.totalDoubles = parsed.stats.totalDoubles || 0;
         parsed.stats.totalMarsa = parsed.stats.totalMarsa || 0;
         parsed.stats.highestCombo = parsed.stats.highestCombo || 0;
+        parsed.stats.currentStreak = parsed.stats.currentStreak || 0;
+        parsed.stats.highestStreak = Math.max(parsed.stats.highestStreak || 0, parsed.stats.currentStreak);
+        parsed.stats.diceHistory = parsed.stats.diceHistory || {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
         
         parsed.stats.matchesPlayed = Math.max(parsed.stats.matchesPlayed, (parsed.wins || 0) + (parsed.losses || 0));
         
         if (!parsed.unlockedAchievements || !Array.isArray(parsed.unlockedAchievements)) {
           parsed.unlockedAchievements = [];
         }
-        
         return parsed;
       }
     } catch(e){}
@@ -119,6 +124,10 @@ function loadUserProfile(userId) {
           legacyData.stats.totalDoubles = legacyData.stats.totalDoubles || 0;
           legacyData.stats.totalMarsa = legacyData.stats.totalMarsa || 0;
           legacyData.stats.highestCombo = legacyData.stats.highestCombo || 0;
+          legacyData.stats.currentStreak = legacyData.stats.currentStreak || 0;
+          legacyData.stats.highestStreak = Math.max(legacyData.stats.highestStreak || 0, legacyData.stats.currentStreak);
+          legacyData.stats.diceHistory = legacyData.stats.diceHistory || {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+          
           legacyData.stats.matchesPlayed = Math.max(legacyData.stats.matchesPlayed, (legacyData.wins || 0) + (legacyData.losses || 0));
 
           if (!legacyData.unlockedAchievements || !Array.isArray(legacyData.unlockedAchievements)) {
@@ -513,6 +522,20 @@ function updateWebProfileUI() {
   if (xpBar) xpBar.style.width = prog.percentage.toFixed(1) + '%';
   if (xpText) xpText.innerText = `${prog.currentXP.toLocaleString()} / ${prog.requiredXP.toLocaleString()} XP`;
 
+  // Profil Kartı güncelleme
+  setTxt('modal-level-text', 'SEVİYE ' + prog.level);
+  let cardXpBar = document.getElementById('modal-xp-bar');
+  let cardXpText = document.getElementById('modal-xp-text');
+  if (cardXpBar) cardXpBar.style.width = prog.percentage.toFixed(1) + '%';
+  if (cardXpText) cardXpText.innerText = `${prog.currentXP.toLocaleString()} / ${prog.requiredXP.toLocaleString()} XP`;
+
+  let rankStr = "ÇIRAK";
+  if (prog.level >= 5) rankStr = "OYUNCU";
+  if (prog.level >= 10) rankStr = "USTA";
+  if (prog.level >= 15) rankStr = "BÜYÜK USTA";
+  if (prog.level >= 20) rankStr = "TAVLA EFSANESİ";
+  setTxt('profile-rank-badge', rankStr);
+
   setTxt('profile-avatar-display', userProfile.avatar);
   setVal('profile-name-input', userProfile.name);
   setTxt('modal-wins', userProfile.wins);
@@ -529,6 +552,22 @@ function updateWebProfileUI() {
     setTxt('stat-marsa', userProfile.stats.totalMarsa);
     setTxt('stat-combo', userProfile.stats.highestCombo);
     setTxt('stat-moves', userProfile.stats.totalMoves);
+    
+    setTxt('stat-highest-streak', userProfile.stats.highestStreak || 0);
+    setTxt('modal-streak-count', userProfile.stats.currentStreak || 0);
+    
+    let dHistory = userProfile.stats.diceHistory || {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+    let totalDice = 0;
+    for (let i = 1; i <= 6; i++) totalDice += (dHistory[i] || 0);
+    if (totalDice === 0) totalDice = 1;
+    for (let i = 1; i <= 6; i++) {
+      let count = dHistory[i] || 0;
+      let pct = Math.round((count / totalDice) * 100);
+      let fillEl = document.getElementById(`dice-stat-all-${i}-fill`);
+      let textEl = document.getElementById(`dice-stat-all-${i}-text`);
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (textEl) textEl.innerText = count.toLocaleString();
+    }
   }
 
   let loginBtn = document.getElementById('main-login-btn');
@@ -800,7 +839,10 @@ const ShopService = {
 
       if (typeof CoinService !== 'undefined' && !CoinService.canAfford(prod.price)) {
         this.isPurchasing = false;
-        if (typeof showToast === 'function') showToast('✕ Yeterli Coin yok!', 2000);
+        let diff = prod.price - CoinService.getCoins();
+        if (typeof showToast === 'function') {
+          showToast(`✕ YETERSİZ COIN\nBu eşya için ${prod.price.toLocaleString()} Coin gerekiyor.\nEksik: ${diff.toLocaleString()} Coin.\n\nGörevleri tamamlayarak Coin kazanabilirsin.`, 4500);
+        }
         return { success: false, reason: 'INSUFFICIENT_FUNDS' };
       }
 
@@ -866,7 +908,10 @@ const ShopService = {
 
       if (typeof CoinService !== 'undefined' && !CoinService.canAfford(prod.price)) {
         this.isPurchasing = false;
-        if (typeof showToast === 'function') showToast('✕ Yeterli Coin yok!', 2000);
+        let diff = prod.price - CoinService.getCoins();
+        if (typeof showToast === 'function') {
+          showToast(`✕ YETERSİZ COIN\nBu eşya için ${prod.price.toLocaleString()} Coin gerekiyor.\nEksik: ${diff.toLocaleString()} Coin.\n\nGörevleri tamamlayarak Coin kazanabilirsin.`, 4500);
+        }
         return { success: false, reason: 'INSUFFICIENT_FUNDS' };
       }
 
@@ -925,51 +970,69 @@ const ShopService = {
   },
 
   renderShopItems() {
-    if (typeof document === 'undefined') return;
     let container = document.getElementById('shop-items-container');
+    let coinsDisplay = document.getElementById('shop-coins-display');
     if (!container) return;
 
-    let html = '';
-    let currentBoard = typeof currentBoardTheme !== 'undefined' ? currentBoardTheme : 'walnut';
-    let currentDice = typeof currentDiceTheme !== 'undefined' ? currentDiceTheme : 'ivory';
     let userCoins = typeof CoinService !== 'undefined' ? CoinService.getCoins() : 0;
+    if (coinsDisplay) coinsDisplay.innerText = userCoins.toLocaleString();
+
+    let currentBoard = 'walnut';
+    let currentDice = 'ivory';
+    if (typeof userProfile !== 'undefined' && userProfile && userProfile.settings) {
+      currentBoard = userProfile.settings.boardTheme || 'walnut';
+      currentDice = userProfile.settings.diceTheme || 'ivory';
+    }
+
+    let html = '';
 
     // --- BOARDS ---
-    html += `<div style="font-size:11px; font-weight:600; color:#B89959; margin:10px 0 8px 0; letter-spacing:1.5px;">TAHTA MAĞAZASI</div>`;
-    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">`;
-    
+    html += `<div style="font-size:11px; font-weight:700; color:#A68045; letter-spacing:3px; margin-bottom:12px; border-bottom:1px dashed #3A2318; padding-bottom:6px;">TAHTA KOLEKSİYONU</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:25px;">`;
+
     Object.values(this.CATALOG.boards).forEach(b => {
       let isUnlocked = typeof UnlockService !== 'undefined' ? UnlockService.isBoardUnlocked(b.id) : (b.id === 'walnut');
       let isEquipped = (currentBoard === b.id);
       let canAfford = userCoins >= b.price;
 
       html += `
-        <div style="background:rgba(28,16,11,0.85); border:1px solid ${isEquipped ? '#D4AF37' : 'rgba(184,153,89,0.2)'}; border-radius:6px; padding:8px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:${isEquipped ? '0 0 10px rgba(212,175,55,0.3)' : 'none'};">
-          <div>
-            <div style="font-weight:600; font-size:11px; color:#E5DAC8; margin-bottom:4px;">${b.name}</div>
-            <div style="font-size:10px; color:${b.price === 0 ? '#9CCB86' : '#B89959'}; font-weight:600; margin-bottom:6px;">
-              ${b.price === 0 ? 'ÜCRETSİZ' : '🪙 ' + b.price.toLocaleString()}
+        <div class="premium-card" style="background:#170B06; border:1px solid ${isEquipped ? 'rgba(212,175,55,0.4)' : '#3A2318'}; border-radius:6px; padding:12px 15px; display:flex; align-items:center; justify-content:space-between; box-shadow:${isEquipped ? 'inset 0 0 15px rgba(212,175,55,0.05)' : 'none'}; position:relative; overflow:hidden; gap: 10px;">
+          
+          <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+            <div class="premium-card-icon" style="font-size:38px; flex-shrink:0; width:45px; text-align:center; filter: grayscale(${isUnlocked ? '0' : '100%'}); opacity:${isUnlocked ? '1' : '0.5'}; line-height:1;">🪵</div>
+            
+            <div style="display:flex; flex-direction:column; justify-content:center; min-width:0; overflow:hidden;">
+              <div style="color:#E5DAC8; font-size:13px; font-weight:700; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${b.name.toUpperCase()}">${b.name.toUpperCase()}</div>
+              <div style="color:${isUnlocked ? '#A68045' : '#8A6D3B'}; font-size:10px; font-weight:600; letter-spacing:1px; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${isUnlocked ? (isEquipped ? '✓ KUŞANILI' : '✓ SAHİPSİN') : 'KOLEKSİYON PARÇASI'}
+              </div>
             </div>
           </div>
-          <div>
+
+          <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:6px; width:95px; flex-shrink:0;">
+            <div style="color:#D4AF37; font-size:12px; font-weight:700; letter-spacing:1px; display:${isUnlocked ? 'none' : 'block'}; text-align:right; width:100%;">
+              🪙 ${b.price.toLocaleString()}
+            </div>
       `;
 
       if (isEquipped) {
-        html += `<button class="menu-btn" style="padding:5px; font-size:10px; background:#D4AF37; color:#1A0F0A; font-weight:bold; width:100%; border:none;" disabled>✓ SEÇİLİ</button>`;
+        html += `<div style="padding:5px 12px; font-size:10px; background:rgba(212,175,55,0.05); color:#D4AF37; font-weight:bold; border:1px solid rgba(212,175,55,0.3); border-radius:4px; letter-spacing:1px; cursor:default; text-align:center; width:100%; box-sizing:border-box;">AKTİF</div>`;
       } else if (isUnlocked) {
-        html += `<button class="menu-btn menu-btn-primary" style="padding:5px; font-size:10px; width:100%;" onclick="changeBoardTheme('${b.id}'); ShopService.updateShopUI();">KULLAN</button>`;
+        html += `<button style="padding:5px 12px; font-size:10px; background:transparent; color:#E5DAC8; font-weight:bold; border:1px solid #8A6D3B; border-radius:4px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; width:100%; box-sizing:border-box;" onmouseover="this.style.background='#8A6D3B'; this.style.color='#170B06';" onmouseout="this.style.background='transparent'; this.style.color='#E5DAC8';" onclick="changeBoardTheme('${b.id}'); ShopService.updateShopUI();">KUŞAN</button>`;
       } else {
-        let btnBg = canAfford ? 'background:#8B6B23; color:#FFF; cursor:pointer;' : 'background:rgba(60,40,20,0.5); color:#888; cursor:not-allowed;';
-        html += `<button class="menu-btn" style="padding:5px; font-size:10px; width:100%; ${btnBg}" onclick="ShopService.purchaseBoard('${b.id}')">🔒 SATIN AL</button>`;
+        if (canAfford) {
+          html += `<button style="padding:5px 12px; font-size:10px; background:#8B6B23; color:#E5DAC8; font-weight:bold; border:1px solid #D4AF37; border-radius:4px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; width:100%; box-sizing:border-box;" onmouseover="this.style.background='#A68045';" onmouseout="this.style.background='#8B6B23';" onclick="ShopService.purchaseBoard('${b.id}')">SATIN AL</button>`;
+        } else {
+          html += `<button style="padding:5px 12px; font-size:10px; background:transparent; color:#A68045; font-weight:bold; border:1px dashed #3A2318; border-radius:4px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; width:100%; box-sizing:border-box;" onmouseover="this.style.borderColor='#8A6D3B'; this.style.color='#8A6D3B';" onmouseout="this.style.borderColor='#3A2318'; this.style.color='#A68045';" onclick="ShopService.purchaseBoard('${b.id}')">KİLİTLİ</button>`;
+        }
       }
-
       html += `</div></div>`;
     });
     html += `</div>`;
 
     // --- DICE ---
-    html += `<div style="font-size:11px; font-weight:600; color:#B89959; margin:10px 0 8px 0; letter-spacing:1.5px;">ZAR MAĞAZASI</div>`;
-    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
+    html += `<div style="font-size:11px; font-weight:700; color:#A68045; letter-spacing:3px; margin-bottom:12px; border-bottom:1px dashed #3A2318; padding-bottom:6px;">ZAR KOLEKSİYONU</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:10px;">`;
 
     Object.values(this.CATALOG.dice).forEach(d => {
       let isUnlocked = typeof UnlockService !== 'undefined' ? UnlockService.isDiceUnlocked(d.id) : (d.id === 'ivory');
@@ -977,25 +1040,36 @@ const ShopService = {
       let canAfford = userCoins >= d.price;
 
       html += `
-        <div style="background:rgba(28,16,11,0.85); border:1px solid ${isEquipped ? '#D4AF37' : 'rgba(184,153,89,0.2)'}; border-radius:6px; padding:8px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:${isEquipped ? '0 0 10px rgba(212,175,55,0.3)' : 'none'};">
-          <div>
-            <div style="font-weight:600; font-size:11px; color:#E5DAC8; margin-bottom:4px;">${d.name}</div>
-            <div style="font-size:10px; color:${d.price === 0 ? '#9CCB86' : '#B89959'}; font-weight:600; margin-bottom:6px;">
-              ${d.price === 0 ? 'ÜCRETSİZ' : '🪙 ' + d.price.toLocaleString()}
+        <div class="premium-card" style="background:#170B06; border:1px solid ${isEquipped ? 'rgba(212,175,55,0.4)' : '#3A2318'}; border-radius:6px; padding:12px 15px; display:flex; align-items:center; justify-content:space-between; box-shadow:${isEquipped ? 'inset 0 0 15px rgba(212,175,55,0.05)' : 'none'}; position:relative; overflow:hidden; gap: 10px;">
+          
+          <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+            <div class="premium-card-icon" style="font-size:38px; flex-shrink:0; width:45px; text-align:center; filter: grayscale(${isUnlocked ? '0' : '100%'}); opacity:${isUnlocked ? '1' : '0.5'}; line-height:1;">🎲</div>
+            
+            <div style="display:flex; flex-direction:column; justify-content:center; min-width:0; overflow:hidden;">
+              <div style="color:#E5DAC8; font-size:13px; font-weight:700; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.name.toUpperCase()}">${d.name.toUpperCase()}</div>
+              <div style="color:${isUnlocked ? '#A68045' : '#8A6D3B'}; font-size:10px; font-weight:600; letter-spacing:1px; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${isUnlocked ? (isEquipped ? '✓ KUŞANILI' : '✓ SAHİPSİN') : 'KOLEKSİYON PARÇASI'}
+              </div>
             </div>
           </div>
-          <div>
+
+          <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:6px; width:95px; flex-shrink:0;">
+            <div style="color:#D4AF37; font-size:12px; font-weight:700; letter-spacing:1px; display:${isUnlocked ? 'none' : 'block'}; text-align:right; width:100%;">
+              🪙 ${d.price.toLocaleString()}
+            </div>
       `;
 
       if (isEquipped) {
-        html += `<button class="menu-btn" style="padding:5px; font-size:10px; background:#D4AF37; color:#1A0F0A; font-weight:bold; width:100%; border:none;" disabled>✓ SEÇİLİ</button>`;
+        html += `<div style="padding:5px 12px; font-size:10px; background:rgba(212,175,55,0.05); color:#D4AF37; font-weight:bold; border:1px solid rgba(212,175,55,0.3); border-radius:4px; letter-spacing:1px; cursor:default; text-align:center; width:100%; box-sizing:border-box;">AKTİF</div>`;
       } else if (isUnlocked) {
-        html += `<button class="menu-btn menu-btn-primary" style="padding:5px; font-size:10px; width:100%;" onclick="changeDiceTheme('${d.id}'); ShopService.updateShopUI();">KULLAN</button>`;
+        html += `<button style="padding:5px 12px; font-size:10px; background:transparent; color:#E5DAC8; font-weight:bold; border:1px solid #8A6D3B; border-radius:4px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; width:100%; box-sizing:border-box;" onmouseover="this.style.background='#8A6D3B'; this.style.color='#170B06';" onmouseout="this.style.background='transparent'; this.style.color='#E5DAC8';" onclick="changeDiceTheme('${d.id}'); ShopService.updateShopUI();">KUŞAN</button>`;
       } else {
-        let btnBg = canAfford ? 'background:#8B6B23; color:#FFF; cursor:pointer;' : 'background:rgba(60,40,20,0.5); color:#888; cursor:not-allowed;';
-        html += `<button class="menu-btn" style="padding:5px; font-size:10px; width:100%; ${btnBg}" onclick="ShopService.purchaseDice('${d.id}')">🔒 SATIN AL</button>`;
+        if (canAfford) {
+          html += `<button style="padding:5px 12px; font-size:10px; background:#8B6B23; color:#E5DAC8; font-weight:bold; border:1px solid #D4AF37; border-radius:4px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; width:100%; box-sizing:border-box;" onmouseover="this.style.background='#A68045';" onmouseout="this.style.background='#8B6B23';" onclick="ShopService.purchaseDice('${d.id}')">SATIN AL</button>`;
+        } else {
+          html += `<button style="padding:5px 12px; font-size:10px; background:transparent; color:#A68045; font-weight:bold; border:1px dashed #3A2318; border-radius:4px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; width:100%; box-sizing:border-box;" onmouseover="this.style.borderColor='#8A6D3B'; this.style.color='#8A6D3B';" onmouseout="this.style.borderColor='#3A2318'; this.style.color='#A68045';" onclick="ShopService.purchaseDice('${d.id}')">KİLİTLİ</button>`;
+        }
       }
-
       html += `</div></div>`;
     });
     html += `</div>`;
@@ -1304,7 +1378,7 @@ const MissionService = {
   endMatch(isWin = false, isDarkMode = false) {
     this.stopMatchTimer();
 
-    if (typeof userProfile === 'undefined' || !userProfile) return;
+    if (typeof userProfile === 'undefined' || !userProfile) return { xp: 0, coins: 0, count: 0 };
     this.notifyEvent('MATCH_COMPLETED', 1);
     if (isWin) {
       this.notifyEvent('MATCH_WON', 1);
@@ -1315,36 +1389,29 @@ const MissionService = {
       this.notifyEvent('DARK_MATCH_COMPLETED', 1);
     }
 
+    let missionSummary = { xp: 0, coins: 0, count: 0 };
+
     // Process Match Missions rewards at the end of the match
     if (Array.isArray(userProfile.activeMatchMissions)) {
-      let totalXP = 0;
-      let totalCoins = 0;
-      let completedCount = 0;
-
       userProfile.activeMatchMissions.forEach(mm => {
         if (mm.completed && !mm.claimed) {
           mm.claimed = true;
-          totalXP += mm.xp;
-          totalCoins += mm.coins;
-          completedCount++;
+          missionSummary.xp += mm.xp;
+          missionSummary.coins += mm.coins;
+          missionSummary.count++;
           
           if (typeof CoinService !== 'undefined') CoinService.addCoins(mm.coins, 'MATCH_MISSION_' + mm.id);
           if (typeof XPService !== 'undefined') XPService.addXP(mm.xp, 'MATCH_MISSION_' + mm.id);
         }
       });
-
-      if (completedCount > 0 && typeof showToast === 'function') {
-         setTimeout(() => {
-           showToast(`🎯 TAMAMLANAN MAÇ GÖREVLERİ (${completedCount})\n🎁 +${totalXP} XP | +${totalCoins} 🪙`, 4000);
-         }, 1500);
-      }
-      
       // Clean up Match Missions since the match ended
       userProfile.activeMatchMissions = [];
     }
 
     if (typeof saveUserProfile === 'function') saveUserProfile(userProfile);
     this.updateMissionUI();
+    
+    return missionSummary;
   },
 
   abandonMatch() {
@@ -1441,66 +1508,66 @@ const MissionService = {
     let html = '';
 
     // --- MAIN MISSIONS ---
-    html += `<div style="font-size:11px; font-weight:600; color:#B89959; margin:6px 0; letter-spacing:1.5px;">ANA GÖREVLER</div>`;
-    html += `<div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">`;
+    html += `<div style="font-size:11px; font-weight:700; color:#A68045; letter-spacing:3px; margin-bottom:12px; border-bottom:1px dashed #3A2318; padding-bottom:6px;">ANA GÖREVLER (TAVLA YOLCULUĞU)</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:25px;">`;
 
     userProfile.mainMissions.forEach(m => {
       let pct = Math.min(100, Math.floor((m.progress / m.target) * 100));
       html += `
-        <div style="background:rgba(28,16,11,0.85); border:1px solid rgba(184,153,89,0.2); border-radius:6px; padding:10px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <div style="font-size:12px; font-weight:600; color:#E5DAC8;">${m.title}</div>
-            <div style="font-size:11px; font-weight:bold; color:#B89959;">🎁 +${m.xp} XP | +${m.coins} 🪙</div>
+        <div style="background:#170B06; border:1px solid #3A2318; border-radius:6px; padding:14px; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:13px; font-weight:700; color:#E5DAC8;">${m.title}</div>
+            <div style="font-size:11px; font-weight:bold; color:#D4AF37;">🎁 +${m.xp} XP | +${m.coins} 🪙</div>
           </div>
-          <div style="background:rgba(0,0,0,0.5); height:8px; border-radius:4px; overflow:hidden; position:relative; margin-top:6px;">
-            <div style="background:linear-gradient(90deg, #B89959, #D4AF37); height:100%; width:${pct}%; transition:width 0.3s;"></div>
+          <div style="background:#0F0804; height:8px; border-radius:4px; overflow:hidden; position:relative; border:1px solid #2A1A0F;">
+            <div style="background:linear-gradient(90deg, #8A6D3B, #D4AF37); height:100%; width:${pct}%; transition:width 0.4s;"></div>
           </div>
-          <div style="font-size:10px; color:rgba(229,218,200,0.6); text-align:right; margin-top:3px;">${m.progress} / ${m.target} (${pct}%)</div>
+          <div style="font-size:10px; color:#A68045; text-align:right; margin-top:4px; font-weight:600;">${m.progress} / ${m.target} (${pct}%)</div>
         </div>
       `;
     });
     html += `</div>`;
 
     // --- MATCH MISSIONS ---
-    html += `<div style="font-size:11px; font-weight:600; color:#B89959; margin:6px 0; letter-spacing:1.5px;">BU MAÇIN GÖREVLERİ</div>`;
-    html += `<div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">`;
+    html += `<div style="font-size:11px; font-weight:700; color:#A68045; letter-spacing:3px; margin-bottom:12px; border-bottom:1px dashed #3A2318; padding-bottom:6px;">BU MAÇIN GÖREVLERİ</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:25px;">`;
 
     if (Array.isArray(userProfile.activeMatchMissions) && userProfile.activeMatchMissions.length > 0) {
       userProfile.activeMatchMissions.forEach(mm => {
         let isDone = mm.completed;
         html += `
-          <div style="background:rgba(28,16,11,0.85); border:1px solid ${isDone ? '#9CCB86' : 'rgba(184,153,89,0.2)'}; border-radius:6px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="background:#170B06; border:1px solid ${isDone ? '#4C7338' : '#3A2318'}; border-radius:6px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <div style="font-size:12px; font-weight:600; color:${isDone ? '#9CCB86' : '#E5DAC8'};">
-                ${isDone ? '✓ ' : '☐ '} ${mm.title}
+              <div style="font-size:12px; font-weight:700; color:${isDone ? '#9CCB86' : '#E5DAC8'};">
+                ${isDone ? '✓ ' : '🎯 '} ${mm.title}
               </div>
-              <div style="font-size:10px; color:rgba(229,218,200,0.6); margin-top:2px;">İlerleme: ${mm.progress} / ${mm.target}</div>
+              <div style="font-size:10px; color:#8A6D3B; margin-top:3px; font-weight:600;">İlerleme: ${mm.progress} / ${mm.target}</div>
             </div>
-            <div style="font-size:11px; font-weight:bold; color:${isDone ? '#9CCB86' : '#B89959'};">
+            <div style="font-size:11px; font-weight:bold; color:${isDone ? '#9CCB86' : '#D4AF37'};">
               ${isDone ? 'TAMAMLANDI' : `🎁 +${mm.xp} XP | +${mm.coins} 🪙`}
             </div>
           </div>
         `;
       });
     } else {
-      html += `<div style="font-size:11px; color:rgba(229,218,200,0.5); font-style:italic; padding:8px;">Maç başladığında yeni maç görevleri yüklenecektir.</div>`;
+      html += `<div style="font-size:11px; color:#8A6D3B; font-style:italic; padding:10px; text-align:center; background:#170B06; border:1px solid #3A2318; border-radius:6px;">Maç başladığında görevler görünecektir.</div>`;
     }
     html += `</div>`;
 
     // --- PLAYTIME REWARDS ---
     let totalMins = Math.floor((userProfile.totalMatchPlaytimeSeconds || 0) / 60);
-    html += `<div style="font-size:11px; font-weight:600; color:#B89959; margin:6px 0; letter-spacing:1.5px;">MAÇ OYNAMA SÜRESİ (${totalMins} Dk)</div>`;
-    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
+    html += `<div style="font-size:11px; font-weight:700; color:#A68045; letter-spacing:3px; margin-bottom:12px; border-bottom:1px dashed #3A2318; padding-bottom:6px;">MAÇ OYNAMA SÜRESİ (${totalMins} Dk)</div>`;
+    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">`;
 
     this.PLAYTIME_REWARD_TIERS.forEach(tier => {
       let isClaimed = userProfile.claimedPlaytimeRewards.includes(tier.minutes);
       let canClaim = totalMins >= tier.minutes;
 
       html += `
-        <div style="background:rgba(28,16,11,0.85); border:1px solid ${isClaimed ? '#9CCB86' : 'rgba(184,153,89,0.2)'}; border-radius:6px; padding:8px; text-align:center;">
-          <div style="font-size:11px; font-weight:600; color:#E5DAC8;">⏱️ ${tier.minutes} Dk</div>
-          <div style="font-size:10px; color:#B89959; margin:3px 0;">+${tier.xp} XP | +${tier.coins} 🪙</div>
-          <div style="font-size:10px; font-weight:bold; color:${isClaimed ? '#9CCB86' : (canClaim ? '#D4AF37' : '#888')};">
+        <div style="background:#170B06; border:1px solid ${isClaimed ? '#4C7338' : '#3A2318'}; border-radius:6px; padding:10px; text-align:center;">
+          <div style="font-size:12px; font-weight:700; color:#E5DAC8;">⏱️ ${tier.minutes} Dk</div>
+          <div style="font-size:10px; color:#D4AF37; margin:4px 0; font-weight:bold;">+${tier.xp} XP | +${tier.coins} 🪙</div>
+          <div style="font-size:10px; font-weight:bold; color:${isClaimed ? '#9CCB86' : (canClaim ? '#D4AF37' : '#8A6D3B')};">
             ${isClaimed ? '✓ ALINDI' : (canClaim ? 'KAZANILDI' : `${tier.minutes - totalMins} Dk Kaldı`)}
           </div>
         </div>

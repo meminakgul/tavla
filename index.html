@@ -94,117 +94,272 @@
     </div>
   </div>
 
-  <!-- Profile Modal -->
-  <div id="profile-modal" class="menu-modal" style="display: none; max-height: 85vh; overflow-y: auto;">
-    <h3 style="color:#B89959; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">OYUNCU PROFİLİ</h3>
-    <div style="text-align:center; margin-bottom:15px;">
-      <div id="profile-avatar-display" style="font-size:36px; background:#1C100B; border:1px solid rgba(184,153,89,0.5); width:76px; height:76px; line-height:76px; border-radius:50%; margin:0 auto 10px auto; color:#E5DAC8;">◈</div>
-      <label style="display:block; margin-bottom:5px; font-size:11px; color:#A68045; letter-spacing: 1px;">AVATAR SEÇİN:</label>
-      <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:15px; color:#E5DAC8;">
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('◈')">◈</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('◆')">◆</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♙')">♙</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♞')">♞</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♚')">♚</span>
-        <span style="font-size:24px; cursor:pointer; padding:4px;" onclick="setWebAvatar('♛')">♛</span>
+  <!-- Profile Modal (Premium Player Card) -->
+  <div id="profile-modal" class="menu-modal" style="display: none; width: 360px; max-height: 85vh; padding: 0; flex-direction: column; background: #1C100B; border: 2px solid #3A2318; border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.6);">
+    
+    <!-- Header / Badge Area -->
+    <div style="background: linear-gradient(180deg, #2E1A11 0%, #170B06 100%); padding: 25px 20px 20px 20px; border-bottom: 2px solid #4A3320; text-align: center; position: relative;">
+      
+      <div style="position: absolute; top: 12px; right: 15px; display: flex; align-items: center; gap: 15px;">
+        <span style="color: #8A6D3B; font-size: 9px; font-weight: 700; letter-spacing: 2px;">TAVLA EVRİMİ</span>
+        <button onclick="saveWebProfile()" style="background: none; border: none; color: #8A6D3B; font-size: 16px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: color 0.2s;" onmouseover="this.style.color='#E5DAC8'" onmouseout="this.style.color='#8A6D3B'">✕</button>
+      </div>
+      
+      <!-- Avatar -->
+      <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px auto;">
+        <div id="profile-avatar-display" style="width: 80px; height: 80px; background: #0F0804; border: 2px solid #8A6D3B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #E5DAC8; box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 0 15px rgba(184,153,89,0.1);">◈</div>
+      </div>
+      
+      <!-- Avatar Selector (Subtle) -->
+      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 15px;">
+        <span style="font-size:16px; cursor:pointer; color:#A68045; opacity:0.6; transition:0.2s;" onclick="setWebAvatar('◈')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">◈</span>
+        <span style="font-size:16px; cursor:pointer; color:#A68045; opacity:0.6; transition:0.2s;" onclick="setWebAvatar('◆')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">◆</span>
+        <span style="font-size:16px; cursor:pointer; color:#A68045; opacity:0.6; transition:0.2s;" onclick="setWebAvatar('♙')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">♙</span>
+        <span style="font-size:16px; cursor:pointer; color:#A68045; opacity:0.6; transition:0.2s;" onclick="setWebAvatar('♞')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">♞</span>
+        <span style="font-size:16px; cursor:pointer; color:#A68045; opacity:0.6; transition:0.2s;" onclick="setWebAvatar('♚')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">♚</span>
+        <span style="font-size:16px; cursor:pointer; color:#A68045; opacity:0.6; transition:0.2s;" onclick="setWebAvatar('♛')" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">♛</span>
+      </div>
+
+      <!-- Player Info -->
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <input type="text" id="profile-name-input" style="background: transparent; border: none; text-align: center; color: #E5DAC8; font-size: 20px; font-weight: 700; letter-spacing: 1px; outline: none; width: 80%; border-bottom: 1px dashed rgba(184,153,89,0.3); padding-bottom: 2px;" value="Misafir_1001">
+        
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;">
+          <span id="modal-level-text" style="color: #A68045; font-size: 11px; font-weight: 800; letter-spacing: 1px;">SEVİYE 1</span>
+          <span style="color: #4A3320;">|</span>
+          <span id="profile-rank-badge" style="background: #2A1A0F; border: 1px solid #8A6D3B; color: #E5DAC8; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; letter-spacing: 1px;">ÇIRAK</span>
+        </div>
+        
+        <!-- XP Bar -->
+        <div style="width: 100%; max-width: 240px; margin-top: 15px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="width: 100%; height: 6px; background: #0F0804; border-radius: 3px; border: 1px solid #3A2318; overflow: hidden; position: relative;">
+            <div id="modal-xp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #8A6D3B, #D4AF37); transition: width 0.4s ease;"></div>
+          </div>
+          <span id="modal-xp-text" style="color: rgba(229,218,200,0.5); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-align: right;">0 / 100 XP</span>
+        </div>
       </div>
     </div>
-    <div style="margin-bottom:15px;">
-      <label style="display:block; margin-bottom:6px; font-weight:600; font-size: 11px; letter-spacing: 1px; color:#E5DAC8;">OYUNCU ADI:</label>
-      <input type="text" id="profile-name-input" style="width:100%; padding:12px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); font-weight:600; outline: none;" placeholder="İsminizi yazın">
-    </div>
-    <div style="display:flex; justify-content:space-around; background:#1C100B; padding:12px; border-radius:4px; margin-bottom:20px; text-align:center; border:1px solid rgba(184,153,89,0.2);">
-      <div><div style="color:#A68045; font-size:9px; letter-spacing:1px;">COIN</div><div id="modal-chips" style="font-weight:600; font-size:14px; color:#E5DAC8;">1000</div></div>
-      <div><div style="color:#A68045; font-size:9px; letter-spacing:1px;">KAZANMA</div><div id="modal-wins" style="font-weight:600; font-size:14px; color:#E5DAC8;">0</div></div>
-      <div><div style="color:#A68045; font-size:9px; letter-spacing:1px;">KAZANMA %</div><div id="modal-winrate" style="font-weight:600; font-size:14px; color:#E5DAC8;">%0.0</div></div>
+
+    <!-- Content Area -->
+    <div style="padding: 20px; overflow-y: auto; flex: 1 1 auto; min-height: 0;">
+      
+      <!-- Win Streak -->
+      <div style="background: #24160E; border: 1px solid #3A2318; border-radius: 4px; padding: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 20px; color: #C64A22;">🔥</div>
+          <div style="display: flex; flex-direction: column;">
+            <span style="color: #E5DAC8; font-size: 12px; font-weight: 700; letter-spacing: 1px;">AKTİF SERİ</span>
+            <span style="color: #A68045; font-size: 9px; font-weight: 700; letter-spacing: 1px;">REKOR: <span id="stat-highest-streak">0</span></span>
+          </div>
+        </div>
+        <div style="color: #E5DAC8; font-size: 18px; font-weight: 800;"><span id="modal-streak-count">0</span></div>
+      </div>
+
+      <!-- Stat Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 25px;">
+        <div style="background: #1C100B; border: 1px solid #3A2318; border-radius: 4px; padding: 10px; text-align: center;">
+          <div style="color: #A68045; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">MAÇLAR</div>
+          <div id="stat-played" style="color: #E5DAC8; font-size: 16px; font-weight: 800;">0</div>
+        </div>
+        <div style="background: #1C100B; border: 1px solid #3A2318; border-radius: 4px; padding: 10px; text-align: center;">
+          <div style="color: #A68045; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">GALİBİYET</div>
+          <div id="stat-won" style="color: #E5DAC8; font-size: 16px; font-weight: 800;">0</div>
+        </div>
+        <div style="background: #1C100B; border: 1px solid #3A2318; border-radius: 4px; padding: 10px; text-align: center;">
+          <div style="color: #A68045; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">KAZANMA ORANI</div>
+          <div id="modal-winrate" style="color: #E5DAC8; font-size: 16px; font-weight: 800;">%0.0</div>
+        </div>
+        <div style="background: #1C100B; border: 1px solid #3A2318; border-radius: 4px; padding: 10px; text-align: center;">
+          <div style="color: #A68045; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">KIRILAN TAŞ</div>
+          <div id="stat-hits" style="color: #E5DAC8; font-size: 16px; font-weight: 800;">0</div>
+        </div>
+      </div>
+
+      <!-- Dice Stats -->
+      <div style="margin-bottom: 10px;">
+        <div style="color: #E5DAC8; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 2px;">ZAR ŞEFFAFLIĞI</div>
+        <div style="color: #A68045; font-size: 9px; margin-bottom: 12px; letter-spacing: 1px;">TÜM ZAMANLAR — ZAR DAĞILIMI</div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- 1 to 6 bars -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #E5DAC8; font-size: 11px; font-weight: 800; width: 12px;">1</div>
+            <div style="flex: 1; height: 6px; background: #0F0804; border-radius: 3px; position: relative; border: 1px solid #2A1A0F;">
+              <div id="dice-stat-all-1-fill" style="position: absolute; left: 0; top: 0; bottom: 0; background: #8A6D3B; border-radius: 3px; width: 0%;"></div>
+            </div>
+            <div id="dice-stat-all-1-text" style="color: #A68045; font-size: 9px; font-weight: 700; width: 35px; text-align: right;">0</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #E5DAC8; font-size: 11px; font-weight: 800; width: 12px;">2</div>
+            <div style="flex: 1; height: 6px; background: #0F0804; border-radius: 3px; position: relative; border: 1px solid #2A1A0F;">
+              <div id="dice-stat-all-2-fill" style="position: absolute; left: 0; top: 0; bottom: 0; background: #8A6D3B; border-radius: 3px; width: 0%;"></div>
+            </div>
+            <div id="dice-stat-all-2-text" style="color: #A68045; font-size: 9px; font-weight: 700; width: 35px; text-align: right;">0</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #E5DAC8; font-size: 11px; font-weight: 800; width: 12px;">3</div>
+            <div style="flex: 1; height: 6px; background: #0F0804; border-radius: 3px; position: relative; border: 1px solid #2A1A0F;">
+              <div id="dice-stat-all-3-fill" style="position: absolute; left: 0; top: 0; bottom: 0; background: #8A6D3B; border-radius: 3px; width: 0%;"></div>
+            </div>
+            <div id="dice-stat-all-3-text" style="color: #A68045; font-size: 9px; font-weight: 700; width: 35px; text-align: right;">0</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #E5DAC8; font-size: 11px; font-weight: 800; width: 12px;">4</div>
+            <div style="flex: 1; height: 6px; background: #0F0804; border-radius: 3px; position: relative; border: 1px solid #2A1A0F;">
+              <div id="dice-stat-all-4-fill" style="position: absolute; left: 0; top: 0; bottom: 0; background: #8A6D3B; border-radius: 3px; width: 0%;"></div>
+            </div>
+            <div id="dice-stat-all-4-text" style="color: #A68045; font-size: 9px; font-weight: 700; width: 35px; text-align: right;">0</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #E5DAC8; font-size: 11px; font-weight: 800; width: 12px;">5</div>
+            <div style="flex: 1; height: 6px; background: #0F0804; border-radius: 3px; position: relative; border: 1px solid #2A1A0F;">
+              <div id="dice-stat-all-5-fill" style="position: absolute; left: 0; top: 0; bottom: 0; background: #8A6D3B; border-radius: 3px; width: 0%;"></div>
+            </div>
+            <div id="dice-stat-all-5-text" style="color: #A68045; font-size: 9px; font-weight: 700; width: 35px; text-align: right;">0</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="color: #E5DAC8; font-size: 11px; font-weight: 800; width: 12px;">6</div>
+            <div style="flex: 1; height: 6px; background: #0F0804; border-radius: 3px; position: relative; border: 1px solid #2A1A0F;">
+              <div id="dice-stat-all-6-fill" style="position: absolute; left: 0; top: 0; bottom: 0; background: #8A6D3B; border-radius: 3px; width: 0%;"></div>
+            </div>
+            <div id="dice-stat-all-6-text" style="color: #A68045; font-size: 9px; font-weight: 700; width: 35px; text-align: right;">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Achievements Container -->
+      <div id="profile-achievements-container" style="margin-bottom:10px;"></div>
     </div>
     
-    <div style="margin-bottom:15px;">
-      <label style="display:block; margin-bottom:6px; font-weight:600; font-size: 11px; letter-spacing: 1px; color:#E5DAC8;">KARİYER İSTATİSTİKLERİ:</label>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-        <div style="background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>🎮 Oynanan Maç</span> <span id="stat-played">0</span></div>
-        <div style="background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>🏆 Kazanılan Maç</span> <span id="stat-won">0</span></div>
-        <div style="background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>💥 Kırılan Taş</span> <span id="stat-hits">0</span></div>
-        <div style="background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>🎲 Çift Zar</span> <span id="stat-doubles">0</span></div>
-        <div style="background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>💀 Mars</span> <span id="stat-marsa">0</span></div>
-        <div style="background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>🔥 En Yüksek Combo</span> <span id="stat-combo">0</span></div>
-        <div style="grid-column: 1 / -1; background:#1C100B; border:1px solid rgba(184,153,89,0.2); padding:10px; border-radius:4px; font-size:12px; color:#E5DAC8; font-weight:600; display:flex; justify-content:space-between;"><span>👣 Toplam Hamle</span> <span id="stat-moves">0</span></div>
-      </div>
+    <div style="padding: 15px 20px; background: #170B06; border-top: 1px solid #3A2318;">
+      <button class="menu-btn menu-btn-primary" style="width: 100%;" onclick="saveWebProfile()">KAYDET VE KAPAT</button>
     </div>
-    <div id="profile-achievements-container" style="margin-bottom:15px;"></div>
-
-    <button class="menu-btn menu-btn-primary" onclick="saveWebProfile()">KAYDET VE KAPAT</button>
   </div>
 
-  <!-- Customization & Shop Modal -->
-  <div id="custom-modal" class="menu-modal" style="display: none; max-height: 85vh; flex-direction: column;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(184,153,89,0.2); padding-bottom:8px;">
-      <h3 style="color:#B89959; margin:0; font-weight: 300; letter-spacing: 2px;">MAĞAZA & ÖZELLEŞTİR</h3>
-      <div style="font-weight:600; color:#E5DAC8; font-size:13px;">
-        🪙 <span id="shop-coins-display">1,000</span>
+  <!-- Customization & Shop Modal (Premium Collection Room) -->
+  <div id="custom-modal" class="menu-modal" style="display: none; width: 400px; max-height: 85vh; padding: 0; flex-direction: column; background: #1C100B; border: 2px solid #3A2318; border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.6);">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(180deg, #2E1A11 0%, #170B06 100%); padding: 15px 20px; border-bottom: 2px solid #4A3320; display: flex; justify-content: space-between; align-items: center; position: relative;">
+      
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+        <h3 style="color:#B89959; margin:0; font-weight: 300; letter-spacing: 2px; font-size: 14px;">ÖZEL KOLEKSİYON</h3>
+        <span style="color: #8A6D3B; font-size: 9px; font-weight: 700; letter-spacing: 2px;">ATÖLYE</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 6px; background: #0F0804; border: 1px solid #3A2318; padding: 4px 10px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+          <span style="font-size: 14px; color: #D4AF37;">🪙</span>
+          <span id="shop-coins-display" style="font-weight:700; color:#E5DAC8; font-size:13px; letter-spacing: 1px;">1,000</span>
+        </div>
+        
+        <button onclick="openMissionsFromShop()" style="background: transparent; border: 1px dashed #8A6D3B; color: #8A6D3B; padding: 4px 10px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(138,109,59,0.1)'; this.style.color='#E5DAC8'; this.style.borderColor='#E5DAC8';" onmouseout="this.style.background='transparent'; this.style.color='#8A6D3B'; this.style.borderColor='#8A6D3B';">
+          + KAZAN
+        </button>
+
+        <button onclick="closeModal('custom-modal')" style="background: none; border: none; color: #8A6D3B; font-size: 18px; cursor: pointer; padding: 0 0 0 6px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;" onmouseover="this.style.color='#E5DAC8'" onmouseout="this.style.color='#8A6D3B'">✕</button>
       </div>
     </div>
-
-    <div style="overflow-y: auto; padding-right: 4px; max-height: 60vh; margin-bottom: 15px;">
-      <div style="margin-bottom:12px;">
-        <label style="display:block; margin-bottom:6px; font-weight:600; font-size:11px; letter-spacing:1px; color:#E5DAC8;">HIZLI SEÇİM (TAHTA):</label>
-        <select id="board-theme-select" style="width:100%; padding:10px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); outline:none;" onchange="changeBoardTheme(this.value)">
-          <option value="walnut">Klasik Ceviz Ahşap</option>
-          <option value="fenerbahce">Sarı-Lacivert</option>
-          <option value="ottoman">Geleneksel Motifli Ahşap</option>
-          <option value="tropical">Tropikal</option>
-          <option value="green">Kına & Sedef (Yeşil Çuha)</option>
-          <option value="marble">Kraliyet Mermeri</option>
-          <option value="midnight">Gece Safiri</option>
-        </select>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <label style="display:block; margin-bottom:6px; font-weight:600; font-size:11px; letter-spacing:1px; color:#E5DAC8;">HIZLI SEÇİM (ZAR):</label>
-        <select id="dice-theme-select" style="width:100%; padding:10px; border-radius:4px; background:#1C100B; color:#E5DAC8; border:1px solid rgba(184,153,89,0.3); outline:none;" onchange="changeDiceTheme(this.value)">
-          <option value="ivory">Klasik Fildişi</option>
-          <option value="fbYellow">Sarı-Lacivert</option>
-          <option value="gold">Mat Altın</option>
-          <option value="red">Koyu Kırmızı</option>
-          <option value="black">Siyah</option>
-          <option value="green">Yeşil</option>
-        </select>
-      </div>
-
-      <div id="shop-items-container">
-        <!-- Rendered dynamically by ShopService.renderShopItems() -->
-      </div>
+    <!-- Content Area (Rendered by JS) -->
+    <div id="shop-items-container" class="premium-scrollbar" style="padding: 20px; overflow-y: auto; flex: 1 1 auto; min-height: 0;">
+      <!-- Dinamik olarak ShopService.updateShopUI() tarafından doldurulacak -->
     </div>
-
-    <button class="menu-btn menu-btn-primary" onclick="closeModal('custom-modal')">KAPAT</button>
   </div>
 
   <!-- Missions Modal -->
-  <div id="missions-modal" class="menu-modal" style="display: none; max-height: 85vh; flex-direction: column; width: 340px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(184,153,89,0.2); padding-bottom:8px;">
-      <h3 style="color:#B89959; margin:0; font-weight: 300; letter-spacing: 2px;">GÖREVLER & ÖDÜLLER</h3>
-      <div style="font-weight:600; color:#E5DAC8; font-size:13px;">
-        🎯 MERKEZ
+  <div id="missions-modal" class="menu-modal" style="display: none; width: 400px; max-height: 85vh; padding: 0; flex-direction: column; background: #1C100B; border: 2px solid #3A2318; border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.6);">
+    <!-- Header -->
+    <div style="background: linear-gradient(180deg, #2E1A11 0%, #170B06 100%); padding: 25px 20px 20px 20px; border-bottom: 2px solid #4A3320; text-align: center; position: relative;">
+      
+      <button id="missions-back-btn" onclick="returnToShopFromMissions()" style="display: none; position: absolute; top: 12px; left: 15px; background: none; border: none; color: #8A6D3B; font-size: 9px; font-weight: 700; letter-spacing: 2px; cursor: pointer; align-items: center; gap: 5px; transition: color 0.2s;" onmouseover="this.style.color='#E5DAC8'" onmouseout="this.style.color='#8A6D3B'">
+        <span style="font-size:12px;">◀</span> MAĞAZA
+      </button>
+
+      <div style="position: absolute; top: 12px; right: 15px; display: flex; align-items: center; gap: 15px;">
+        <span style="color: #8A6D3B; font-size: 9px; font-weight: 700; letter-spacing: 2px;">TAVLA EVRİMİ</span>
+        <button onclick="closeModal('missions-modal')" style="background: none; border: none; color: #8A6D3B; font-size: 16px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: color 0.2s;" onmouseover="this.style.color='#E5DAC8'" onmouseout="this.style.color='#8A6D3B'">✕</button>
       </div>
+      <h3 style="color:#B89959; margin:0; font-weight: 300; letter-spacing: 3px; font-size: 16px; margin-bottom: 5px;">GÖREVLER & ÖDÜLLER</h3>
     </div>
 
-    <div id="missions-scroll-container" style="overflow-y: auto; padding-right: 4px; max-height: 60vh; margin-bottom: 15px;">
+    <div id="missions-scroll-container" style="padding: 20px; overflow-y: auto; flex: 1 1 auto; min-height: 0;">
       <div id="missions-list-container">
         <!-- Rendered dynamically by MissionService.updateMissionUI() -->
       </div>
     </div>
-
-    <button class="menu-btn menu-btn-primary" onclick="closeModal('missions-modal')">KAPAT</button>
   </div>
 
-  <!-- 2. Online Mode Selection Submodal -->
-  <div id="online-modal" class="menu-modal">
-    <h3 style="color:#B89959; text-align:center; margin-bottom:20px; font-weight: 300; letter-spacing: 2px;">ÇEVRİMİÇİ MOD SEÇİMİ</h3>
-    <div class="menu-btn-list">
-      <button class="menu-btn menu-btn-primary" onclick="startMode('2p-classic')">KLASİK ÇEVRİMİÇİ MOD</button>
-      <button class="menu-btn" onclick="startMode('2p-cards')">KARTLI ÖZEL GÜÇLER MODU</button>
-      <button class="menu-btn menu-btn-ghost" style="margin-top: 6px;" onclick="closeModal('online-modal')">İPTAL</button>
+  <!-- 2. Online Mode Selection & Lobby Modal -->
+  <div id="online-modal" class="menu-modal" style="width: 380px;">
+    
+    <!-- View 1: Main Online Menu -->
+    <div id="online-view-menu">
+      <h3 style="color:#B89959; text-align:center; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">ÇEVRİMİÇİ TAVLA</h3>
+      <p style="font-size:12px; color:#E5DAC8; text-align:center; margin-bottom:20px; opacity:0.8;">
+        Arkadaşınla gerçek zamanlı P2P bağlantı üzerinden birebir tavla maçı yap.
+      </p>
+      <div class="menu-btn-list">
+        <button class="menu-btn menu-btn-primary" onclick="showOnlineHostView()">🏠 ODA OLUŞTUR (KOD AL)</button>
+        <button class="menu-btn" onclick="showOnlineJoinView()">🔑 ODAYA KATIL (KOD GİR)</button>
+        <button class="menu-btn menu-btn-ghost" style="margin-top: 6px;" onclick="closeModal('online-modal')">İPTAL</button>
+      </div>
     </div>
+
+    <!-- View 2: Host Room View (Waiting for Opponent) -->
+    <div id="online-view-host" style="display: none; text-align: center;">
+      <h3 style="color:#B89959; margin-bottom:10px; font-weight: 300; letter-spacing: 2px;">ODA KURULDU</h3>
+      <div style="font-size:12px; color:#E5DAC8; margin-bottom:12px;">
+        <span class="online-pulse"></span> Rakip bekleniyor...
+      </div>
+
+      <div class="room-code-box">
+        <div style="font-size:10px; color:#8A6D3B; letter-spacing:2px; margin-bottom:4px; font-weight:700;">ODA KODU</div>
+        <div id="online-room-code-display" class="room-code-text">----</div>
+      </div>
+
+      <div class="menu-btn-list" style="gap: 8px;">
+        <button class="menu-btn menu-btn-primary" onclick="copyRoomCode()">📋 KODU KOPYALA</button>
+        <button class="menu-btn" onclick="copyInviteLink()">🔗 DAVET LİNKİNİ KOPYALA</button>
+        <button class="menu-btn menu-btn-ghost" style="margin-top: 6px;" onclick="cancelOnlineHosting()">İPTAL ET</button>
+      </div>
+    </div>
+
+    <!-- View 3: Join Room View -->
+    <div id="online-view-join" style="display: none;">
+      <h3 style="color:#B89959; text-align:center; margin-bottom:15px; font-weight: 300; letter-spacing: 2px;">ODAYA KATIL</h3>
+      <p style="font-size:12px; color:#E5DAC8; text-align:center; margin-bottom:15px; opacity:0.8;">
+        Arkadaşının paylaştığı 4-6 haneli oda kodunu gir:
+      </p>
+      <div style="margin-bottom: 18px;">
+        <input type="text" id="online-room-code-input" placeholder="ÖRN: 8A4F" maxlength="10" style="width:100%; padding:14px; text-align:center; font-family:monospace; font-size:20px; font-weight:700; letter-spacing:4px; text-transform:uppercase; border-radius:6px; background:#0F0804; color:#D4AF37; border:1px solid #3A2318; outline:none; box-sizing:border-box;">
+      </div>
+      <div class="menu-btn-list">
+        <button class="menu-btn menu-btn-primary" onclick="submitJoinRoom()">BAĞLAN VE BAŞLA</button>
+        <button class="menu-btn menu-btn-ghost" onclick="showOnlineMenuView()">GERİ</button>
+      </div>
+    </div>
+
+    <!-- View 4: Match Found / Starting Countdown -->
+    <div id="online-view-ready" style="display: none; text-align: center; padding: 10px 0;">
+      <h3 style="color:#D4AF37; margin-bottom:15px; font-weight: 600; letter-spacing: 2px;">RAKİP BULUNDU! 🔥</h3>
+      
+      <div style="display:flex; justify-content:space-around; align-items:center; margin:20px 0; background:#0F0804; padding:15px; border-radius:8px; border:1px solid #3A2318;">
+        <div>
+          <div style="font-size:28px;">⚪</div>
+          <div id="match-p1-name" style="font-weight:700; color:#E5DAC8; font-size:13px; margin-top:4px;">Sen</div>
+          <div id="match-p1-title" style="font-size:10px; color:#8A6D3B;">Ev Sahibi</div>
+        </div>
+        <div style="font-weight:800; font-size:18px; color:#B89959;">VS</div>
+        <div>
+          <div style="font-size:28px;">⚫</div>
+          <div id="match-p2-name" style="font-weight:700; color:#E5DAC8; font-size:13px; margin-top:4px;">Rakip</div>
+          <div id="match-p2-title" style="font-size:10px; color:#8A6D3B;">Misafir</div>
+        </div>
+      </div>
+
+      <div id="online-countdown-text" style="font-size:16px; font-weight:700; color:#9CCB86; letter-spacing:1px;">Maç Başlıyor...</div>
+    </div>
+
   </div>
 
   <!-- 3. Settings Modal -->
@@ -309,7 +464,7 @@
       </div>
       
       <div class="player-hud">
-        <div class="player-name">BEYAZ OYUNCU <span class="indicator white-indicator"></span></div>
+        <div class="player-name" id="hud-name-left">BEYAZ OYUNCU <span class="indicator white-indicator"></span></div>
         <div class="player-score">Toplanan: <span id="white-off-count">0</span> / 15</div>
       </div>
     </div>
@@ -317,7 +472,7 @@
     <!-- Top Right Corner -->
     <div class="ui-corner ui-top-right">
       <div class="player-hud" style="text-align:right;">
-        <div class="player-name"><span class="indicator black-indicator"></span>SİYAH OYUNCU</div>
+        <div class="player-name" id="hud-name-right"><span class="indicator black-indicator"></span>SİYAH OYUNCU</div>
         <div class="player-score">Toplanan: <span id="black-off-count">0</span> / 15</div>
       </div>
     </div>
@@ -331,6 +486,8 @@
 
     <!-- Bottom Right Corner -->
     <div class="ui-corner ui-bottom-right">
+      <button id="undo-btn" onclick="undoLastMove()" class="hud-primary-btn" style="display:none; background: linear-gradient(135deg, #2E1A11, #1A120A); font-size: 14px; padding: 12px 20px;">GERİ AL</button>
+      <button id="hint-btn" onclick="showHint()" class="hud-primary-btn" style="display:none; background: linear-gradient(135deg, #2A3B4C, #121A2F); font-size: 14px; padding: 12px 20px; color: #8AB4F8;">İPUCU</button>
       <button id="roll-btn" onclick="rollDice()" class="hud-primary-btn">ZAR AT</button>
     </div>
   </div>
@@ -339,14 +496,15 @@
     <canvas id="boardCanvas"></canvas>
   </div>
 
-
-
   <!-- Game JavaScript Modules -->
-  <script src="js/sound.js"></script>
-  <script src="js/progression.js"></script>
-  <script src="js/physics3d.js"></script>
-  <script src="js/ai.js"></script>
-  <script src="js/game.js"></script>
+  <script src="server/game_rules.js?v=2.0.6"></script>
+  <script src="js/sound.js?v=2.0.6"></script>
+  <script src="js/progression.js?v=2.0.6"></script>
+  <script src="js/physics3d.js?v=2.0.6"></script>
+  <script src="js/network.js?v=2.0.6"></script>
+  <script src="js/ai_weights.js?v=2.0.6"></script>
+  <script src="js/ai.js?v=2.0.6"></script>
+  <script src="js/game.js?v=2.0.6"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

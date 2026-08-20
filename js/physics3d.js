@@ -1,4 +1,25 @@
 // ----------------------------------------------------
+// Perspective Mapping Helpers
+// ----------------------------------------------------
+function isBoardFlipped() {
+  return typeof isOnlineMatch !== 'undefined' && isOnlineMatch && typeof onlinePlayerRole !== 'undefined' && onlinePlayerRole === 'black';
+}
+
+function toVisualPoint(idx) {
+  if (idx >= 0 && idx < 24 && isBoardFlipped()) {
+    return 23 - idx;
+  }
+  return idx;
+}
+
+function toLogicalPoint(v) {
+  if (v >= 0 && v < 24 && isBoardFlipped()) {
+    return 23 - v;
+  }
+  return v;
+}
+
+// ----------------------------------------------------
 // Waypoint Path Calculation Across the BAR
 // ----------------------------------------------------
 function getPointCenterCoords(index) {
@@ -12,11 +33,12 @@ function getPointCenterCoords(index) {
   if (index === 24) return { x: halfW + barW / 2, y: 45 };
   if (index === -1) return { x: halfW + barW / 2, y: h - 45 };
 
-  let left = 0, isTop = index >= 12;
-  if (index <= 5) left = halfW + barW + (5 - index) * ptW;
-  else if (index <= 11) left = frameBorder + (11 - index) * ptW;
-  else if (index <= 17) left = frameBorder + (index - 12) * ptW;
-  else left = halfW + barW + (index - 18) * ptW;
+  let v = toVisualPoint(index);
+  let left = 0, isTop = v >= 12;
+  if (v <= 5) left = halfW + barW + (5 - v) * ptW;
+  else if (v <= 11) left = frameBorder + (11 - v) * ptW;
+  else if (v <= 17) left = frameBorder + (v - 12) * ptW;
+  else left = halfW + barW + (v - 18) * ptW;
 
   let pt = state.points[index];
   let count = pt ? pt.count : 0;
@@ -39,15 +61,21 @@ function getPointCenter(idx) {
   if (idx === -1 && state.turn === 'black') return { x: halfW + barW / 2, y: h - 45 };
 
   // Bear-Off targets (Trays)
-  if (idx === -1 && state.turn === 'white') return { x: w - rightTrayW / 2, y: h - 45 };
-  if (idx === 24 && state.turn === 'black') return { x: w - rightTrayW / 2, y: 45 };
+  let flipped = isBoardFlipped();
+  if (idx === -1 && state.turn === 'white') {
+    return { x: w - rightTrayW / 2, y: flipped ? 45 : h - 45 };
+  }
+  if (idx === 24 && state.turn === 'black') {
+    return { x: w - rightTrayW / 2, y: flipped ? h - 45 : 45 };
+  }
 
-  let isTop = idx >= 12;
+  let v = toVisualPoint(idx);
+  let isTop = v >= 12;
   let left = frameBorder;
-  if (idx >= 0 && idx <= 5) left = halfW + barW + (5 - idx) * ptW;
-  else if (idx >= 6 && idx <= 11) left = frameBorder + (11 - idx) * ptW;
-  else if (idx >= 12 && idx <= 17) left = frameBorder + (idx - 12) * ptW;
-  else if (idx >= 18 && idx <= 23) left = halfW + barW + (idx - 18) * ptW;
+  if (v >= 0 && v <= 5) left = halfW + barW + (5 - v) * ptW;
+  else if (v >= 6 && v <= 11) left = frameBorder + (11 - v) * ptW;
+  else if (v >= 12 && v <= 17) left = frameBorder + (v - 12) * ptW;
+  else if (v >= 18 && v <= 23) left = halfW + barW + (v - 18) * ptW;
 
   let x = left + ptW / 2;
   let y = isTop ? frameBorder + 45 : h - frameBorder - 45;

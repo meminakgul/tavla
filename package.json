@@ -1,0 +1,13 @@
+{
+  "name": "yeni-nesil-tavla",
+  "version": "2.0.0",
+  "description": "Tavla Evrimi - Server-Authoritative Multiplayer & 2.5D HTML5 Backgammon",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"const rules = require('./server/game_rules.js'); console.log('Rules engine loaded successfully:', typeof rules.createInitialBoardState);\""
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

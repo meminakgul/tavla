@@ -654,3 +654,237 @@ canvas {
 #missions-scroll-container::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #B89959 0%, #9A7B3E 100%);
 }
+
+/* Dice Stats Panel Styles */
+.dice-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.dice-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #A68045;
+  width: 12px;
+  text-align: right;
+}
+.dice-stat-bar-container {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(184, 153, 89, 0.2);
+  overflow: hidden;
+}
+.dice-stat-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #9A7B3E 0%, #D4AF37 100%);
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.dice-stat-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #E5DAC8;
+  width: 20px;
+  text-align: left;
+}
+
+/* Player Profile & Stats Styles */
+.stat-badge {
+  flex: 1;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(184,153,89,0.3);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+}
+.stat-badge-title {
+  color: #A68045;
+  font-size: 9px;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.stat-badge-val {
+  font-weight: 700;
+  font-size: 14px;
+  color: #E5DAC8;
+}
+.stat-card {
+  background: #1C100B;
+  border: 1px solid rgba(184,153,89,0.2);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: rgba(229,218,200,0.7);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+.stat-card:hover {
+  background: rgba(184,153,89,0.1);
+}
+.stat-card strong {
+  color: #E5DAC8;
+  font-size: 13px;
+}
+
+/* -------------------------------------
+   PREMIUM CUSTOM SCROLLBAR
+   ------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 8, 4, 0.8);
+  border-left: 1px solid rgba(58, 35, 24, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: #5E4613;
+  border-radius: 4px;
+  border: 1px solid #8B6B23;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8A6D3B;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* -------------------------------------
+   SHOP & MISSION CARDS HOVER
+   ------------------------------------- */
+.premium-card {
+  transition: all 0.2s ease-out;
+}
+.premium-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 0 10px rgba(212,175,55,0.05);
+  border-color: rgba(212,175,55,0.4) !important;
+}
+.premium-card-icon {
+  transition: transform 0.2s ease-out;
+}
+.premium-card:hover .premium-card-icon {
+  transform: scale(1.1);
+}
+
+/* -------------------------------------
+   ONLINE MULTIPLAYER & ROOM LOBBY
+   ------------------------------------- */
+.room-code-box {
+  background: #0F0804;
+  border: 2px dashed #B89959;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  margin: 15px 0;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+.room-code-text {
+  font-family: monospace;
+  font-size: 28px;
+  font-weight: 800;
+  color: #D4AF37;
+  letter-spacing: 6px;
+  user-select: all;
+}
+.online-pulse {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9CCB86;
+  box-shadow: 0 0 0 0 rgba(156, 203, 134, 0.7);
+  animation: pulse-green 1.5s infinite;
+  margin-right: 6px;
+}
+@keyframes pulse-green {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(156, 203, 134, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(156, 203, 134, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(156, 203, 134, 0); }
+}
+
+/* Emote Menu & Floating Speech Bubble */
+.emote-toggle-btn {
+  background: #1C100B;
+  border: 1px solid rgba(184,153,89,0.4);
+  color: #E5DAC8;
+  font-size: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  transition: all 0.2s;
+}
+.emote-toggle-btn:hover {
+  transform: scale(1.1);
+  border-color: #D4AF37;
+  background: #2E1A11;
+}
+.emote-popup-menu {
+  position: absolute;
+  bottom: 60px;
+  right: 0;
+  background: #170B06;
+  border: 1px solid #3A2318;
+  border-radius: 8px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  width: 220px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+  z-index: 200;
+  animation: fadeIn 0.2s ease-out;
+}
+.emote-item-btn {
+  background: #25130A;
+  border: 1px solid rgba(184,153,89,0.2);
+  color: #E5DAC8;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.emote-item-btn:hover {
+  background: #3D2214;
+  border-color: #D4AF37;
+  color: #FFF;
+}
+.speech-bubble-container {
+  position: absolute;
+  pointer-events: none;
+  z-index: 150;
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.speech-bubble-container.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.speech-bubble-content {
+  background: rgba(28, 16, 11, 0.95);
+  border: 2px solid #D4AF37;
+  border-radius: 12px;
+  padding: 8px 16px;
+  color: #FFF;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+  white-space: nowrap;
+}
+

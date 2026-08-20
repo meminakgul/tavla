@@ -9,7 +9,14 @@ let state = {
   dice: [], remainingDice: [],
   selectedPoint: null, validMoves: [],
   highestWhiteCombo: 0, highestBlackCombo: 0, matchComboXP: 0,
-  turnCounter: 0, isRevealActive: false
+  turnCounter: 0, isRevealActive: false,
+  matchDiceStats: {
+    white: { rolls: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}, doubles: 0, total: 0 },
+    black: { rolls: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}, doubles: 0, total: 0 }
+  },
+  turnHistory: [],
+  undoUsedThisTurn: false,
+  hintMove: null
 };
 
 let currentGameMode = 'NORMAL'; // 'NORMAL' veya 'DARK_TAVLA'
@@ -111,7 +118,7 @@ function toggleFullScreen() {
 function openModal(id) {
   let modal = document.getElementById(id);
   if (modal) {
-    if (id === 'custom-modal' || id === 'missions-modal') {
+    if (id === 'custom-modal' || id === 'missions-modal' || id === 'profile-modal') {
       modal.style.display = 'flex';
     } else {
       modal.style.display = 'block';
@@ -128,10 +135,112 @@ function openModal(id) {
 function closeModal(id) {
   let modal = document.getElementById(id);
   if (modal) modal.style.display = 'none';
+  
+  if (id === 'missions-modal') {
+    let backBtn = document.getElementById('missions-back-btn');
+    if (backBtn) backBtn.style.display = 'none';
+  }
 }
 
+function openMissionsFromShop() {
+  closeModal('custom-modal');
+  openModal('missions-modal');
+  let backBtn = document.getElementById('missions-back-btn');
+  if (backBtn) backBtn.style.display = 'flex';
+}
+
+function returnToShopFromMissions() {
+  closeModal('missions-modal');
+  openModal('custom-modal');
+}
+
+// --- Online Multiplayer State ---
+let isOnlineMatch = false;
+let onlinePlayerRole = 'white'; // 'white' (host) or 'black' (guest)
+let isRemoteAction = false;
+let onlineOpponent = null;
+
 function openOnlineModal() {
+  showOnlineMenuView();
   openModal('online-modal');
+}
+
+function showOnlineMenuView() {
+  let vMenu = document.getElementById('online-view-menu');
+  let vHost = document.getElementById('online-view-host');
+  let vJoin = document.getElementById('online-view-join');
+  let vReady = document.getElementById('online-view-ready');
+  if (vMenu) vMenu.style.display = 'block';
+  if (vHost) vHost.style.display = 'none';
+  if (vJoin) vJoin.style.display = 'none';
+  if (vReady) vReady.style.display = 'none';
+}
+
+function showOnlineHostView() {
+  document.getElementById('online-view-menu').style.display = 'none';
+  document.getElementById('online-view-host').style.display = 'block';
+  document.getElementById('online-view-join').style.display = 'none';
+  document.getElementById('online-view-ready').style.display = 'none';
+  
+  let codeEl = document.getElementById('online-room-code-display');
+  if (codeEl) codeEl.innerText = 'BEKLENİYOR...';
+
+  if (typeof NetworkService !== 'undefined') {
+    NetworkService.createRoom();
+  }
+}
+
+function showOnlineJoinView() {
+  document.getElementById('online-view-menu').style.display = 'none';
+  document.getElementById('online-view-host').style.display = 'none';
+  document.getElementById('online-view-join').style.display = 'block';
+  document.getElementById('online-view-ready').style.display = 'none';
+  let input = document.getElementById('online-room-code-input');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+  }
+}
+
+function copyRoomCode() {
+  if (typeof NetworkService !== 'undefined' && NetworkService.roomCode) {
+    navigator.clipboard.writeText(NetworkService.roomCode).then(() => {
+      showToast(`📋 ODA KODU KOPYALANDI:\n${NetworkService.roomCode}`, 2000);
+    }).catch(() => {
+      showToast(`Oda Kodu: ${NetworkService.roomCode}`, 3000);
+    });
+  }
+}
+
+function copyInviteLink() {
+  if (typeof NetworkService !== 'undefined' && NetworkService.roomCode) {
+    let url = window.location.origin + window.location.pathname + '?room=' + NetworkService.roomCode;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('🔗 DAVET LİNKİ KOPYALANDI!\nArkadaşına gönder ve hemen başla.', 3000);
+    }).catch(() => {
+      showToast(`Davet Linki: ${url}`, 4000);
+    });
+  }
+}
+
+function cancelOnlineHosting() {
+  if (typeof NetworkService !== 'undefined') {
+    NetworkService.disconnect();
+  }
+  showOnlineMenuView();
+}
+
+function submitJoinRoom() {
+  let input = document.getElementById('online-room-code-input');
+  if (!input || !input.value.trim()) {
+    showToast('Lütfen geçerli bir oda kodu girin!', 2500);
+    return;
+  }
+  let code = input.value.trim().toUpperCase();
+  if (typeof NetworkService !== 'undefined') {
+    NetworkService.joinRoom(code);
+    showToast('Odaya bağlanılıyor...', 2000);
+  }
 }
 
 function requestExitToMainMenu() {
@@ -144,6 +253,12 @@ function requestExitToMainMenu() {
 
 function confirmExitToMainMenu() {
   closeModal('exit-modal');
+
+  if (isOnlineMatch && state.winner == null) {
+    if (typeof NetworkService !== 'undefined') {
+      NetworkService.leaveMatch();
+    }
+  }
 
   if (state.winner == null && typeof userProfile !== 'undefined') {
     userProfile.losses = (userProfile.losses || 0) + 1;
@@ -161,6 +276,7 @@ function confirmExitToMainMenu() {
     }
   }
 
+  isOnlineMatch = false;
   stopRevealTimer();
   state.isRevealActive = false;
   hideRevealUI();
@@ -242,6 +358,13 @@ function initGame() {
   state.turn = 'white';
   state.winner = null;
   state.dice = []; state.remainingDice = [];
+  state.matchDiceStats = {
+    white: { rolls: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}, doubles: 0, total: 0 },
+    black: { rolls: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}, doubles: 0, total: 0 }
+  };
+  state.turnHistory = [];
+  state.undoUsedThisTurn = false;
+  state.hintMove = null;
   state.selectedPoint = null; state.validMoves = [];
   state.matchProcessed = false;
   dragItem = null;
@@ -273,6 +396,16 @@ function setPt(idx, count, owner) {
 
 function rollDice() {
   if (state.dice.length > 0 || isRolling || activeMoveAnim || state.winner != null) return;
+  
+  if (isOnlineMatch) {
+    if (state.turn !== onlinePlayerRole) return;
+    document.getElementById('roll-btn').disabled = true;
+    if (typeof NetworkService !== 'undefined') {
+      NetworkService.requestRollDice();
+    }
+    return;
+  }
+
   SoundFX.playDiceRoll();
   isRolling = true;
   document.getElementById('roll-btn').disabled = true;
@@ -285,6 +418,15 @@ function rollDice() {
   state.dice = finalDice;
   state.remainingDice = [...finalDice];
 
+  // İstatistikleri kaydet
+  let currentPlayer = state.turn === 'white' ? 'white' : 'black';
+  state.matchDiceStats[currentPlayer].rolls[d1]++;
+  state.matchDiceStats[currentPlayer].rolls[d2]++;
+  state.matchDiceStats[currentPlayer].total += 2;
+  if (d1 === d2) {
+    state.matchDiceStats[currentPlayer].doubles++;
+  }
+
   if (typeof MissionService !== 'undefined' && state.turn === 'white') {
     MissionService.notifyEvent('DICE_ROLLED', 1);
     if (d1 === d2) {
@@ -294,6 +436,12 @@ function rollDice() {
 
   if (d1 === d2 && state.turn === 'white' && typeof userProfile !== 'undefined' && userProfile.stats) {
     userProfile.stats.totalDoubles++;
+  }
+  if (state.turn === 'white' && typeof userProfile !== 'undefined' && userProfile.stats) {
+    if (!userProfile.stats.diceHistory) userProfile.stats.diceHistory = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+    userProfile.stats.diceHistory[d1]++;
+    userProfile.stats.diceHistory[d2]++;
+    if (typeof saveUserProfile === 'function') saveUserProfile(userProfile);
   }
 
   dicePhysics = [
@@ -328,6 +476,60 @@ function rollDice() {
   }, 1100);
 }
 
+function animateRemoteDice(d1, d2, finalDice, remainingDice, validMoves, stateVersion) {
+  if (isRolling) return;
+  SoundFX.playDiceRoll();
+  isRolling = true;
+  let rBtn = document.getElementById('roll-btn');
+  if (rBtn) rBtn.disabled = true;
+
+  let computedDice = finalDice || ((d1 === d2) ? [d1, d1, d1, d1] : [d1, d2]);
+  let computedRemaining = remainingDice ? [...remainingDice] : [...computedDice];
+
+  state.dice = computedDice;
+  state.remainingDice = computedRemaining;
+  if (stateVersion !== undefined) state.stateVersion = stateVersion;
+
+  let currentPlayer = state.turn === 'white' ? 'white' : 'black';
+  state.matchDiceStats[currentPlayer].rolls[d1]++;
+  state.matchDiceStats[currentPlayer].rolls[d2]++;
+  state.matchDiceStats[currentPlayer].total += 2;
+  if (d1 === d2) state.matchDiceStats[currentPlayer].doubles++;
+
+  dicePhysics = [
+    {
+      startX: -15 + (Math.random() - 0.5) * 10, startY: 12 + (Math.random() - 0.5) * 8,
+      targetX: -36 + (Math.random() - 0.5) * 8, targetY: (Math.random() - 0.5) * 6,
+      rotSpeedX: (3 + Math.random() * 2) * Math.PI,
+      rotSpeedY: (4 + Math.random() * 2) * Math.PI,
+      targetVal: d1, delay: 0.0
+    },
+    {
+      startX: 15 + (Math.random() - 0.5) * 10, startY: -10 + (Math.random() - 0.5) * 8,
+      targetX: 36 + (Math.random() - 0.5) * 8, targetY: (Math.random() - 0.5) * 6,
+      rotSpeedX: -(3 + Math.random() * 2) * Math.PI,
+      rotSpeedY: -(4 + Math.random() * 2) * Math.PI,
+      targetVal: d2, delay: 0.04
+    }
+  ];
+
+  animStartTime = performance.now();
+  requestAnimationFrame(stepPhysicsAnimation);
+
+  setTimeout(() => {
+    state.dice = computedDice;
+    state.remainingDice = computedRemaining;
+    if (validMoves) {
+      state.validMoves = validMoves;
+    } else {
+      calculateValidMoves();
+    }
+    isRolling = false;
+    updateUI();
+    draw();
+  }, 1100);
+}
+
 function stepPhysicsAnimation(now) {
   let elapsed = (now - animStartTime) / 1500.0;
   let t = Math.min(1.0, elapsed);
@@ -351,12 +553,17 @@ function checkAutoPass() {
     showToast(msg, 2400);
 
     setTimeout(() => {
+      if (isOnlineMatch && !isRemoteAction && state.turn === onlinePlayerRole && typeof NetworkService !== 'undefined') {
+        NetworkService.send('TURN_PASSED', {});
+      }
       state.whiteCombo = 0;
       state.blackCombo = 0;
       state.turn = state.turn === 'white' ? 'black' : 'white';
       state.dice = [];
       state.remainingDice = [];
       state.validMoves = [];
+      state.turnHistory = [];
+      state.undoUsedThisTurn = false;
       updateUI();
       draw();
       checkAITurn();
@@ -614,18 +821,32 @@ function getCanvasCoords(e) {
   };
 }
 
+function executeMove(move) {
+  state.selectedPoint = null;
+  dragItem = null;
+
+  if (isOnlineMatch) {
+    // Multiplayer: Server Authoritative Move Request
+    if (typeof NetworkService !== 'undefined') {
+      NetworkService.requestMove(move.from, move.to, move.die);
+    }
+  } else {
+    // Local / AI: Execute locally
+    applyMoveWithWaypointAnim(move);
+  }
+}
+
 function startDrag(e) {
   if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
   if (state.dice.length === 0 || isRolling || activeMoveAnim) return;
+  if (isOnlineMatch && state.turn !== onlinePlayerRole) return;
   let pos = getCanvasCoords(e);
   let clickedPt = getPointFromCoords(pos.x, pos.y);
 
   if (state.selectedPoint !== null && clickedPt !== null && clickedPt !== state.selectedPoint) {
     let move = state.validMoves.find(m => m.from === state.selectedPoint && m.to === clickedPt);
     if (move) {
-      state.selectedPoint = null;
-      dragItem = null;
-      applyMoveWithWaypointAnim(move);
+      executeMove(move);
       return;
     }
   }
@@ -646,9 +867,7 @@ function startDrag(e) {
     } else if (state.selectedPoint === barIdx) {
       let move = state.validMoves.find(m => m.from === barIdx && m.to === clickedPt);
       if (move) {
-        state.selectedPoint = null;
-        dragItem = null;
-        applyMoveWithWaypointAnim(move);
+        executeMove(move);
         return;
       }
     }
@@ -689,9 +908,7 @@ function endDrag(e) {
     if (targetPt !== null && targetPt !== dragItem.from) {
       let move = state.validMoves.find(m => m.from === dragItem.from && m.to === targetPt);
       if (move) {
-        state.selectedPoint = null;
-        dragItem = null;
-        applyMoveWithWaypointAnim(move);
+        executeMove(move);
         return;
       }
     }
@@ -717,7 +934,28 @@ function showToast(msg, duration = 2400) {
   toast.hideTimeout = setTimeout(() => { toast.style.opacity = '0'; }, duration);
 }
 
-function applyMoveWithWaypointAnim(m) {
+function syncServerGameState(gameState, stateVersion) {
+  if (!gameState) return;
+  state.points = gameState.points.map(p => ({ ...p }));
+  state.whiteBar = gameState.whiteBar;
+  state.blackBar = gameState.blackBar;
+  state.whiteOff = gameState.whiteOff;
+  state.blackOff = gameState.blackOff;
+  state.turn = gameState.turn;
+  state.dice = gameState.dice ? [...gameState.dice] : [];
+  state.remainingDice = gameState.remainingDice ? [...gameState.remainingDice] : [];
+  state.validMoves = gameState.validMoves ? [...gameState.validMoves] : [];
+  state.winner = gameState.winner;
+  state.stateVersion = stateVersion || gameState.stateVersion;
+  state.selectedPoint = null;
+  dragItem = null;
+  isRolling = false;
+
+  updateUI();
+  draw();
+}
+
+function applyMoveWithWaypointAnim(m, onComplete = null) {
   let waypoints = buildWaypointPath(m.from, m.to);
   let startT = performance.now();
   let duration = 420;
@@ -743,7 +981,12 @@ function applyMoveWithWaypointAnim(m) {
       requestAnimationFrame(stepMoveAnim);
     } else {
       activeMoveAnim = null;
-      applyMoveState(m);
+      if (isOnlineMatch) {
+        if (onComplete) onComplete();
+        else updateUI();
+      } else {
+        applyMoveState(m);
+      }
     }
   }
 
@@ -751,6 +994,24 @@ function applyMoveWithWaypointAnim(m) {
 }
 
 function applyMoveState(m) {
+  if (state.turn === 'white' && !isAIBusy) {
+    let snapshot = {
+      points: JSON.parse(JSON.stringify(state.points)),
+      whiteBar: state.whiteBar,
+      blackBar: state.blackBar,
+      whiteOff: state.whiteOff,
+      blackOff: state.blackOff,
+      remainingDice: [...state.remainingDice],
+      whiteCombo: state.whiteCombo,
+      blackCombo: state.blackCombo,
+      highestWhiteCombo: state.highestWhiteCombo,
+      highestBlackCombo: state.highestBlackCombo,
+      matchComboXP: state.matchComboXP
+    };
+    if (!state.turnHistory) state.turnHistory = [];
+    state.turnHistory.push(snapshot);
+  }
+
   if (m.isCombined) {
     let d1 = m.componentDice[0];
     let d2 = m.componentDice[1];
@@ -767,6 +1028,32 @@ function applyMoveState(m) {
   }
 
   applySingleMove(m);
+}
+
+function undoLastMove() {
+  if (state.turn !== 'white' || isAIBusy || !state.turnHistory || state.turnHistory.length === 0 || state.undoUsedThisTurn) return;
+  
+  state.hintMove = null;
+  let snapshot = state.turnHistory.pop();
+  state.points = snapshot.points;
+  state.whiteBar = snapshot.whiteBar;
+  state.blackBar = snapshot.blackBar;
+  state.whiteOff = snapshot.whiteOff;
+  state.blackOff = snapshot.blackOff;
+  state.remainingDice = snapshot.remainingDice;
+  state.whiteCombo = snapshot.whiteCombo;
+  state.blackCombo = snapshot.blackCombo;
+  state.highestWhiteCombo = snapshot.highestWhiteCombo;
+  state.highestBlackCombo = snapshot.highestBlackCombo;
+  state.matchComboXP = snapshot.matchComboXP;
+  
+  state.undoUsedThisTurn = true;
+  state.selectedPoint = null;
+  dragItem = null;
+  calculateValidMoves();
+  updateUI();
+  draw();
+  SoundFX.playCheckerHit(); // Küçük bir ses geri beslemesi
 }
 
 function checkWinCondition() {
@@ -795,10 +1082,16 @@ function checkWinCondition() {
           if (userProfile.stats) {
             userProfile.stats.matchesWon = userProfile.wins;
             if (state.blackOff === 0) userProfile.stats.totalMarsa++;
+            userProfile.stats.currentStreak = (userProfile.stats.currentStreak || 0) + 1;
+            userProfile.stats.highestStreak = Math.max(userProfile.stats.highestStreak || 0, userProfile.stats.currentStreak);
           }
         } else {
           userProfile.losses = (userProfile.losses || 0) + 1;
+          if (userProfile.stats) {
+            userProfile.stats.currentStreak = 0;
+          }
         }
+        if (typeof saveUserProfile === 'function') saveUserProfile(userProfile);
       }
 
       if (typeof CoinService !== 'undefined') {
@@ -807,10 +1100,6 @@ function checkWinCondition() {
 
       if (typeof XPService !== 'undefined') {
         xpResult = XPService.grantMatchReward(isWin);
-      }
-
-      if (typeof MissionService !== 'undefined') {
-        MissionService.endMatch(isWin, typeof currentGameMode !== 'undefined' && currentGameMode === 'DARK_TAVLA');
       }
 
       if (typeof AchievementService !== 'undefined') {
@@ -823,36 +1112,99 @@ function checkWinCondition() {
     updateUI();
     draw();
     SoundFX.playGameWin();
+
     setTimeout(() => {
-      let msg = `🏆 TEBRİKLER! ${winnerName.toUpperCase()} OYUNCU MAÇI KAZANDI! 🎉\n\n`;
       let isWin = (winnerName === 'Beyaz');
-      if (isWin && coinReward && coinReward.granted) {
-        msg += `🪙 +${coinReward.amount} Coins\n`;
+      let missionSummary = { xp: 0, coins: 0, count: 0 };
+
+      if (typeof MissionService !== 'undefined') {
+        missionSummary = MissionService.endMatch(isWin, typeof currentGameMode !== 'undefined' && currentGameMode === 'DARK_TAVLA');
       }
+
+      if (typeof saveUserProfile === 'function') saveUserProfile(userProfile);
+
+      let msg = `=============================\n`;
+      msg += `  🏆 MAÇ SONUCU: ${isWin ? 'GALİBİYET!' : 'MAĞLUBİYET'} \n`;
+      msg += `=============================\n\n`;
+
+      let totalXP = 0;
+      let totalCoins = 0;
+
       if (xpResult && xpResult.granted) {
-        msg += `⭐ +${xpResult.amount} XP (${isWin ? 'GALİBİYET' : 'MAĞLUBİYET'})\n\n`;
+        msg += `⭐ XP Ödülü: +${xpResult.amount}\n`;
+        totalXP += xpResult.amount;
       }
+      
       if (state.matchComboXP > 0 && isWin) {
-        msg += `\n🔥 COMBO BAŞARISI: +${state.matchComboXP} XP\n`;
-        if (state.highestWhiteCombo > 0) {
-          msg += `   (En Yüksek Seri: x${state.highestWhiteCombo})\n`;
-        }
+        msg += `🔥 Combo Primi: +${state.matchComboXP}\n`;
+        totalXP += state.matchComboXP;
       }
+
+      if (coinReward && coinReward.granted) {
+        msg += `🪙 Maç Ödülü: +${coinReward.amount} Coin\n`;
+        totalCoins += coinReward.amount;
+      }
+
+      if (missionSummary && missionSummary.count > 0) {
+        msg += `🎯 Görevler (${missionSummary.count}): +${missionSummary.xp} XP | +${missionSummary.coins} Coin\n`;
+        totalXP += missionSummary.xp;
+        totalCoins += missionSummary.coins;
+      }
+
+      msg += `\n-----------------------------\n`;
+      msg += `TOPLAM KAZANÇ:\n`;
+      msg += `+${totalXP} XP   |   +${totalCoins} COIN\n`;
+      msg += `-----------------------------\n`;
 
       let prog = typeof XPService !== 'undefined' ? XPService.getProgress() : { level: 1, currentXP: 0, requiredXP: 100 };
-      msg += `\n⭐ MEVCUT: SEVİYE ${prog.level} (${prog.currentXP} / ${prog.requiredXP} XP)`;
-
+      
       if (xpResult && xpResult.leveledUp) {
-        msg += `\n\n🌟 SEVİYE ATLADINIZ! YENİ SEVİYE: LEVEL ${xpResult.newLevel}`;
+        msg += `\n🌟 SEVİYE ATLADINIZ! YENİ: LEVEL ${xpResult.newLevel} 🌟`;
+      } else {
+        msg += `\nSıradaki Seviyeye: ${prog.requiredXP - prog.currentXP} XP Kaldı`;
       }
-      showToast(msg, 7000);
+
+      showToast(msg, 8000);
+      
+      // Şeffaflık panelini oyun bittikten 7.5 saniye sonra aç
+      setTimeout(() => {
+        if(typeof populateDiceStatsModal === 'function') {
+          populateDiceStatsModal();
+        }
+        openModal('dice-stats-modal');
+      }, 7500);
     }, 150);
     return true;
   }
   return false;
 }
 
+function populateDiceStatsModal() {
+  ['white', 'black'].forEach(player => {
+    const stats = state.matchDiceStats[player];
+    const total = stats.total > 0 ? stats.total : 1;
+    const prefix = player === 'white' ? 'w' : 'b';
+    
+    // Zarları doldur
+    for(let i=1; i<=6; i++) {
+      const count = stats.rolls[i];
+      const pct = Math.round((count / total) * 100);
+      
+      let fillEl = document.getElementById(`dice-stat-${prefix}-${i}-fill`);
+      let textEl = document.getElementById(`dice-stat-${prefix}-${i}-text`);
+      
+      if(fillEl) fillEl.style.width = pct + '%';
+      if(textEl) textEl.innerText = count;
+    }
+    
+    // Çiftleri doldur
+    let doubleEl = document.getElementById(`dice-stat-${prefix}-doubles`);
+    if(doubleEl) doubleEl.innerText = stats.doubles;
+  });
+}
+
 function applySingleMove(m) {
+  state.hintMove = null;
   if (state.turn === 'white' && typeof userProfile !== 'undefined' && userProfile.stats) {
     userProfile.stats.totalMoves++;
   }
@@ -931,6 +1283,10 @@ function applySingleMove(m) {
   state.selectedPoint = null;
   calculateValidMoves();
 
+  if (isOnlineMatch && !isRemoteAction && state.turn === onlinePlayerRole && typeof NetworkService !== 'undefined') {
+    NetworkService.send('MOVE_APPLIED', m);
+  }
+
   if (state.remainingDice.length === 0) {
     state.whiteCombo = 0;
     state.blackCombo = 0;
@@ -957,6 +1313,8 @@ function applySingleMove(m) {
     state.dice = [];
     state.remainingDice = [];
     state.validMoves = [];
+    state.turnHistory = [];
+    state.undoUsedThisTurn = false;
   } else {
     checkAutoPass();
   }
@@ -976,6 +1334,8 @@ function getPointFromCoords(x, y) {
   let rightTrayW = 54;
   let barW = 48, halfW = (w - barW - rightTrayW) / 2, ptW = (halfW - frameBorder) / 6;
 
+  let flipped = isBoardFlipped();
+
   if (x > halfW && x < halfW + barW) {
     return y < h / 2 ? 24 : -1;
   }
@@ -985,26 +1345,28 @@ function getPointFromCoords(x, y) {
   }
 
   let isTop = y < h / 2;
-  let idx = null;
+  let v = null;
 
   if (!isTop) {
     if (x >= halfW + barW && x < w - rightTrayW) {
       let col = Math.floor((x - (halfW + barW)) / ptW);
-      idx = 5 - col;
+      v = 5 - col;
     } else if (x >= frameBorder && x < halfW) {
       let col = Math.floor((x - frameBorder) / ptW);
-      idx = 11 - col;
+      v = 11 - col;
     }
   } else {
     if (x >= frameBorder && x < halfW) {
       let col = Math.floor((x - frameBorder) / ptW);
-      idx = 12 + col;
+      v = 12 + col;
     } else if (x >= halfW + barW && x < w - rightTrayW) {
       let col = Math.floor((x - (halfW + barW)) / ptW);
-      idx = 18 + col;
+      v = 18 + col;
     }
   }
-  return idx;
+
+  if (v === null) return null;
+  return toLogicalPoint(v);
 }
 
 function draw(animRatio = 1.0, moveRatio = 1.0) {
@@ -1029,7 +1391,7 @@ function draw(animRatio = 1.0, moveRatio = 1.0) {
 
   let theme = boardThemes[currentBoardTheme] || boardThemes.walnut;
 
-  let viewer = isVsAI ? 'white' : state.turn;
+  let viewer = isOnlineMatch ? onlinePlayerRole : (isVsAI ? 'white' : state.turn);
   let forceReveal = (currentGameMode === 'DARK_TAVLA' && state.isRevealActive);
   let isFogMode = (currentGameMode === 'DARK_TAVLA' && !forceReveal);
 
@@ -1086,40 +1448,52 @@ function draw(animRatio = 1.0, moveRatio = 1.0) {
   let trayCheckerR = Math.min(ptW * 0.44, 17);
   let stackSpacing = Math.min(trayCheckerR * 2.2, (trayH / 2 - 20) / 15);
 
-  let wCount = state.whiteOff;
-  if (dragItem && dragItem.from === -1 && state.turn === 'white') wCount--;
-  let showWhiteOff = true;
-  if (isFogMode && !forceReveal && viewer !== 'white') showWhiteOff = false;
+  let flipped = isBoardFlipped();
+  let bottomOwner = flipped ? 'black' : 'white';
+  let topOwner = flipped ? 'white' : 'black';
 
-  if (showWhiteOff) {
-    for (let i = 0; i < wCount; i++) {
+  let bottomCount = bottomOwner === 'white' ? state.whiteOff : state.blackOff;
+  let topCount = topOwner === 'white' ? state.whiteOff : state.blackOff;
+
+  if (dragItem) {
+    if (bottomOwner === 'white' && dragItem.from === -1 && state.turn === 'white') bottomCount--;
+    if (bottomOwner === 'black' && dragItem.from === 24 && state.turn === 'black') bottomCount--;
+    if (topOwner === 'white' && dragItem.from === -1 && state.turn === 'white') topCount--;
+    if (topOwner === 'black' && dragItem.from === 24 && state.turn === 'black') topCount--;
+  }
+
+  let showBottomOff = true;
+  let showTopOff = true;
+  if (isFogMode && !forceReveal) {
+    if (viewer !== bottomOwner) showBottomOff = false;
+    if (viewer !== topOwner) showTopOff = false;
+  }
+
+  if (showBottomOff) {
+    for (let i = 0; i < bottomCount; i++) {
       let cy = h - trayTop - trayCheckerR - 6 - i * stackSpacing;
-      draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'white');
+      draw3DCylindricalChecker(trayCx, cy, trayCheckerR, bottomOwner);
     }
   }
 
-  let bCount = state.blackOff;
-  if (dragItem && dragItem.from === 24 && state.turn === 'black') bCount--;
-  let showBlackOff = true;
-  if (isFogMode && !forceReveal && viewer !== 'black') showBlackOff = false;
-
-  if (showBlackOff) {
-    for (let i = 0; i < bCount; i++) {
+  if (showTopOff) {
+    for (let i = 0; i < topCount; i++) {
       let cy = trayTop + trayCheckerR + 6 + i * stackSpacing;
-      draw3DCylindricalChecker(trayCx, cy, trayCheckerR, 'black');
+      draw3DCylindricalChecker(trayCx, cy, trayCheckerR, topOwner);
     }
   }
 
   // Draw 24 Points
-  for (let i = 0; i < 24; i++) {
-    let isDark = i % 2 === 0;
+  for (let v = 0; v < 24; v++) {
+    let i = toLogicalPoint(v);
+    let isDark = v % 2 === 0;
     let isSel = state.selectedPoint === i;
 
-    let left = 0, isTop = i >= 12;
-    if (i <= 5) left = halfW + barW + (5 - i) * ptW;
-    else if (i <= 11) left = frameBorder + (11 - i) * ptW;
-    else if (i <= 17) left = frameBorder + (i - 12) * ptW;
-    else left = halfW + barW + (i - 18) * ptW;
+    let left = 0, isTop = v >= 12;
+    if (v <= 5) left = halfW + barW + (5 - v) * ptW;
+    else if (v <= 11) left = frameBorder + (11 - v) * ptW;
+    else if (v <= 17) left = frameBorder + (v - 12) * ptW;
+    else left = halfW + barW + (v - 18) * ptW;
 
     ctx.beginPath();
     if (!isTop) {
@@ -1193,14 +1567,20 @@ function draw(animRatio = 1.0, moveRatio = 1.0) {
       ptGrd.addColorStop(0, theme.light); ptGrd.addColorStop(1, '#C7B79E');
     }
 
+    if (state.hintMove && (state.hintMove.from === i || state.hintMove.to === i)) {
+      ptGrd = ctx.createLinearGradient(0, isTop ? frameBorder : h - frameBorder, 0, isTop ? frameBorder + triH : h - frameBorder - triH);
+      ptGrd.addColorStop(0, '#FFF200'); ptGrd.addColorStop(1, '#B89959');
+    }
+
     ctx.fillStyle = ptGrd;
     ctx.fill();
 
-    if (isLegalDestination && isFogMode) ctx.strokeStyle = '#D4AF37';
+    if (state.hintMove && (state.hintMove.from === i || state.hintMove.to === i)) ctx.strokeStyle = '#FFFFFF';
+    else if (isLegalDestination && isFogMode) ctx.strokeStyle = '#D4AF37';
     else if (isOpponentGateTarget && isFogMode) ctx.strokeStyle = '#8B0000';
     else ctx.strokeStyle = isSel ? '#F2EBDF' : isLegalDestination ? '#9CCB86' : (isFogMode && !forceReveal && !isOwnPoint ? 'rgba(0,0,0,0.8)' : (isDark ? 'rgba(0,0,0,0.4)' : 'rgba(100,60,30,0.1)'));
 
-    ctx.lineWidth = isSel || isLegalDestination || isOpponentGateTarget ? 1.5 : 1.0;
+    ctx.lineWidth = isSel || isLegalDestination || isOpponentGateTarget || (state.hintMove && (state.hintMove.from === i || state.hintMove.to === i)) ? 1.5 : 1.0;
     ctx.stroke();
 
     if (pt.count > 0) {
@@ -1473,25 +1853,94 @@ function getDieOpacity(dieIndex) {
 }
 
 function updateUI() {
-  let isHumanTurn = !isVsAI || state.turn === 'white';
+  let isHumanTurn = isOnlineMatch
+    ? (state.turn === onlinePlayerRole)
+    : (!isVsAI || state.turn === 'white');
+
   let wTurn = document.getElementById('white-turn');
   let bTurn = document.getElementById('black-turn');
   let wOff = document.getElementById('white-off-count');
   let bOff = document.getElementById('black-off-count');
   let rBtn = document.getElementById('roll-btn');
   let sMsg = document.getElementById('status-msg');
+  let undoBtn = document.getElementById('undo-btn');
+  let hintBtn = document.getElementById('hint-btn');
+  let wNameEl = document.getElementById('hud-name-left');
+  let bNameEl = document.getElementById('hud-name-right');
 
-  if (wTurn) wTurn.style.display = (state.turn === 'white' && !state.winner) ? 'block' : 'none';
-  if (bTurn) bTurn.style.display = (state.turn === 'black' && !state.winner) ? 'block' : 'none';
-  if (wOff) wOff.innerText = state.whiteOff;
-  if (bOff) bOff.innerText = state.blackOff;
-  if (rBtn) rBtn.disabled = state.dice.length > 0 || isRolling || state.winner != null || !isHumanTurn;
+  if (isOnlineMatch) {
+    let myName = (typeof userProfile !== 'undefined' && userProfile && userProfile.username) ? userProfile.username : 'Sen';
+    let oppName = (typeof opponentProfile !== 'undefined' && opponentProfile && opponentProfile.username) ? opponentProfile.username : 'Rakip';
+
+    if (onlinePlayerRole === 'black') {
+      if (wNameEl) wNameEl.innerHTML = `${myName} (SİYAH - SEN) <span class="indicator black-indicator"></span>`;
+      if (bNameEl) bNameEl.innerHTML = `<span class="indicator white-indicator"></span>${oppName} (BEYAZ - RAKİP)`;
+      if (wOff) wOff.innerText = state.blackOff;
+      if (bOff) bOff.innerText = state.whiteOff;
+    } else {
+      if (wNameEl) wNameEl.innerHTML = `${myName} (BEYAZ - SEN) <span class="indicator white-indicator"></span>`;
+      if (bNameEl) bNameEl.innerHTML = `<span class="indicator black-indicator"></span>${oppName} (SİYAH - RAKİP)`;
+      if (wOff) wOff.innerText = state.whiteOff;
+      if (bOff) bOff.innerText = state.blackOff;
+    }
+
+    if (wTurn) {
+      wTurn.style.display = (state.turn === onlinePlayerRole && !state.winner) ? 'block' : 'none';
+      wTurn.innerText = '● SIRA SENDE';
+    }
+    if (bTurn) bTurn.style.display = 'none';
+  } else {
+    if (wNameEl) wNameEl.innerHTML = `BEYAZ OYUNCU <span class="indicator white-indicator"></span>`;
+    if (bNameEl) bNameEl.innerHTML = `<span class="indicator black-indicator"></span>${isVsAI ? 'YAPAY ZEKA' : 'SİYAH OYUNCU'}`;
+    if (wOff) wOff.innerText = state.whiteOff;
+    if (bOff) bOff.innerText = state.blackOff;
+    if (wTurn) wTurn.style.display = (state.turn === 'white' && !state.winner) ? 'block' : 'none';
+    if (bTurn) bTurn.style.display = (state.turn === 'black' && !state.winner) ? 'block' : 'none';
+  }
+
+  // Zar Butonunun Durumu
+  if (rBtn) {
+    if (isOnlineMatch) {
+      const isMyTurn = (state.turn === onlinePlayerRole);
+      const hasDice = (state.dice && state.dice.length > 0);
+      rBtn.disabled = !isMyTurn || hasDice || isRolling || activeMoveAnim != null || state.winner != null;
+    } else {
+      rBtn.disabled = state.dice.length > 0 || isRolling || activeMoveAnim != null || state.winner != null || !isHumanTurn;
+    }
+  }
+  
+  if (undoBtn) {
+    if (!isOnlineMatch && state.turn === 'white' && state.turnHistory && state.turnHistory.length > 0 && !isAIBusy && state.winner == null && !state.undoUsedThisTurn) {
+      undoBtn.style.display = 'block';
+    } else {
+      undoBtn.style.display = 'none';
+    }
+  }
+
+  if (hintBtn) {
+    if (!isOnlineMatch && state.turn === 'white' && state.dice.length > 0 && state.validMoves.length > 0 && !state.winner && !state.hintMove) {
+      hintBtn.style.display = 'block';
+    } else {
+      hintBtn.style.display = 'none';
+    }
+  }
 
   if (sMsg) {
     if (state.winner) {
       sMsg.innerText = `MAÇ BİTTİ - ${state.winner.toUpperCase()} KAZANDI`;
+    } else if (isOnlineMatch) {
+      const isMyTurn = (state.turn === onlinePlayerRole);
+      if (!isMyTurn) {
+        sMsg.innerText = 'RAKİBİN SIRASI';
+      } else if (state.dice.length > 0) {
+        let d1 = state.dice[0];
+        let d2 = state.dice[1] !== undefined ? state.dice[1] : state.dice[0];
+        sMsg.innerText = `ZAR [ ${d1} - ${d2} ] - HAMLE YAP`;
+      } else {
+        sMsg.innerText = 'SIRA SENDE - ZAR AT';
+      }
     } else if (!isHumanTurn) {
-      sMsg.innerText = 'RAKİP BEKLENİYOR...';
+      sMsg.innerText = 'YAPAY ZEKA DÜŞÜNÜYOR...';
     } else {
       if (state.dice.length > 0) {
         let d1 = state.dice[0];
@@ -1531,13 +1980,302 @@ function setupEventListeners() {
   window.addEventListener('resize', handleResize);
 }
 
+// --- Emote Handlers ---
+function toggleEmoteMenu() {
+  let menu = document.getElementById('emote-popup-menu');
+  if (menu) {
+    menu.style.display = menu.style.display === 'none' ? 'grid' : 'none';
+  }
+}
+
+function sendEmote(text) {
+  let menu = document.getElementById('emote-popup-menu');
+  if (menu) menu.style.display = 'none';
+
+  let player = isOnlineMatch ? onlinePlayerRole : 'white';
+  displayEmoteBubble(player, text);
+
+  if (isOnlineMatch && typeof NetworkService !== 'undefined') {
+    NetworkService.send('EMOTE', { player, text });
+  }
+}
+
+function displayEmoteBubble(player, text) {
+  let bubbleId = player === 'white' ? 'white-speech-bubble' : 'black-speech-bubble';
+  let textId = player === 'white' ? 'white-speech-text' : 'black-speech-text';
+  let bubble = document.getElementById(bubbleId);
+  let txt = document.getElementById(textId);
+
+  if (bubble && txt) {
+    txt.innerText = text;
+    bubble.classList.add('show');
+    setTimeout(() => {
+      bubble.classList.remove('show');
+    }, 3000);
+  }
+}
+
+// --- Network Event Listeners & Online Match Lifecycle ---
+function initNetworkListeners() {
+  if (typeof NetworkService === 'undefined') return;
+
+  NetworkService.on('room_state', (data) => {
+    let el = document.getElementById('online-room-code-display');
+    if (el) el.innerText = data.roomCode;
+  });
+
+  NetworkService.on('game_start', (data) => {
+    onlineOpponent = data.opponent || { username: 'Misafir', title: 'Oyuncu' };
+    onlinePlayerRole = data.role; // 'white' or 'black'
+
+    // Show ready countdown view
+    let vMenu = document.getElementById('online-view-menu');
+    let vHost = document.getElementById('online-view-host');
+    let vJoin = document.getElementById('online-view-join');
+    let vReady = document.getElementById('online-view-ready');
+    if (vMenu) vMenu.style.display = 'none';
+    if (vHost) vHost.style.display = 'none';
+    if (vJoin) vJoin.style.display = 'none';
+    if (vReady) vReady.style.display = 'block';
+
+    let myName = (typeof userProfile !== 'undefined' && userProfile.username) ? userProfile.username : 'Sen';
+    let oppName = onlineOpponent.username || 'Rakip';
+
+    let p1El = document.getElementById('match-p1-name');
+    let p2El = document.getElementById('match-p2-name');
+
+    if (onlinePlayerRole === 'white') {
+      if (p1El) p1El.innerText = myName;
+      if (p2El) p2El.innerText = oppName;
+    } else {
+      if (p1El) p1El.innerText = oppName;
+      if (p2El) p2El.innerText = myName;
+    }
+
+    let count = 3;
+    let cdText = document.getElementById('online-countdown-text');
+    if (cdText) cdText.innerText = `Maç Başlıyor... (${count})`;
+
+    let timer = setInterval(() => {
+      count--;
+      if (count > 0) {
+        if (cdText) cdText.innerText = `Maç Başlıyor... (${count})`;
+      } else {
+        clearInterval(timer);
+        startOnlineMatch(data.gameState);
+      }
+    }, 1000);
+  });
+
+  NetworkService.on('dice_rolled', (data) => {
+    animateRemoteDice(data.d1, data.d2, data.dice, data.remainingDice, data.validMoves, data.stateVersion);
+  });
+
+  NetworkService.on('move_accepted', (data) => {
+    const { move, gameState, wasHit, turnChanged, stateVersion } = data;
+    
+    // Ses efektini anında çal
+    if (move.isOff) SoundFX.playBearOff();
+    else if (wasHit) SoundFX.playCheckerHit();
+    else SoundFX.playCheckerMove();
+
+    // Pul hareketini 2.5D Waypoint Trajectory ile canlandır ve bitince authoritative state senkronize et
+    applyMoveWithWaypointAnim(move, () => {
+      if (gameState) {
+        syncServerGameState(gameState, stateVersion);
+      }
+    });
+  });
+
+  NetworkService.on('move_rejected', (data) => {
+    showToast('⚠️ Geçersiz hamle veya sıra sizde değil!', 2000);
+    if (data && data.currentGameState) {
+      syncServerGameState(data.currentGameState, data.stateVersion);
+    }
+  });
+
+  NetworkService.on('turn_changed', (data) => {
+    isRolling = false;
+    activeMoveAnim = null;
+    if (data.gameState) {
+      syncServerGameState(data.gameState, data.stateVersion);
+    } else {
+      state.turn = data.turn;
+      state.dice = [];
+      state.remainingDice = [];
+      state.validMoves = [];
+      updateUI();
+      draw();
+    }
+  });
+
+  NetworkService.on('game_state', (data) => {
+    // Reconnect State Senkronizasyonu
+    const { gameState, role, turn, dice, remainingDice, validMoves, stateVersion } = data;
+    isOnlineMatch = true;
+    isVsAI = false;
+    onlinePlayerRole = role;
+    isRolling = false;
+    activeMoveAnim = null;
+
+    closeModal('online-modal');
+    let mm = document.getElementById('main-menu');
+    if (mm) mm.style.display = 'none';
+
+    if (gameState) {
+      syncServerGameState(gameState, stateVersion);
+    }
+
+    showToast('🔄 MAÇA YENİDEN BAĞLANILDI!\nDurum senkronize edildi.', 4000);
+  });
+
+  NetworkService.on('player_disconnected', (data) => {
+    if (isOnlineMatch && state.winner == null) {
+      showToast('⚠️ RAKİBİN BAĞLANTISI KESİLDİ!\nYeniden bağlanması için 60 saniye bekleniyor...', 8000);
+    }
+  });
+
+  NetworkService.on('player_reconnected', (data) => {
+    showToast('✅ RAKİP YENİDEN BAĞLANDI!\nMaç devam ediyor.', 3000);
+  });
+
+  NetworkService.on('game_over', (data) => {
+    const { winner, loser, reason, rewards, gameState } = data;
+    state.winner = (winner === 'white' ? 'Beyaz' : 'Siyah');
+    state.dice = [];
+    state.remainingDice = [];
+    state.validMoves = [];
+    isRolling = false;
+    activeMoveAnim = null;
+    
+    if (gameState) {
+      state.points = gameState.points.map(p => ({ ...p }));
+      state.whiteOff = gameState.whiteOff;
+      state.blackOff = gameState.blackOff;
+      state.turn = gameState.turn;
+    }
+    
+    updateUI();
+    draw();
+    SoundFX.playGameWin();
+
+    const isWin = (winner === onlinePlayerRole);
+    const myReward = rewards ? (isWin ? rewards.winner : rewards.loser) : { xp: 50, coins: 100 };
+
+    if (!state.matchProcessed) {
+      state.matchProcessed = true;
+      if (typeof userProfile !== 'undefined') {
+        if (isWin) {
+          userProfile.wins = (userProfile.wins || 0) + 1;
+          if (userProfile.stats) {
+            userProfile.stats.matchesWon = userProfile.wins;
+            userProfile.stats.currentStreak = (userProfile.stats.currentStreak || 0) + 1;
+            userProfile.stats.highestStreak = Math.max(userProfile.stats.highestStreak || 0, userProfile.stats.currentStreak);
+          }
+        } else {
+          userProfile.losses = (userProfile.losses || 0) + 1;
+          if (userProfile.stats) {
+            userProfile.stats.currentStreak = 0;
+          }
+        }
+        if (typeof saveUserProfile === 'function') saveUserProfile(userProfile);
+      }
+
+      if (typeof XPService !== 'undefined' && myReward && myReward.xp) {
+        XPService.addXP(myReward.xp, 'ONLINE_MATCH');
+      }
+      if (typeof CoinService !== 'undefined' && myReward && myReward.coins) {
+        CoinService.addCoins(myReward.coins, 'ONLINE_MATCH');
+      }
+      if (typeof MissionService !== 'undefined') {
+        MissionService.endMatch(isWin, false);
+      }
+      if (typeof AchievementService !== 'undefined') {
+        AchievementService.checkAll();
+      }
+    }
+
+    let msg = `=============================\n`;
+    msg += `  🏆 ÇEVRİMİÇİ MAÇ SONUCU: ${isWin ? 'GALİBİYET!' : 'MAĞLUBİYET'} \n`;
+    msg += `=============================\n\n`;
+    if (reason === 'FORFEIT' || reason === 'OPPONENT_FORFEIT') {
+      if (isWin) {
+        msg += `⚡ Rakip oyundan ayrıldığı için HÜKMEN KAZANDINIZ!\n\n`;
+      } else {
+        msg += `🚪 Oyundan ayrıldığınız için HÜKMEN MAĞLUP OLDUNUZ.\n\n`;
+      }
+    }
+    if (myReward) {
+      msg += `⭐ XP Ödülü: +${myReward.xp} XP\n`;
+      msg += `🪙 Coin Ödülü: +${myReward.coins} Coin\n`;
+    }
+
+    showToast(msg, 9000);
+  });
+
+  NetworkService.on('error', (err) => {
+    if (err && (err.code === 'INVALID_TOKEN' || err.code === 'MATCH_EXPIRED')) {
+      sessionStorage.removeItem('tavla_reconnect_token');
+      return;
+    }
+    showToast(`❌ ${err.message || 'Bağlantı hatası!'}`, 4000);
+    showOnlineMenuView();
+  });
+}
+
+function startOnlineMatch(initialState = null) {
+  closeModal('online-modal');
+  let mm = document.getElementById('main-menu');
+  if (mm) mm.style.display = 'none';
+  isVsAI = false;
+  isOnlineMatch = true;
+  currentGameMode = 'NORMAL';
+  isRolling = false;
+  activeMoveAnim = null;
+  
+  if (initialState) {
+    syncServerGameState(initialState, initialState.stateVersion);
+  } else {
+    initGame();
+  }
+  
+  let roleName = onlinePlayerRole === 'white' ? 'BEYAZ (İlk Hamle)' : 'SİYAH (İkinci Hamle)';
+  showToast(`⚔️ ÇEVRİMİÇİ MAÇ BAŞLADI!\nSenin Rolün: ${roleName}`, 4000);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   loadWebProfile();
+  initNetworkListeners();
   initGame();
   setTimeout(draw, 50);
+
+  // Oturum / Reconnect kontrolü
+  if (typeof NetworkService !== 'undefined') {
+    let reconnected = NetworkService.tryReconnect();
+    if (!reconnected) {
+      let urlRoom = NetworkService.getRoomFromURL();
+      if (urlRoom) {
+        openOnlineModal();
+        showOnlineJoinView();
+        let input = document.getElementById('online-room-code-input');
+        if (input) input.value = urlRoom;
+        showToast(`🔗 Odaya katılmak için "BAĞLAN" butonuna tıkla! (Oda: ${urlRoom})`, 4000);
+      }
+    }
+  }
 });
 
 window.addEventListener('load', () => {
   draw();
 });
+
+function showHint() {
+  if (state.turn !== 'white' || state.dice.length === 0 || state.validMoves.length === 0 || state.winner) return;
+  let best = getAIBestMove('white');
+  if (best) {
+    state.hintMove = best;
+    updateUI();
+    draw();
+  }
+}

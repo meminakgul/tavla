@@ -48,7 +48,7 @@ function checkAITurn() {
   }
 }
 
-function getAIBestMove() {
+function getAIBestMove(player = 'black') {
   let valid = state.validMoves;
   if (valid.length === 0) return null;
 
@@ -61,7 +61,7 @@ function getAIBestMove() {
 
   valid.forEach(m => {
     let temp = simulateSingleMoveState(baseState, m);
-    let score = evaluateBoardForAI(temp);
+    let score = evaluateBoardForAI(temp, player);
     if (score > maxScore) {
       maxScore = score;
       bestMove = m;
@@ -87,49 +87,74 @@ function getPerceivedStateForAI(realState) {
   return perceived;
 }
 
-function evaluateBoardForAI(st) {
-  let score = 0;
-  if (st.blackOff === 15) return 100000;
-  if (st.whiteOff === 15) return -100000;
+function evaluateBoardForAI(st, player = 'black') {
+  // Neural Network Evaluation
+  if (typeof AI_WEIGHTS !== 'undefined') {
+    let vec = new Array(28).fill(0);
+    for (let i = 0; i < 24; i++) {
+      if (st.points[i].owner === 'white') vec[i] = st.points[i].count;
+      else if (st.points[i].owner === 'black') vec[i] = -st.points[i].count;
+    }
+    vec[24] = st.whiteBar;
+    vec[25] = st.blackBar;
+    vec[26] = st.whiteOff;
+    vec[27] = st.blackOff;
 
-  score += st.blackOff * 200 - st.whiteOff * 200;
-  score -= st.blackBar * 200 - st.whiteBar * 200;
+    let h1 = new Array(128).fill(0);
+    for (let i = 0; i < 128; i++) {
+      let sum = AI_WEIGHTS.fc1_bias[i];
+      for (let j = 0; j < 28; j++) sum += vec[j] * AI_WEIGHTS.fc1_weight[i][j];
+      h1[i] = sum > 0 ? sum : 0;
+    }
+
+    let h2 = new Array(64).fill(0);
+    for (let i = 0; i < 64; i++) {
+      let sum = AI_WEIGHTS.fc2_bias[i];
+      for (let j = 0; j < 128; j++) sum += h1[j] * AI_WEIGHTS.fc2_weight[i][j];
+      h2[i] = sum > 0 ? sum : 0;
+    }
+
+    let out = AI_WEIGHTS.out_bias[0];
+    for (let i = 0; i < 64; i++) {
+      out += h2[i] * AI_WEIGHTS.out_weight[0][i];
+    }
+
+    let pWhite = 1 / (1 + Math.exp(-out));
+    return player === 'white' ? pWhite : (1 - pWhite);
+  }
+
+  // --- Original Heuristic Fallback ---
+  if (st.blackOff === 15) return player === 'black' ? 100000 : -100000;
+  if (st.whiteOff === 15) return player === 'white' ? 100000 : -100000;
+
+  let blackAdvantage = 0;
+  blackAdvantage += st.blackOff * 200 - st.whiteOff * 200;
+  blackAdvantage -= st.blackBar * 200 - st.whiteBar * 200;
 
   let consecutiveBlackPoints = 0;
-
   for (let i = 0; i < 24; i++) {
     let pt = st.points[i];
-    
-    // --- Ardışık Kapı (Prime / Duvar) Bonusu ---
     if (pt.owner === 'black' && pt.count >= 2) {
       consecutiveBlackPoints++;
-      if (consecutiveBlackPoints >= 2) {
-        score += consecutiveBlackPoints * 15; 
-      }
+      if (consecutiveBlackPoints >= 2) blackAdvantage += consecutiveBlackPoints * 15; 
     } else {
       consecutiveBlackPoints = 0;
     }
 
     if (!pt.owner || pt.count === 0) continue;
-    
     if (pt.owner === 'black') {
       if (pt.count === 1) {
         let penalty = i >= 18 ? 60 : 40;
-        if (st.whiteBar > 0) penalty = 150; // Rakip bardayken açık vermeye ceza
-        score -= penalty;
+        if (st.whiteBar > 0) penalty = 150;
+        blackAdvantage -= penalty;
       }
       else if (pt.count >= 2) {
-        score += (i >= 18 ? 90 : 45); 
-        
-        // Yığılma (Stacking) Cezası
-        if (pt.count > 4) {
-          score -= (pt.count - 4) * 20;
-        }
+        blackAdvantage += (i >= 18 ? 90 : 45); 
+        if (pt.count > 4) blackAdvantage -= (pt.count - 4) * 20;
       }
     } else {
-      // White pieces (opponent)
-      if (pt.count === 1) score += 30; // Rakibin açığını yakalamak (hit) için teşvik
+      if (pt.count === 1) blackAdvantage += 30;
     }
   }
-  return score;
+  return player === 'black' ? blackAdvantage : -blackAdvantage;
 }
