@@ -47,8 +47,18 @@ const NetworkService = {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host || 'localhost:8080';
+    let protocol = 'ws:';
+    let host = 'localhost:8080';
+
+    if (typeof window !== 'undefined' && window.location) {
+      if (window.location.protocol === 'https:') {
+        protocol = 'wss:';
+      }
+      if (window.location.host && window.location.protocol !== 'file:') {
+        host = window.location.host;
+      }
+    }
+
     const wsUrl = `${protocol}//${host}`;
 
     this.status = 'connecting';
