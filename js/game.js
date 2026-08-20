@@ -1963,21 +1963,31 @@ function handleResize() {
   draw();
 }
 
+function handleResize() {
+  if (typeof draw === 'function') {
+    draw();
+  }
+}
+
 function setupEventListeners() {
   canvas = document.getElementById('boardCanvas');
   if (!canvas) return;
   ctx = canvas.getContext('2d');
 
   canvas.addEventListener('mousedown', startDrag);
-  canvas.addEventListener('touchstart', startDrag);
+  canvas.addEventListener('touchstart', startDrag, { passive: false });
 
   window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('touchmove', moveDrag);
+  window.addEventListener('touchmove', moveDrag, { passive: false });
 
   window.addEventListener('mouseup', endDrag);
-  window.addEventListener('touchend', endDrag);
+  window.addEventListener('touchend', endDrag, { passive: false });
 
   window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(handleResize, 100);
+    setTimeout(handleResize, 300);
+  });
 }
 
 // --- Emote Handlers ---

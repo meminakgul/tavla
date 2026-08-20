@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Yeni Nesil Tavla - Premium 2.5D Waypoint Trajectory</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=2.0.8">
 </head>
 <body>
   <!-- 1. Tavla Evrimi Main Menu Overlay -->
@@ -457,34 +457,37 @@
   </div>
 
   <div class="game-ui-layer">
-    <!-- Top Left Corner -->
-    <div class="ui-corner ui-top-left">
-      <div class="hud-action-group">
-        <button id="main-menu-btn" onclick="requestExitToMainMenu()" class="hud-action-btn">ANA MENÜ</button>
+    <!-- Top Header Bar Container -->
+    <div class="ui-top-bar">
+      <!-- Top Left Corner -->
+      <div class="ui-corner ui-top-left">
+        <div class="hud-action-group">
+          <button id="main-menu-btn" onclick="requestExitToMainMenu()" class="hud-action-btn">ANA MENÜ</button>
+        </div>
+        
+        <div class="player-hud">
+          <div class="player-name" id="hud-name-left">BEYAZ OYUNCU <span class="indicator white-indicator"></span></div>
+          <div class="player-score">Toplanan: <span id="white-off-count">0</span> / 15</div>
+        </div>
       </div>
-      
-      <div class="player-hud">
-        <div class="player-name" id="hud-name-left">BEYAZ OYUNCU <span class="indicator white-indicator"></span></div>
-        <div class="player-score">Toplanan: <span id="white-off-count">0</span> / 15</div>
+
+      <!-- Top Center -->
+      <div class="ui-corner ui-top-center">
+        <div id="white-turn" class="turn-indicator" style="display:none;">● SIRA SENDE</div>
+        <div id="black-turn" class="turn-indicator" style="display:none;">SIRA SENDE ●</div>
+        <div id="status-msg" class="status-msg">ZAR BEKLENİYOR</div>
+      </div>
+
+      <!-- Top Right Corner -->
+      <div class="ui-corner ui-top-right">
+        <div class="player-hud" style="text-align:right;">
+          <div class="player-name" id="hud-name-right"><span class="indicator black-indicator"></span>SİYAH OYUNCU</div>
+          <div class="player-score">Toplanan: <span id="black-off-count">0</span> / 15</div>
+        </div>
       </div>
     </div>
 
-    <!-- Top Right Corner -->
-    <div class="ui-corner ui-top-right">
-      <div class="player-hud" style="text-align:right;">
-        <div class="player-name" id="hud-name-right"><span class="indicator black-indicator"></span>SİYAH OYUNCU</div>
-        <div class="player-score">Toplanan: <span id="black-off-count">0</span> / 15</div>
-      </div>
-    </div>
-
-    <!-- Top Center -->
-    <div class="ui-corner ui-top-center">
-      <div id="white-turn" class="turn-indicator" style="display:none;">● SIRA SENDE</div>
-      <div id="black-turn" class="turn-indicator" style="display:none;">SIRA SENDE ●</div>
-      <div id="status-msg" class="status-msg">ZAR BEKLENİYOR</div>
-    </div>
-
-    <!-- Bottom Right Corner -->
+    <!-- Bottom Right / Action Controls Corner -->
     <div class="ui-corner ui-bottom-right">
       <button id="undo-btn" onclick="undoLastMove()" class="hud-primary-btn" style="display:none; background: linear-gradient(135deg, #2E1A11, #1A120A); font-size: 14px; padding: 12px 20px;">GERİ AL</button>
       <button id="hint-btn" onclick="showHint()" class="hud-primary-btn" style="display:none; background: linear-gradient(135deg, #2A3B4C, #121A2F); font-size: 14px; padding: 12px 20px; color: #8AB4F8;">İPUCU</button>
@@ -497,14 +500,14 @@
   </div>
 
   <!-- Game JavaScript Modules -->
-  <script src="server/game_rules.js?v=2.0.7"></script>
-  <script src="js/sound.js?v=2.0.7"></script>
-  <script src="js/progression.js?v=2.0.7"></script>
-  <script src="js/physics3d.js?v=2.0.7"></script>
-  <script src="js/network.js?v=2.0.7"></script>
-  <script src="js/ai_weights.js?v=2.0.7"></script>
-  <script src="js/ai.js?v=2.0.7"></script>
-  <script src="js/game.js?v=2.0.7"></script>
+  <script src="server/game_rules.js?v=2.0.8"></script>
+  <script src="js/sound.js?v=2.0.8"></script>
+  <script src="js/progression.js?v=2.0.8"></script>
+  <script src="js/physics3d.js?v=2.0.8"></script>
+  <script src="js/network.js?v=2.0.8"></script>
+  <script src="js/ai_weights.js?v=2.0.8"></script>
+  <script src="js/ai.js?v=2.0.8"></script>
+  <script src="js/game.js?v=2.0.8"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
